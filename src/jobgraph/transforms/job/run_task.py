@@ -110,7 +110,7 @@ worker_defaults = {
 
 
 @run_job_using(
-    "docker-worker", "run-task", schema=run_task_schema, defaults=worker_defaults
+    "kubernetes", "run-task", schema=run_task_schema, defaults=worker_defaults
 )
 def docker_worker_run_task(config, job, taskdesc):
     run = job["run"]

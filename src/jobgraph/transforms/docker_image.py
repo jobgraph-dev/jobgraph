@@ -146,7 +146,7 @@ def fill_template(config, tasks):
             },
             "worker-type": "images",
             "worker": {
-                "implementation": "docker-worker",
+                "implementation": "kubernetes",
                 "os": "linux",
                 "artifacts": [
                     {

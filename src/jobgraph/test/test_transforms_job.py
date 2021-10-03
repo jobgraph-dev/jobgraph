@@ -90,17 +90,17 @@ def transform(monkeypatch, config):
             marks=pytest.mark.xfail,
         ),
     ],
-    ids=["docker-worker"],
+    ids=["kubernetes"],
 )
 def test_worker_caches(task, transform):
     config, job, taskdesc, impl = transform(task)
     add_cache(job, taskdesc, "cache1", "/cache1")
     add_cache(job, taskdesc, "cache2", "/cache2", skip_untrusted=True)
 
-    if impl not in ("docker-worker"):
+    if impl not in ("kubernetes"):
         pytest.xfail(f"caches not implemented for '{impl}'")
 
-    key = "caches" if impl == "docker-worker" else "mounts"
+    key = "caches" if impl == "kubernetes" else "mounts"
     assert key in taskdesc["worker"]
     assert len(taskdesc["worker"][key]) == 2
 

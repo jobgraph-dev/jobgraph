@@ -13,14 +13,14 @@ taskgraph:
 workers:
     aliases:
         images:
-            implementation: docker-worker
+            implementation: kubernetes
             os: linux
             worker-type: images
         t-linux:
-            implementation: docker-worker
+            implementation: kubernetes
             os: linux
             worker-type: linux
         misc:
-            implementation: docker-worker
+            implementation: kubernetes
             os: linux
             worker-type: linux

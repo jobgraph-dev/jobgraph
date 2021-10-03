@@ -30,14 +30,14 @@ def add_cache(job, taskdesc, name, mount_point, skip_untrusted=False):
         name (str): Name of the cache.
         mount_point (path): Path on the host to mount the cache.
         skip_untrusted (bool): Whether cache is used in untrusted environments
-            (default: False). Only applies to docker-worker.
+            (default: False). Only applies to kubernetes.
     """
     if not job["run"].get("use-caches", True):
         return
 
     worker = job["worker"]
 
-    if worker["implementation"] == "docker-worker":
+    if worker["implementation"] == "kubernetes":
         taskdesc["worker"].setdefault("caches", []).append(
             {
                 "type": "persistent",
@@ -103,7 +103,7 @@ def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):
     is_mac = worker["os"] == "macosx"
     is_win = worker["os"] == "windows"
     is_linux = worker["os"] == "linux"
-    is_docker = worker["implementation"] == "docker-worker"
+    is_docker = worker["implementation"] == "kubernetes"
     assert is_mac or is_win or is_linux
 
     if is_win:
@@ -173,5 +173,5 @@ def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):
         )
 
     # only some worker platforms have taskcluster-proxy enabled
-    if job["worker"]["implementation"] in ("docker-worker",):
+    if job["worker"]["implementation"] in ("kubernetes",):
         taskdesc["worker"]["taskcluster-proxy"] = True

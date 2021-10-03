@@ -164,7 +164,7 @@ def add_resource_monitor(config, jobs):
             job["fetches"].setdefault("toolchain", [])
             job["fetches"]["toolchain"].append(f"{worker_os}{arch}-resource-monitor")
 
-            if worker_implementation == "docker-worker":
+            if worker_implementation == "kubernetes":
                 artifact_source = "/builds/worker/monitoring/resource-monitor.json"
             else:
                 artifact_source = "monitoring/resource-monitor.json"
@@ -324,7 +324,7 @@ def make_task_description(config, jobs):
     import_all()
     for job in jobs:
         # always-optimized tasks never execute, so have no workdir
-        if job["worker"]["implementation"] in ("docker-worker"):
+        if job["worker"]["implementation"] in ("kubernetes"):
             job["run"].setdefault("workdir", "/builds/worker")
 
         taskdesc = copy.deepcopy(job)

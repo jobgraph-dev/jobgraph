@@ -84,7 +84,7 @@ toolchain_defaults = {
 
 
 @run_job_using(
-    "docker-worker",
+    "kubernetes",
     "toolchain-script",
     schema=toolchain_run_schema,
     defaults=toolchain_defaults,

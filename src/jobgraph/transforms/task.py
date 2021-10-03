@@ -175,10 +175,10 @@ def verify_index(config, index):
 
 
 @payload_builder(
-    "docker-worker",
+    "kubernetes",
     schema={
         Required("os"): "linux",
-        # For tasks that will run in docker-worker, this is the name of the docker
+        # For tasks that will run in kubernetes, this is the name of the docker
         # image or in-tree docker image to run the task in.  If in-tree, then a
         # dependency will be created automatically.  This is generally
         # `desktop-test`, or an image that acts an awful lot like it.
@@ -239,7 +239,7 @@ def verify_index(config, index):
         ],
         # environment variables
         Required("env"): {str: taskref_or_string},
-        # the command to run; if not given, docker-worker will default to the
+        # the command to run; if not given, kubernetes will default to the
         # command in the docker image
         Optional("command"): [taskref_or_string],
         # the maximum time to run, in seconds
@@ -424,7 +424,7 @@ def set_defaults(config, tasks):
         task.setdefault("needs-sccache", False)
 
         worker = task["worker"]
-        if worker["implementation"] in ("docker-worker",):
+        if worker["implementation"] in ("kubernetes",):
             worker.setdefault("relengapi-proxy", False)
             worker.setdefault("chain-of-trust", False)
             worker.setdefault("taskcluster-proxy", False)
