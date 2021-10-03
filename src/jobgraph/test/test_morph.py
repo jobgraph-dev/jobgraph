@@ -41,9 +41,6 @@ def test_make_index_tasks(make_taskgraph, graph_config):
             "owner": "owner@foo.com",
             "source": "https://source",
         },
-        "extra": {
-            "index": {"rank": 1540722354},
-        },
     }
     task = Job(kind="test", label="a", attributes={}, task=task_def)
     docker_task = Job(

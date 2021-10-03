@@ -69,8 +69,6 @@ task_description_schema = Schema(
                 ),
             ): object,
         },
-        # custom "task.extra" content
-        Optional("extra"): {str: object},
         # information for indexing this build so its artifacts can be discovered;
         # if omitted, the build will not be indexed.
         Optional("index"): {
@@ -469,10 +467,6 @@ def build_task(config, tasks):
             level,
         )
         project = config.params["project"]
-
-        # set up extra
-        extra = task.get("extra", {})
-        extra["parent"] = os.environ.get("TASK_ID", "")
 
         task_def = {
             "image": "ubuntu:20.04",

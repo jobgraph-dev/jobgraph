@@ -51,7 +51,6 @@ job_description_schema = Schema(
         Optional("attributes"): task_description_schema["attributes"],
         Optional("job-from"): task_description_schema["job-from"],
         Optional("dependencies"): task_description_schema["dependencies"],
-        Optional("extra"): task_description_schema["extra"],
         Optional("index"): task_description_schema["index"],
         Optional("run-on-pipeline-sources"): task_description_schema["run-on-pipeline-sources"],
         Optional("run-on-git-branches"): task_description_schema["run-on-git-branches"],
@@ -332,7 +331,6 @@ def make_task_description(config, jobs):
         # fill in some empty defaults to make run implementations easier
         taskdesc.setdefault("attributes", {})
         taskdesc.setdefault("dependencies", {})
-        taskdesc.setdefault("extra", {})
 
         # give the function for job.run.using on this worker implementation a
         # chance to set up the task description.
