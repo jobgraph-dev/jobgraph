@@ -109,7 +109,7 @@ task_description_schema = Schema(
         # Optimization to perform on this task during the optimization phase.
         # Optimizations are defined in taskcluster/taskgraph/optimize.py.
         Required("optimization"): OptimizationSchema,
-        # the provisioner-id/worker-type for the task.  The following parameters will
+        # the worker-type for the task.  The following parameters will
         # be substituted in this string:
         #  {level} -- the scm level of this push
         "worker-type": str,
@@ -475,12 +475,11 @@ def build_task(config, tasks):
     for task in tasks:
         level = str(config.params["level"])
 
-        provisioner_id, worker_type = get_worker_type(
+        worker_type = get_worker_type(
             config.graph_config,
             task["worker-type"],
             level,
         )
-        task["worker-type"] = "/".join([provisioner_id, worker_type])
         project = config.params["project"]
 
         # set up extra

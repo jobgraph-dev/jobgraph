@@ -11,7 +11,6 @@ from .memoize import memoize
 
 @attr.s
 class _BuiltinWorkerType:
-    provisioner = attr.ib(str)
     worker_type = attr.ib(str)
 
     @property
@@ -25,8 +24,8 @@ class _BuiltinWorkerType:
 
 
 _BUILTIN_TYPES = {
-    "always-optimized": _BuiltinWorkerType("invalid", "always-optimized"),
-    "succeed": _BuiltinWorkerType("built-in", "succeed"),
+    "always-optimized": _BuiltinWorkerType("always-optimized"),
+    "succeed": _BuiltinWorkerType("succeed"),
 }
 
 
@@ -54,7 +53,7 @@ def get_worker_type(graph_config, alias, level):
     """
     if alias in _BUILTIN_TYPES:
         builtin_type = _BUILTIN_TYPES[alias]
-        return builtin_type.provisioner, builtin_type.worker_type
+        return builtin_type.worker_type
 
     level = str(level)
     worker_config = evaluate_keyed_by(
@@ -62,14 +61,9 @@ def get_worker_type(graph_config, alias, level):
         "graph_config.workers.aliases",
         {"alias": alias},
     )
-    provisioner = evaluate_keyed_by(
-        worker_config["provisioner"],
-        alias,
-        {"level": level},
-    ).format(level=level)
     worker_type = evaluate_keyed_by(
         worker_config["worker-type"],
         alias,
         {"level": level},
     ).format(level=level, alias=alias)
-    return provisioner, worker_type
+    return worker_type

@@ -13,17 +13,14 @@ taskgraph:
 workers:
     aliases:
         images:
-            provisioner: 'taskgraph-{level}'
             implementation: docker-worker
             os: linux
             worker-type: images
         t-linux:
-            provisioner: 'taskgraph-t'
             implementation: docker-worker
             os: linux
             worker-type: linux
         misc:
-            provisioner: 'taskgraph-t'
             implementation: docker-worker
             os: linux
             worker-type: linux

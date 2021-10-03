@@ -250,24 +250,24 @@ def rerun_task(task_id):
         _do_request(get_task_url(task_id, use_proxy=True) + "/rerun", json={})
 
 
-def get_purge_cache_url(provisioner_id, worker_type, use_proxy=False):
+def get_purge_cache_url(worker_type, use_proxy=False):
     url_tmpl = liburls.api(
         get_root_url(use_proxy), "purge-cache", "v1", "purge-cache/{}/{}"
     )
-    return url_tmpl.format(provisioner_id, worker_type)
+    return url_tmpl.format(worker_type)
 
 
-def purge_cache(provisioner_id, worker_type, cache_name, use_proxy=False):
+def purge_cache(worker_type, cache_name, use_proxy=False):
     """Requests a cache purge from the purge-caches service."""
     if testing:
         logger.info(
-            "Would have purged {}/{}/{}.".format(
-                provisioner_id, worker_type, cache_name
+            "Would have purged {}/{}.".format(
+                worker_type, cache_name
             )
         )
     else:
-        logger.info(f"Purging {provisioner_id}/{worker_type}/{cache_name}.")
-        purge_cache_url = get_purge_cache_url(provisioner_id, worker_type, use_proxy)
+        logger.info(f"Purging {worker_type}/{cache_name}.")
+        purge_cache_url = get_purge_cache_url(worker_type, use_proxy)
         _do_request(purge_cache_url, json={"cacheName": cache_name})
 
 

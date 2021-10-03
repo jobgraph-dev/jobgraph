@@ -24,7 +24,6 @@ graph_config_schema = Schema(
         Required("workers"): {
             Required("aliases"): {
                 str: {
-                    Required("provisioner"): optionally_keyed_by("level", str),
                     Required("implementation"): str,
                     Required("os"): str,
                     Required("worker-type"): optionally_keyed_by("level", str),

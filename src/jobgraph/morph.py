@@ -53,12 +53,11 @@ def derive_index_task(task, taskgraph, label_to_taskid, parameters, graph_config
     image."""
     purpose = "index-task"
     label = f"{purpose}-{task.label}"
-    provisioner_id, worker_type = get_worker_type(
+    worker_type = get_worker_type(
         graph_config, "misc", parameters["level"]
     )
 
     task_def = {
-        "provisionerId": provisioner_id,
         "workerType": worker_type,
         "dependencies": [task.task_id],
         "created": {"relative-datestamp": "0 seconds"},
