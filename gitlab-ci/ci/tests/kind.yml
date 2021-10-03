@@ -3,11 +3,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 ---
 
-loader: taskgraph.loader.transform:loader
+loader: jobgraph.loader.transform:loader
 
 transforms:
-    - taskgraph.transforms.job:transforms
-    - taskgraph.transforms.task:transforms
+    - jobgraph.transforms.job:transforms
+    - jobgraph.transforms.task:transforms
 
 job-defaults:
     attributes:
@@ -29,7 +29,7 @@ jobs:
             command: >-
                 pip install --user -r requirements/test.txt &&
                 pip install --user --no-deps . &&
-                pytest --pyargs taskgraph
+                pytest --pyargs jobgraph
 
     flake8:
         description: "Run `flake8` on Python 3 to validate the latest changes"

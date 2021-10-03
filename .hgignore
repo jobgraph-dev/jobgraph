@@ -13,6 +13,6 @@
 # Build directories
 ^build
 ^dist
-^src/taskgraph.egg-info
+^src/jobgraph.egg-info
 
 ^\.pytest_cache/

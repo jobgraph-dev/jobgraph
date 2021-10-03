@@ -4,10 +4,10 @@ with open("requirements/base.in", "r") as fp:
     requirements = fp.read().splitlines()
 
 setup(
-    name="taskcluster-taskgraph",
+    name="gitlabci-jobraph",
     version="1.0.0",
-    description="Build taskcluster taskgraphs",
-    url="https://hg.mozilla.org/ci/taskgraph",
+    description="Build Gitlab CI jobgraph",
+    url="TODO",
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=requirements,
@@ -17,14 +17,14 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ),
-    entry_points={"console_scripts": ["taskgraph = taskgraph.main:main"]},
+    entry_points={"console_scripts": ["jobgraph = jobgraph.main:main"]},
     package_data={
-        "taskgraph": [
+        "jobgraph": [
             "run-task/run-task",
             "run-task/fetch-content",
             "run-task/hgrc",
             "run-task/robustcheckout.py",
         ],
-        "taskgraph.test": ["automationrelevance.json"],
+        "jobgraph.test": ["automationrelevance.json"],
     },
 )
