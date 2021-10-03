@@ -73,7 +73,6 @@ def derive_index_task(task, taskgraph, label_to_taskid, parameters, graph_config
             "owner": task.task["metadata"]["owner"],
             "source": task.task["metadata"]["source"],
         },
-        "scopes": [],
         "payload": {
             "image": {
                 "path": "public/image.tar.zst",
@@ -149,7 +148,6 @@ def add_code_review_task(taskgraph, label_to_taskid, parameters, graph_config):
                 "owner": parameters["owner"],
                 "source": _get_morph_url(),
             },
-            "scopes": [],
             "payload": {},
             "extra": {
                 "code-review": {

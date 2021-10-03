@@ -54,7 +54,6 @@ job_description_schema = Schema(
         Optional("soft-dependencies"): task_description_schema["soft-dependencies"],
         Optional("requires"): task_description_schema["requires"],
         Optional("expires-after"): task_description_schema["expires-after"],
-        Optional("scopes"): task_description_schema["scopes"],
         Optional("tags"): task_description_schema["tags"],
         Optional("extra"): task_description_schema["extra"],
         Optional("index"): task_description_schema["index"],
@@ -318,14 +317,6 @@ def use_fetches(config, jobs):
             for fetch in job_fetches
             if not fetch["artifact"].startswith("public/")
         }
-        if job_artifact_prefixes:
-            # Use taskcluster-proxy and request appropriate scope.  For example, add
-            # 'scopes: [queue:get-artifact:path/to/*]' for 'path/to/artifact.tar.xz'.
-            worker["taskcluster-proxy"] = True
-            for prefix in sorted(job_artifact_prefixes):
-                scope = f"queue:get-artifact:{prefix}/*"
-                if scope not in job.setdefault("scopes", []):
-                    job["scopes"].append(scope)
 
         env = worker.setdefault("env", {})
         env["MOZ_FETCHES"] = {"task-reference": json.dumps(job_fetches, sort_keys=True)}
@@ -351,7 +342,6 @@ def make_task_description(config, jobs):
         taskdesc.setdefault("attributes", {})
         taskdesc.setdefault("dependencies", {})
         taskdesc.setdefault("soft-dependencies", [])
-        taskdesc.setdefault("scopes", [])
         taskdesc.setdefault("extra", {})
 
         # give the function for job.run.using on this worker implementation a

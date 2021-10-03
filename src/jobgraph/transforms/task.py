@@ -5,7 +5,7 @@
 These transformations take a task description and turn it into a TaskCluster
 task definition (along with attributes, label, etc.).  The input to these
 transformations is generic to any kind of task, but abstracts away some of the
-complexities of worker implementations and scopes.
+complexities of worker implementations.
 """
 
 
@@ -76,12 +76,6 @@ task_description_schema = Schema(
         # (e.g., "14 days").  Defaults are set based on the project.
         Optional("expires-after"): str,
         Optional("deadline-after"): str,
-        # custom scopes for this task; any scopes required for the worker will be
-        # added automatically. The following parameters will be substituted in each
-        # scope:
-        #  {level} -- the scm level of this push
-        #  {project} -- the project of this push
-        Optional("scopes"): [str],
         # Tags
         Optional("tags"): {str: str},
         # custom "task.extra" content
@@ -551,10 +545,6 @@ def build_task(config, tasks):
         task["worker-type"] = "/".join([provisioner_id, worker_type])
         project = config.params["project"]
 
-        scopes = [
-            s.format(level=level, project=project) for s in task.get("scopes", [])
-        ]
-
         # set up extra
         extra = task.get("extra", {})
         extra["parent"] = os.environ.get("TASK_ID", "")
@@ -596,7 +586,7 @@ def build_task(config, tasks):
             "needs": [],
         }
 
-        # add the payload and adjust anything else as required (e.g., scopes)
+        # add the payload and adjust anything else as required.
         payload_builders[task["worker"]["implementation"]].builder(
             config, task, task_def
         )

@@ -49,8 +49,7 @@ FETCH_SCHEMA = Schema(
         Optional(
             "artifact-prefix",
             description="The prefix of the taskcluster artifact being uploaded. "
-            "Defaults to `public/`; if it starts with something other than "
-            "`public/` the artifact will require scopes to access.",
+            "Defaults to `public/`",
         ): str,
         Optional("attributes"): {str: object},
         Required("fetch"): {

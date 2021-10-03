@@ -44,13 +44,6 @@ tasks:
                       then:
                         kind: cron-task
 
-              scopes:
-                  $if: 'tasks_for == "hg-push"'
-                  then:
-                      - 'assume:repo:${repoUrl[8:]}:branch:default'
-                  else:
-                      - 'assume:repo:${repoUrl[8:]}:cron:${cron.job_name}'
-
               dependencies: []
               requires: all-completed
 
