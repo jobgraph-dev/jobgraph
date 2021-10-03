@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 @register_callback_action(
     title="Cancel Task",
     name="cancel",
-    symbol="cx",
     generic=True,
     description=("Cancel the given task"),
     order=350,

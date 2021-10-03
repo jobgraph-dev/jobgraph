@@ -43,8 +43,6 @@ docker_image_schema = Schema(
         Required("name"): str,
         # Name of the parent docker image.
         Optional("parent"): str,
-        # Treeherder symbol.
-        Optional("symbol"): str,
         # relative path (from config.path) to the file the docker image was defined
         # in.
         Optional("job-from"): str,
@@ -89,7 +87,6 @@ def fill_template(config, tasks):
 
     for task in tasks:
         image_name = task.pop("name")
-        job_symbol = task.pop("symbol", None)
         args = task.pop("args", {})
         definition = task.pop("definition", image_name)
         packages = task.pop("packages", [])
@@ -184,13 +181,6 @@ def fill_template(config, tasks):
         }
         if "index" in task:
             taskdesc["index"] = task["index"]
-        if job_symbol:
-            taskdesc["treeherder"] = {
-                "symbol": job_symbol,
-                "platform": "taskcluster-images/opt",
-                "kind": "other",
-                "tier": 1,
-            }
 
         worker = taskdesc["worker"]
 

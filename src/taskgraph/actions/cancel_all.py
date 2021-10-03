@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
     title="Cancel All",
     name="cancel-all",
     generic=True,
-    symbol="cAll",
     description=(
         "Cancel all running and pending tasks created by the decision task "
         "this action task is associated with."

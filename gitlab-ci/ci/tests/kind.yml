@@ -17,10 +17,6 @@ job-defaults:
     worker:
         docker-image: {in-tree: python3.7}
         max-run-time: 3600
-    treeherder:
-        kind: test
-        platform: tests/opt
-        tier: 1
     run:
         using: run-task
         cwd: '{checkout}'
@@ -29,8 +25,6 @@ job-defaults:
 jobs:
     unit:
         description: "Run `unit tests` to validate the latest changes"
-        treeherder:
-            symbol: unit
         run:
             command: >-
                 pip install --user -r requirements/test.txt &&
@@ -39,8 +33,6 @@ jobs:
 
     flake8:
         description: "Run `flake8` on Python 3 to validate the latest changes"
-        treeherder:
-            symbol: flake8
         run:
             command: >-
                 pip install --user -r requirements/test.txt &&
@@ -48,8 +40,6 @@ jobs:
 
     black:
         description: "Run `black` to validate the latest changes"
-        treeherder:
-            symbol: black
         run:
             command: >-
                 pip install --user black &&
@@ -57,8 +47,6 @@ jobs:
 
     yamllint:
         description: "Run `yamllint` to validate the latest changes"
-        treeherder:
-            symbol: yaml
         run:
             command: >-
                 pip install --user -r requirements/test.txt &&

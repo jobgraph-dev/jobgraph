@@ -46,37 +46,6 @@ verifications = VerificationSequence()
 
 
 @verifications.add("full_task_graph")
-def verify_task_graph_symbol(task, taskgraph, scratch_pad, graph_config):
-    """
-    This function verifies that tuple
-    (collection.keys(), machine.platform, groupSymbol, symbol) is unique
-    for a target task graph.
-    """
-    if task is None:
-        return
-    task_dict = task.task
-    if "extra" in task_dict:
-        extra = task_dict["extra"]
-        if "treeherder" in extra:
-            treeherder = extra["treeherder"]
-
-            collection_keys = tuple(sorted(treeherder.get("collection", {}).keys()))
-            platform = treeherder.get("machine", {}).get("platform")
-            group_symbol = treeherder.get("groupSymbol")
-            symbol = treeherder.get("symbol")
-
-            key = (collection_keys, platform, group_symbol, symbol)
-            if key in scratch_pad:
-                raise Exception(
-                    "conflict between `{}`:`{}` for values `{}`".format(
-                        task.label, scratch_pad[key], key
-                    )
-                )
-            else:
-                scratch_pad[key] = task.label
-
-
-@verifications.add("full_task_graph")
 def verify_trust_domain_v2_routes(task, taskgraph, scratch_pad, graph_config):
     """
     This function ensures that any two tasks have distinct ``index.{trust-domain}.v2`` routes.
@@ -124,38 +93,6 @@ def verify_routes_notification_filters(task, taskgraph, scratch_pad, graph_confi
                         task.label, route_filter
                     )
                 )
-
-
-@verifications.add("full_task_graph")
-def verify_dependency_tiers(task, taskgraph, scratch_pad, graph_config):
-    tiers = scratch_pad
-    if task is not None:
-        tiers[task.label] = (
-            task.task.get("extra", {}).get("treeherder", {}).get("tier", sys.maxsize)
-        )
-    else:
-
-        def printable_tier(tier):
-            if tier == sys.maxsize:
-                return "unknown"
-            return tier
-
-        for task in taskgraph.tasks.values():
-            tier = tiers[task.label]
-            for d in task.dependencies.values():
-                if taskgraph[d].task.get("workerType") == "always-optimized":
-                    continue
-                if "dummy" in taskgraph[d].kind:
-                    continue
-                if tier < tiers[d]:
-                    raise Exception(
-                        "{} (tier {}) cannot depend on {} (tier {})".format(
-                            task.label,
-                            printable_tier(tier),
-                            d,
-                            printable_tier(tiers[d]),
-                        )
-                    )
 
 
 @verifications.add("optimized_task_graph")

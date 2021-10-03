@@ -26,9 +26,6 @@ from ..util.cached_tasks import (
     add_optimization,
 )
 from ..util.schema import Schema, validate_schema
-from ..util.treeherder import (
-    join_symbol,
-)
 from ..util import path
 
 
@@ -160,14 +157,6 @@ def make_task(config, jobs):
                 ],
             },
         }
-
-        if "treeherder" in config.graph_config:
-            task["treeherder"] = {
-                "symbol": join_symbol("Fetch", name),
-                "kind": "build",
-                "platform": "fetch/opt",
-                "tier": 1,
-            }
 
         if not taskgraph.fast:
             cache_name = task["label"].replace(f"{config.kind}-", "", 1)

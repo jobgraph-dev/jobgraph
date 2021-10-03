@@ -44,23 +44,6 @@ try_task_config_schema_v2 = Schema(
 )
 
 
-def full_task_graph_to_runnable_jobs(full_task_json):
-    runnable_jobs = {}
-    for label, node in full_task_json.items():
-        if not ("extra" in node["task"] and "treeherder" in node["task"]["extra"]):
-            continue
-
-        th = node["task"]["extra"]["treeherder"]
-        runnable_jobs[label] = {"symbol": th["symbol"]}
-
-        for i in ("groupName", "groupSymbol", "collection"):
-            if i in th:
-                runnable_jobs[label][i] = th[i]
-        if th.get("machine", {}).get("platform"):
-            runnable_jobs[label]["platform"] = th["machine"]["platform"]
-    return runnable_jobs
-
-
 def taskgraph_decision(options, parameters=None):
     """
     Run the decision task.  This function implements `mach taskgraph decision`,
@@ -99,11 +82,6 @@ def taskgraph_decision(options, parameters=None):
     # write out the full graph for reference
     full_task_json = tgg.full_task_graph.to_json()
     write_artifact("full-task-graph.json", full_task_json)
-
-    # write out the public/runnable-jobs.json file
-    write_artifact(
-        "runnable-jobs.json", full_task_graph_to_runnable_jobs(full_task_json)
-    )
 
     # this is just a test to check whether the from_json() function is working
     _, _ = TaskGraph.from_json(full_task_json)

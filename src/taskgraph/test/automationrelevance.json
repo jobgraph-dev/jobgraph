@@ -24,7 +24,6 @@
             "parents": [
                 "37c9349b4e8167a61b08b7e119c21ea177b98942"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -52,9 +51,7 @@
                     "name": "bgrins",
                     "revset": "reviewer(bgrins)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         },
         {
             "author": "Wes Kocher <wkocher@mozilla.com>",
@@ -76,7 +73,6 @@
                 "ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
                 "91c2b9d5c1354ca79e5b174591dbb03b32b15bbf"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -100,9 +96,7 @@
                     "name": "merge",
                     "revset": "reviewer(merge)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         },
         {
             "author": "Towkir Ahmed <towkir17@gmail.com>",
@@ -128,7 +122,6 @@
             "parents": [
                 "73a6a267a50a0e1c41e689b265ad3eebe43d7ac6"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -152,9 +145,7 @@
                     "name": "ntim",
                     "revset": "reviewer(ntim)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         },
         {
             "author": "Oriol <oriol-bugzilla@hotmail.com>",
@@ -181,7 +172,6 @@
             "parents": [
                 "16a1a91f9269ab95dd83eb29dc5d0227665f7d94"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -205,9 +195,7 @@
                     "name": "fitzgen",
                     "revset": "reviewer(fitzgen)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         },
         {
             "author": "Ruturaj Vartak <ruturaj@gmail.com>",
@@ -238,7 +226,6 @@
             "parents": [
                 "99c542fa43a72ee863c813b5624048d1b443549b"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -262,9 +249,7 @@
                     "name": "pbro",
                     "revset": "reviewer(pbro)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         },
         {
             "author": "Matteo Ferretti <mferretti@mozilla.com>",
@@ -292,7 +277,6 @@
             "parents": [
                 "a6b6a93eb41a05e310a11f0172f01ba9b21d3eac"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -316,9 +300,7 @@
                     "name": "mstange",
                     "revset": "reviewer(mstange)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         },
         {
             "author": "Patrick Brosset <pbrosset@mozilla.com>",
@@ -345,7 +327,6 @@
             "parents": [
                 "541c9086c0f27fba60beecc9bc94543103895c86"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -369,9 +350,7 @@
                     "name": "me",
                     "revset": "reviewer(me)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         },
         {
             "author": "Carsten \"Tomcat\" Book <cbook@mozilla.com>",
@@ -391,7 +370,6 @@
                 "3d0b41fdd93bd8233745eadb4e0358e385bf2cb9",
                 "041a925171e431bf51fb50193ab19d156088c89a"
             ],
-            "perfherderurl": "https://treeherder.mozilla.org/perf.html#/compare?originalProject=mozilla-central&originalRevision=a14f88a9af7a59e677478694bafd9375ac53683e&newProject=mozilla-central&newRevision=ae2144aa4356b65c2f8c0de8c9082dcb7e330e24",
             "pushdate": [
                 1473261248,
                 0
@@ -415,9 +393,7 @@
                     "name": "merge",
                     "revset": "reviewer(merge)"
                 }
-            ],
-            "treeherderrepo": "mozilla-central",
-            "treeherderrepourl": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central"
+            ]
         }
     ],
     "visible": true

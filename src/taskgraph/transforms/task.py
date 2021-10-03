@@ -5,7 +5,7 @@
 These transformations take a task description and turn it into a TaskCluster
 task definition (along with attributes, label, etc.).  The input to these
 transformations is generic to any kind of task, but abstracts away some of the
-complexities of worker implementations, scopes, and treeherder annotations.
+complexities of worker implementations and scopes.
 """
 
 
@@ -20,7 +20,6 @@ import attr
 from taskgraph.util.hash import hash_path
 from taskgraph.util.keyed_by import evaluate_keyed_by
 from taskgraph.util.memoize import memoize
-from taskgraph.util.treeherder import split_symbol
 from taskgraph.transforms.base import TransformSequence
 from taskgraph.util.schema import (
     validate_schema,
@@ -77,8 +76,7 @@ task_description_schema = Schema(
         # (e.g., "14 days").  Defaults are set based on the project.
         Optional("expires-after"): str,
         Optional("deadline-after"): str,
-        # custom routes for this task; the default treeherder routes will be added
-        # automatically
+        # custom routes for this task
         Optional("routes"): [str],
         # custom scopes for this task; any scopes required for the worker will be
         # added automatically. The following parameters will be substituted in each
@@ -90,22 +88,6 @@ task_description_schema = Schema(
         Optional("tags"): {str: str},
         # custom "task.extra" content
         Optional("extra"): {str: object},
-        # treeherder-related information; see
-        # https://schemas.taskcluster.net/taskcluster-treeherder/v1/task-treeherder-config.json
-        # If not specified, no treeherder extra information or routes will be
-        # added to the task
-        Optional("treeherder"): {
-            # either a bare symbol, or "grp(sym)".
-            "symbol": str,
-            # the job kind
-            "kind": Any("build", "test", "other"),
-            # tier for this task
-            "tier": int,
-            # task platform, in the form platform/collection, used to set
-            # treeherder.machine.platform and treeherder.collection or
-            # treeherder.labels
-            "platform": str,
-        },
         # information for indexing this build so its artifacts can be discovered;
         # if omitted, the build will not be indexed.
         Optional("index"): {
@@ -162,26 +144,12 @@ task_description_schema = Schema(
     }
 )
 
-TC_TREEHERDER_SCHEMA_URL = (
-    "https://github.com/taskcluster/taskcluster-treeherder/"
-    "blob/master/schemas/task-treeherder-config.yml"
-)
-
-
-UNKNOWN_GROUP_NAME = (
-    "Treeherder group {} (from {}) has no name; " "add it to taskcluster/ci/config.yml"
-)
-
 V2_ROUTE_TEMPLATES = [
     "index.{trust-domain}.v2.{project}.latest.{product}.{job-name}",
     "index.{trust-domain}.v2.{project}.pushdate.{build_date_long}.{product}.{job-name}",
     "index.{trust-domain}.v2.{project}.pushlog-id.{pushlog_id}.{product}.{job-name}",
     "index.{trust-domain}.v2.{project}.revision.{branch_rev}.{product}.{job-name}",
 ]
-
-# the roots of the treeherder routes
-TREEHERDER_ROUTE_ROOT = "tc-treeherder"
-
 
 def get_branch_rev(config):
     return config.params["head_rev"]
@@ -609,12 +577,7 @@ def add_index_routes(config, tasks):
         extra_index = task.setdefault("extra", {}).setdefault("index", {})
         rank = index.get("rank", "by-tier")
 
-        if rank == "by-tier":
-            # rank is zero for non-tier-1 tasks and based on pushid for others;
-            # this sorts tier-{2,3} builds below tier-1 in the index
-            tier = task.get("treeherder", {}).get("tier", 3)
-            extra_index["rank"] = 0 if tier > 1 else int(config.params["build_date"])
-        elif rank == "build_date":
+        if rank == "build_date":
             extra_index["rank"] = int(config.params["build_date"])
         else:
             extra_index["rank"] = rank
@@ -653,56 +616,6 @@ def build_task(config, tasks):
         # set up extra
         extra = task.get("extra", {})
         extra["parent"] = os.environ.get("TASK_ID", "")
-        task_th = task.get("treeherder")
-        if task_th:
-            extra.setdefault("treeherder-platform", task_th["platform"])
-            treeherder = extra.setdefault("treeherder", {})
-
-            machine_platform, collection = task_th["platform"].split("/", 1)
-            treeherder["machine"] = {"platform": machine_platform}
-            treeherder["collection"] = {collection: True}
-
-            group_names = config.graph_config["treeherder"]["group-names"]
-            groupSymbol, symbol = split_symbol(task_th["symbol"])
-            if groupSymbol != "?":
-                treeherder["groupSymbol"] = groupSymbol
-                if groupSymbol not in group_names:
-                    path = os.path.join(config.path, task.get("job-from", ""))
-                    raise Exception(UNKNOWN_GROUP_NAME.format(groupSymbol, path))
-                treeherder["groupName"] = group_names[groupSymbol]
-            treeherder["symbol"] = symbol
-            if len(symbol) > 25 or len(groupSymbol) > 25:
-                raise RuntimeError(
-                    "Treeherder group and symbol names must not be longer than "
-                    "25 characters: {} (see {})".format(
-                        task_th["symbol"],
-                        TC_TREEHERDER_SCHEMA_URL,
-                    )
-                )
-            treeherder["jobKind"] = task_th["kind"]
-            treeherder["tier"] = task_th["tier"]
-
-            branch_rev = get_branch_rev(config)
-
-            if config.params["tasks_for"] == "github-pull-request":
-                # In the past we used `project` for this, but that ends up being
-                # set to the repository name of the _head_ repo, which is not correct
-                # (and causes scope issues) if it doesn't match the name of the
-                # base repo
-                base_project = config.params["base_repository"].split("/")[-1]
-                th_project_suffix = "-pr"
-            else:
-                base_project = config.params["project"]
-                th_project_suffix = ""
-
-            routes.append(
-                "{}.v2.{}.{}.{}".format(
-                    TREEHERDER_ROUTE_ROOT,
-                    base_project + th_project_suffix,
-                    branch_rev,
-                    config.params["pushlog_id"],
-                )
-            )
 
         if "expires-after" not in task:
             task["expires-after"] = "28 days" if config.params.is_try() else "1 year"

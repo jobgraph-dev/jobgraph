@@ -69,7 +69,6 @@ tasks:
 
               routes:
                   $flatten:
-                      - "tc-treeherder.v2.${repository.project}.${push.revision}"
                       - $if: 'tasks_for == "hg-push"'
                         then:
                             - "index.${trustDomain}.v2.${repository.project}.latest.taskgraph.decision"
@@ -200,22 +199,6 @@ tasks:
 
               extra:
                   $merge:
-                      - treeherder:
-                            $merge:
-                                - machine:
-                                      platform: gecko-decision
-                                - $if: 'tasks_for == "hg-push"'
-                                  then:
-                                      symbol: D
-                                  else:
-                                      $if: 'tasks_for == "action"'
-                                      then:
-                                          groupName: 'action-callback'
-                                          groupSymbol: AC
-                                          symbol: "${action.symbol}"
-                                      else:
-                                          groupSymbol: cron
-                                          symbol: "${cron.job_symbol}"
                       - $if: 'tasks_for == "action"'
                         then:
                             parent: '${action.taskGroupId}'

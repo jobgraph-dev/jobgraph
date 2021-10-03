@@ -43,7 +43,6 @@ def _should_retrigger(task_graph, label):
 @register_callback_action(
     title="Retrigger",
     name="retrigger",
-    symbol="rt",
     cb_name="retrigger-decision",
     description=textwrap.dedent(
         """\
@@ -72,7 +71,6 @@ def retrigger_decision_action(parameters, graph_config, input, task_group_id, ta
 @register_callback_action(
     title="Retrigger",
     name="retrigger",
-    symbol="rt",
     generic=True,
     description=("Create a clone of the task."),
     order=19,  # must be greater than other orders in this file, as this is the fallback version
@@ -103,7 +101,6 @@ def retrigger_decision_action(parameters, graph_config, input, task_group_id, ta
     title="Retrigger (disabled)",
     name="retrigger",
     cb_name="retrigger-disabled",
-    symbol="rt",
     generic=True,
     description=(
         "Create a clone of the task.\n\n"
@@ -186,7 +183,6 @@ def retrigger_action(parameters, graph_config, input, task_group_id, task_id):
     title="Rerun",
     name="rerun",
     generic=True,
-    symbol="rr",
     description=(
         "Rerun a task.\n\n"
         "This only works on failed or exception tasks in the original taskgraph,"
@@ -229,7 +225,6 @@ def _rerun_task(task_id, label):
 @register_callback_action(
     title="Retrigger",
     name="retrigger-multiple",
-    symbol="rt",
     generic=True,
     description=("Create a clone of the task."),
     context=[],
@@ -280,8 +275,7 @@ def retrigger_multiple(parameters, graph_config, input, task_group_id, task_id):
         for label in rerun_tasks:
             # XXX we should not re-run tasks pulled in from other pushes
             # In practice, this shouldn't matter, as only completed tasks
-            # are pulled in from other pushes and treeherder won't pass
-            # those labels.
+            # are pulled in from other pushes.
             _rerun_task(label_to_taskid[label], label)
 
         for j in range(times):

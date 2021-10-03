@@ -15,7 +15,6 @@ from taskgraph.actions.util import (
     name="add-new-jobs",
     title="Add new jobs",
     generic=True,
-    symbol="add-new",
     description="Add new jobs using task labels.",
     order=100,
     context=[],
