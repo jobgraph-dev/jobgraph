@@ -35,9 +35,6 @@ def make_taskgraph():
 
 def test_make_index_tasks(make_taskgraph, graph_config):
     task_def = {
-        "routes": [
-            "index.gecko.v2.mozilla-central.*",
-        ],
         "deadline": "soon",
         "metadata": {
             "description": "desc",

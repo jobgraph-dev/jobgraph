@@ -31,7 +31,6 @@ from .util.workertypes import get_worker_type
 
 here = os.path.abspath(os.path.dirname(__file__))
 logger = logging.getLogger(__name__)
-MAX_ROUTES = 10
 
 
 def amend_taskgraph(taskgraph, label_to_taskid, to_add):
@@ -104,83 +103,6 @@ def derive_index_task(task, taskgraph, label_to_taskid, parameters, graph_config
     return task, taskgraph, label_to_taskid
 
 
-# these regular expressions capture route prefixes for which we have a star
-# scope, allowing them to be summarized.  Each should correspond to a star scope
-# in each Gecko `assume:repo:hg.mozilla.org/...` role.
-_SCOPE_SUMMARY_REGEXPS = [
-    # TODO Bug 1631839 - Remove these scopes once the migration is done
-    re.compile(r"(index:insert-task:project\.mobile\.fenix\.v2\.[^.]*\.).*"),
-    re.compile(
-        r"(index:insert-task:project\.mobile\.reference-browser\.v3\.[^.]*\.).*"
-    ),
-]
-
-
-def make_index_task(parent_task, taskgraph, label_to_taskid, parameters, graph_config):
-    index_paths = [
-        r.split(".", 1)[1] for r in parent_task.task["routes"] if r.startswith("index.")
-    ]
-    parent_task.task["routes"] = [
-        r for r in parent_task.task["routes"] if not r.startswith("index.")
-    ]
-
-    task, taskgraph, label_to_taskid = derive_index_task(
-        parent_task, taskgraph, label_to_taskid, parameters, graph_config
-    )
-
-    # we need to "summarize" the scopes, otherwise a particularly
-    # namespace-heavy index task might have more scopes than can fit in a
-    # temporary credential.
-    scopes = set()
-    domain_scope_regex = re.compile(
-        r"(index:insert-task:{trust_domain}\.v2\.[^.]*\.).*".format(
-            trust_domain=re.escape(graph_config["trust-domain"])
-        )
-    )
-    all_scopes_summary_regexps = _SCOPE_SUMMARY_REGEXPS + [domain_scope_regex]
-    for path in index_paths:
-        scope = f"index:insert-task:{path}"
-        for summ_re in all_scopes_summary_regexps:
-            match = summ_re.match(scope)
-            if match:
-                scope = match.group(1) + "*"
-                break
-        scopes.add(scope)
-    task.task["scopes"] = sorted(scopes)
-
-    task.task["payload"]["command"] = ["insert-indexes.js"] + index_paths
-    task.task["payload"]["env"] = {
-        "TARGET_TASKID": parent_task.task_id,
-        "INDEX_RANK": parent_task.task.get("extra", {}).get("index", {}).get("rank", 0),
-    }
-    return task, taskgraph, label_to_taskid
-
-
-def add_index_tasks(taskgraph, label_to_taskid, parameters, graph_config):
-    """
-    The TaskCluster queue only allows 10 routes on a task, but we have tasks
-    with many more routes, for purposes of indexing. This graph morph adds
-    "index tasks" that depend on such tasks and do the index insertions
-    directly, avoiding the limits on task.routes.
-    """
-    logger.debug("Morphing: adding index tasks")
-
-    added = []
-    for label, task in taskgraph.tasks.items():
-        if len(task.task.get("routes", [])) <= MAX_ROUTES:
-            continue
-        task, taskgraph, label_to_taskid = make_index_task(
-            task, taskgraph, label_to_taskid, parameters, graph_config
-        )
-        added.append(task)
-
-    if added:
-        taskgraph, label_to_taskid = amend_taskgraph(taskgraph, label_to_taskid, added)
-        logger.info(f"Added {len(added)} index tasks")
-
-    return taskgraph, label_to_taskid
-
-
 def _get_morph_url():
     """
     Guess a URL for the current file, for source metadata for created tasks.
@@ -229,7 +151,6 @@ def add_code_review_task(taskgraph, label_to_taskid, parameters, graph_config):
             },
             "scopes": [],
             "payload": {},
-            "routes": ["project.relman.codereview.v1.try_ending"],
             "extra": {
                 "code-review": {
                     "phabricator-build-target": review_config[

@@ -54,7 +54,6 @@ job_description_schema = Schema(
         Optional("soft-dependencies"): task_description_schema["soft-dependencies"],
         Optional("requires"): task_description_schema["requires"],
         Optional("expires-after"): task_description_schema["expires-after"],
-        Optional("routes"): task_description_schema["routes"],
         Optional("scopes"): task_description_schema["scopes"],
         Optional("tags"): task_description_schema["tags"],
         Optional("extra"): task_description_schema["extra"],
@@ -352,7 +351,6 @@ def make_task_description(config, jobs):
         taskdesc.setdefault("attributes", {})
         taskdesc.setdefault("dependencies", {})
         taskdesc.setdefault("soft-dependencies", [])
-        taskdesc.setdefault("routes", [])
         taskdesc.setdefault("scopes", [])
         taskdesc.setdefault("extra", {})
 

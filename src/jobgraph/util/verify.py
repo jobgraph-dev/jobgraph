@@ -46,30 +46,7 @@ verifications = VerificationSequence()
 
 
 @verifications.add("full_task_graph")
-def verify_trust_domain_v2_routes(task, taskgraph, scratch_pad, graph_config):
-    """
-    This function ensures that any two tasks have distinct ``index.{trust-domain}.v2`` routes.
-    """
-    if task is None:
-        return
-    route_prefix = "index.{}.v2".format(graph_config["trust-domain"])
-    task_dict = task.task
-    routes = task_dict.get("routes", [])
-
-    for route in routes:
-        if route.startswith(route_prefix):
-            if route in scratch_pad:
-                raise Exception(
-                    "conflict between {}:{} for route: {}".format(
-                        task.label, scratch_pad[route], route
-                    )
-                )
-            else:
-                scratch_pad[route] = task.label
-
-
-@verifications.add("full_task_graph")
-def verify_routes_notification_filters(task, taskgraph, scratch_pad, graph_config):
+def verify_notification_filters(task, taskgraph, scratch_pad, graph_config):
     """
     This function ensures that only understood filters for notifications are
     specified.
@@ -78,21 +55,10 @@ def verify_routes_notification_filters(task, taskgraph, scratch_pad, graph_confi
     """
     if task is None:
         return
-    route_prefix = "notify."
     valid_filters = ("on-any", "on-completed", "on-failed", "on-exception")
     task_dict = task.task
-    routes = task_dict.get("routes", [])
 
-    for route in routes:
-        if route.startswith(route_prefix):
-            # Get the filter of the route
-            route_filter = route.split(".")[-1]
-            if route_filter not in valid_filters:
-                raise Exception(
-                    "{} has invalid notification filter ({})".format(
-                        task.label, route_filter
-                    )
-                )
+    # TODO support notification without Taskcluster's routes
 
 
 @verifications.add("optimized_task_graph")

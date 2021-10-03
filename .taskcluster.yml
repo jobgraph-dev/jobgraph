@@ -46,18 +46,6 @@ tasks:
                       then:
                         kind: cron-task
 
-              routes:
-                  $flatten:
-                      - $if: 'tasks_for == "hg-push"'
-                        then:
-                            - "index.${trustDomain}.v2.${repository.project}.latest.taskgraph.decision"
-                            - "index.${trustDomain}.v2.${repository.project}.revision.${push.revision}.taskgraph.decision"
-                            - "index.${trustDomain}.v2.${repository.project}.pushlog-id.${push.pushlog_id}.decision"
-                        else:     # cron
-                            - "index.${trustDomain}.v2.${repository.project}.latest.taskgraph.decision-${cron.job_name}"
-                            - "index.${trustDomain}.v2.${repository.project}.revision.${push.revision}.taskgraph.decision-${cron.job_name}"
-                            - "index.${trustDomain}.v2.${repository.project}.pushlog-id.${push.pushlog_id}.decision-${cron.job_name}"
-
               scopes:
                   $if: 'tasks_for == "hg-push"'
                   then:

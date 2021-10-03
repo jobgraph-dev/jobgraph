@@ -76,8 +76,6 @@ task_description_schema = Schema(
         # (e.g., "14 days").  Defaults are set based on the project.
         Optional("expires-after"): str,
         Optional("deadline-after"): str,
-        # custom routes for this task
-        Optional("routes"): [str],
         # custom scopes for this task; any scopes required for the worker will be
         # added automatically. The following parameters will be substituted in each
         # scope:
@@ -144,12 +142,6 @@ task_description_schema = Schema(
     }
 )
 
-V2_ROUTE_TEMPLATES = [
-    "index.{trust-domain}.v2.{project}.latest.{product}.{job-name}",
-    "index.{trust-domain}.v2.{project}.pushdate.{build_date_long}.{product}.{job-name}",
-    "index.{trust-domain}.v2.{project}.pushlog-id.{pushlog_id}.{product}.{job-name}",
-    "index.{trust-domain}.v2.{project}.revision.{branch_rev}.{product}.{job-name}",
-]
 
 def get_branch_rev(config):
     return config.params["head_rev"]
@@ -546,55 +538,6 @@ def validate(config, tasks):
         yield task
 
 
-@index_builder("generic")
-def add_generic_index_routes(config, task):
-    index = task.get("index")
-    routes = task.setdefault("routes", [])
-
-    verify_index(config, index)
-
-    subs = config.params.copy()
-    subs["job-name"] = index["job-name"]
-    subs["build_date_long"] = time.strftime(
-        "%Y.%m.%d.%Y%m%d%H%M%S", time.gmtime(config.params["build_date"])
-    )
-    subs["product"] = index["product"]
-    subs["trust-domain"] = config.graph_config["trust-domain"]
-    subs["branch_rev"] = get_branch_rev(config)
-
-    for tpl in V2_ROUTE_TEMPLATES:
-        routes.append(tpl.format(**subs))
-
-    return task
-
-
-@transforms.add
-def add_index_routes(config, tasks):
-    for task in tasks:
-        index = task.get("index", {})
-
-        # The default behavior is to rank tasks according to their tier
-        extra_index = task.setdefault("extra", {}).setdefault("index", {})
-        rank = index.get("rank", "by-tier")
-
-        if rank == "build_date":
-            extra_index["rank"] = int(config.params["build_date"])
-        else:
-            extra_index["rank"] = rank
-
-        if not index:
-            yield task
-            continue
-
-        index_type = index.get("type", "generic")
-        if index_type not in index_builders:
-            raise ValueError(f"Unknown index-type {index_type}")
-        task = index_builders[index_type](config, task)
-
-        del task["index"]
-        yield task
-
-
 @transforms.add
 def build_task(config, tasks):
     for task in tasks:
@@ -608,7 +551,6 @@ def build_task(config, tasks):
         task["worker-type"] = "/".join([provisioner_id, worker_type])
         project = config.params["project"]
 
-        routes = task.get("routes", [])
         scopes = [
             s.format(level=level, project=project) for s in task.get("scopes", [])
         ]
