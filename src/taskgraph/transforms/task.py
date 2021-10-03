@@ -360,85 +360,33 @@ def build_docker_worker_payload(config, task, task_def):
 
     features = {}
 
-    if worker.get("relengapi-proxy"):
-        features["relengAPIProxy"] = True
-
-    if worker.get("taskcluster-proxy"):
-        features["taskclusterProxy"] = True
-
-    if worker.get("allow-ptrace"):
-        features["allowPtrace"] = True
-        task_def["scopes"].append("docker-worker:feature:allowPtrace")
-
-    if worker.get("chain-of-trust"):
-        features["chainOfTrust"] = True
-
     if worker.get("docker-in-docker"):
         features["dind"] = True
 
-    if task.get("needs-sccache"):
-        features["taskclusterProxy"] = True
-        task_def["scopes"].append(
-            "assume:project:taskcluster:{trust_domain}:level-{level}-sccache-buckets".format(
-                trust_domain=config.graph_config["trust-domain"],
-                level=config.params["level"],
-            )
-        )
-        worker["env"]["USE_SCCACHE"] = "1"
-        # Disable sccache idle shutdown.
-        worker["env"]["SCCACHE_IDLE_TIMEOUT"] = "0"
-    else:
-        worker["env"]["SCCACHE_DISABLE"] = "1"
-
     capabilities = {}
 
-    for lo in "audio", "video":
-        if worker.get("loopback-" + lo):
-            capitalized = "loopback" + lo.capitalize()
-            devices = capabilities.setdefault("devices", {})
-            devices[capitalized] = True
-            task_def["scopes"].append("docker-worker:capability:device:" + capitalized)
+    task_def["image"] = image
+    task_def["variables"] = worker["env"]
 
-    if worker.get("privileged"):
-        capabilities["privileged"] = True
-        task_def["scopes"].append("docker-worker:capability:privileged")
-
-    task_def["payload"] = payload = {
-        "image": image,
-        "env": worker["env"],
-    }
     if "command" in worker:
-        payload["command"] = worker["command"]
+        task_def["script"] = worker["command"]
 
     if "max-run-time" in worker:
-        payload["maxRunTime"] = worker["max-run-time"]
+        task_def["timeout"] = f'{worker["max-run-time"]} seconds'
 
+    payload = {}
     run_task = payload.get("command", [""])[0].endswith("run-task")
 
-    # run-task exits EXIT_PURGE_CACHES if there is a problem with caches.
-    # Automatically retry the tasks and purge caches if we see this exit
-    # code.
-    # TODO move this closer to code adding run-task once bug 1469697 is
-    # addressed.
-    if run_task:
-        worker.setdefault("retry-exit-status", []).append(72)
-        worker.setdefault("purge-caches-exit-status", []).append(72)
-
-    payload["onExitStatus"] = {}
-    if "retry-exit-status" in worker:
-        payload["onExitStatus"]["retry"] = worker["retry-exit-status"]
-    if "purge-caches-exit-status" in worker:
-        payload["onExitStatus"]["purgeCaches"] = worker["purge-caches-exit-status"]
-
     if "artifacts" in worker:
-        artifacts = {}
-        for artifact in worker["artifacts"]:
-            artifacts[artifact["name"]] = {
-                "path": artifact["path"],
-                "type": artifact["type"],
-                "expires": task_def["expires"],  # always expire with the task
-            }
-        payload["artifacts"] = artifacts
+        task_def["artifacts"] = {
+            "expire_in": "3 months",    # TODO: Parametrize
+            "paths": [
+                artifact["path"]
+                for artifact in worker["artifacts"]
+            ],
+            "public": False,    # TODO: Parametrize
+            "reports": {},  # TODO: Support different types of reports
+        }
 
     if isinstance(worker.get("docker-image"), str):
         out_of_tree_image = worker["docker-image"]
@@ -501,7 +449,6 @@ def build_docker_worker_payload(config, task, task_def):
                 suffix=suffix,
             )
             caches[name] = cache["mount-point"]
-            task_def["scopes"].append("docker-worker:cache:%s" % name)
 
         # Assertion: only run-task is interested in this.
         if run_task:
@@ -513,200 +460,12 @@ def build_docker_worker_payload(config, task, task_def):
     if run_task and worker.get("volumes"):
         payload["env"]["TASKCLUSTER_VOLUMES"] = ";".join(sorted(worker["volumes"]))
 
-    if payload.get("cache") and skip_untrusted:
-        payload["env"]["TASKCLUSTER_UNTRUSTED_CACHES"] = "1"
-
     if features:
         payload["features"] = features
     if capabilities:
         payload["capabilities"] = capabilities
 
     check_caches_are_volumes(task)
-
-
-@payload_builder(
-    "generic-worker",
-    schema={
-        Required("os"): Any("windows", "macosx", "linux", "linux-bitbar"),
-        # see http://schemas.taskcluster.net/generic-worker/v1/payload.json
-        # and https://docs.taskcluster.net/reference/workers/generic-worker/payload
-        # command is a list of commands to run, sequentially
-        # on Windows, each command is a string, on OS X and Linux, each command is
-        # a string array
-        Required("command"): Any(
-            [taskref_or_string], [[taskref_or_string]]  # Windows  # Linux / OS X
-        ),
-        # artifacts to extract from the task image after completion; note that artifacts
-        # for the generic worker cannot have names
-        Optional("artifacts"): [
-            {
-                # type of artifact -- simple file, or recursive directory
-                "type": Any("file", "directory"),
-                # filesystem path from which to read artifact
-                "path": str,
-                # if not specified, path is used for artifact name
-                Optional("name"): str,
-            }
-        ],
-        # Directories and/or files to be mounted.
-        # The actual allowed combinations are stricter than the model below,
-        # but this provides a simple starting point.
-        # See https://docs.taskcluster.net/reference/workers/generic-worker/payload
-        Optional("mounts"): [
-            {
-                # A unique name for the cache volume, implies writable cache directory
-                # (otherwise mount is a read-only file or directory).
-                Optional("cache-name"): str,
-                # Optional content for pre-loading cache, or mandatory content for
-                # read-only file or directory. Pre-loaded content can come from either
-                # a task artifact or from a URL.
-                Optional("content"): {
-                    # *** Either (artifact and task-id) or url must be specified. ***
-                    # Artifact name that contains the content.
-                    Optional("artifact"): str,
-                    # Task ID that has the artifact that contains the content.
-                    Optional("task-id"): taskref_or_string,
-                    # URL that supplies the content in response to an unauthenticated
-                    # GET request.
-                    Optional("url"): str,
-                },
-                # *** Either file or directory must be specified. ***
-                # If mounting a cache or read-only directory, the filesystem location of
-                # the directory should be specified as a relative path to the task
-                # directory here.
-                Optional("directory"): str,
-                # If mounting a file, specify the relative path within the task
-                # directory to mount the file (the file will be read only).
-                Optional("file"): str,
-                # Required if and only if `content` is specified and mounting a
-                # directory (not a file). This should be the archive format of the
-                # content (either pre-loaded cache or read-only directory).
-                Optional("format"): Any("rar", "tar.bz2", "tar.gz", "zip"),
-            }
-        ],
-        # environment variables
-        Required("env"): {str: taskref_or_string},
-        # the maximum time to run, in seconds
-        Required("max-run-time"): int,
-        # os user groups for test task workers
-        Optional("os-groups"): [str],
-        # feature for test task to run as administarotr
-        Optional("run-as-administrator"): bool,
-        # optional features
-        Required("chain-of-trust"): bool,
-        Optional("taskcluster-proxy"): bool,
-        # Wether any artifacts are assigned to this worker
-        Optional("skip-artifacts"): bool,
-    },
-)
-def build_generic_worker_payload(config, task, task_def):
-    worker = task["worker"]
-
-    task_def["payload"] = {
-        "command": worker["command"],
-        "maxRunTime": worker["max-run-time"],
-    }
-
-    if worker["os"] == "windows":
-        task_def["payload"]["onExitStatus"] = {
-            "retry": [
-                # These codes (on windows) indicate a process interruption,
-                # rather than a task run failure. See bug 1544403.
-                1073807364,  # process force-killed due to system shutdown
-                3221225786,  # sigint (any interrupt)
-            ]
-        }
-
-    env = worker.get("env", {})
-
-    if task.get("needs-sccache"):
-        env["USE_SCCACHE"] = "1"
-        # Disable sccache idle shutdown.
-        env["SCCACHE_IDLE_TIMEOUT"] = "0"
-    else:
-        env["SCCACHE_DISABLE"] = "1"
-
-    if env:
-        task_def["payload"]["env"] = env
-
-    artifacts = []
-
-    for artifact in worker.get("artifacts", []):
-        a = {
-            "path": artifact["path"],
-            "type": artifact["type"],
-        }
-        if "name" in artifact:
-            a["name"] = artifact["name"]
-        artifacts.append(a)
-
-    if artifacts:
-        task_def["payload"]["artifacts"] = artifacts
-
-    # Need to copy over mounts, but rename keys to respect naming convention
-    #   * 'cache-name' -> 'cacheName'
-    #   * 'task-id'    -> 'taskId'
-    # All other key names are already suitable, and don't need renaming.
-    mounts = deepcopy(worker.get("mounts", []))
-    for mount in mounts:
-        if "cache-name" in mount:
-            mount["cacheName"] = "{trust_domain}-level-{level}-{name}".format(
-                trust_domain=config.graph_config["trust-domain"],
-                level=config.params["level"],
-                name=mount.pop("cache-name"),
-            )
-            task_def["scopes"].append(
-                "generic-worker:cache:{}".format(mount["cacheName"])
-            )
-        if "content" in mount:
-            if "task-id" in mount["content"]:
-                mount["content"]["taskId"] = mount["content"].pop("task-id")
-            if "artifact" in mount["content"]:
-                if not mount["content"]["artifact"].startswith("public/"):
-                    task_def["scopes"].append(
-                        "queue:get-artifact:{}".format(mount["content"]["artifact"])
-                    )
-
-    if mounts:
-        task_def["payload"]["mounts"] = mounts
-
-    if worker.get("os-groups"):
-        task_def["payload"]["osGroups"] = worker["os-groups"]
-        task_def["scopes"].extend(
-            [
-                "generic-worker:os-group:{}/{}".format(task["worker-type"], group)
-                for group in worker["os-groups"]
-            ]
-        )
-
-    features = {}
-
-    if worker.get("chain-of-trust"):
-        features["chainOfTrust"] = True
-
-    if worker.get("taskcluster-proxy"):
-        features["taskclusterProxy"] = True
-
-    if worker.get("run-as-administrator", False):
-        features["runAsAdministrator"] = True
-        task_def["scopes"].append(
-            "generic-worker:run-as-administrator:{}".format(task["worker-type"]),
-        )
-
-    if features:
-        task_def["payload"]["features"] = features
-
-
-@payload_builder(
-    "invalid",
-    schema={
-        # an invalid task is one which should never actually be created; this is used in
-        # release automation on branches where the task just doesn't make sense
-        Extra: object,
-    },
-)
-def build_invalid_payload(config, task, task_def):
-    task_def["payload"] = "invalid task - should never be created"
 
 
 @payload_builder(
@@ -966,37 +725,21 @@ def build_task(config, tasks):
         )
 
         task_def = {
-            "provisionerId": provisioner_id,
-            "workerType": worker_type,
-            "routes": routes,
-            "created": {"relative-datestamp": "0 seconds"},
-            "deadline": {"relative-datestamp": task["deadline-after"]},
-            "expires": {"relative-datestamp": task["expires-after"]},
-            "scopes": scopes,
-            "metadata": {
-                "description": task["description"],
-                "name": task["label"],
-                "owner": config.params["owner"],
-                "source": config.params.file_url(config.path, pretty=True),
+            "image": "ubuntu:20.04",
+            "retry": {
+                "max": 2,
+                "when": [
+                    "unknown_failure",
+                    "stale_schedule",
+                    "runner_system_failure",
+                    "stuck_or_timeout_failure",
+                ],
             },
-            "extra": extra,
-            "tags": tags,
-            "priority": task["priority"],
+            "tags": [worker_type],
+            "cache": {},
+            "timeout": task["deadline-after"],
+            "needs": [],
         }
-
-        if task.get("requires", None):
-            task_def["requires"] = task["requires"]
-
-        if task_th:
-            # link back to treeherder in description
-            th_push_link = (
-                "https://treeherder.mozilla.org/#/jobs?repo={}&revision={}".format(
-                    config.params["project"] + th_project_suffix, branch_rev
-                )
-            )
-            task_def["metadata"]["description"] += " ([Treeherder push]({}))".format(
-                th_push_link
-            )
 
         # add the payload and adjust anything else as required (e.g., scopes)
         payload_builders[task["worker"]["implementation"]].builder(
@@ -1004,32 +747,10 @@ def build_task(config, tasks):
         )
 
         attributes = task.get("attributes", {})
-        # Resolve run-on-projects
-        build_platform = attributes.get("build_platform")
-        resolve_keyed_by(
-            task,
-            "run-on-projects",
-            item_name=task["label"],
-            **{"build-platform": build_platform},
-        )
         attributes["run_on_projects"] = task.get("run-on-projects", ["all"])
         attributes["run_on_tasks_for"] = task.get("run-on-tasks-for", ["all"])
-        # We don't want to pollute non git repos with this attribute. Moreover, target_tasks
-        # already assumes the default value is ['all']
-        if task.get("run-on-git-branches"):
-            attributes["run_on_git_branches"] = task["run-on-git-branches"]
-
+        attributes["run_on_git_branches"] = task.get("run-on-git-branches", ["all"])
         attributes["always_target"] = task["always-target"]
-
-        # Set MOZ_AUTOMATION on all jobs.
-        if task["worker"]["implementation"] in (
-            "generic-worker",
-            "docker-worker",
-        ):
-            payload = task_def.get("payload")
-            if payload:
-                env = payload.setdefault("env", {})
-                env["MOZ_AUTOMATION"] = "1"
 
         yield {
             "label": task["label"],
@@ -1039,54 +760,6 @@ def build_task(config, tasks):
             "attributes": attributes,
             "optimization": task.get("optimization", None),
         }
-
-
-@transforms.add
-def add_github_checks(config, tasks):
-    """
-    For git repositories, add checks route to all tasks.
-
-    This will be replaced by a configurable option in the future.
-    """
-    if config.params["repository_type"] != "git":
-        for task in tasks:
-            yield task
-
-    for task in tasks:
-        task["task"]["routes"].append("checks")
-        yield task
-
-
-@transforms.add
-def chain_of_trust(config, tasks):
-    for task in tasks:
-        if task["task"].get("payload", {}).get("features", {}).get("chainOfTrust"):
-            image = task.get("dependencies", {}).get("docker-image")
-            if image:
-                cot = (
-                    task["task"].setdefault("extra", {}).setdefault("chainOfTrust", {})
-                )
-                cot.setdefault("inputs", {})["docker-image"] = {
-                    "task-reference": "<docker-image>"
-                }
-        yield task
-
-
-@transforms.add
-def check_task_identifiers(config, tasks):
-    """Ensures that all tasks have well defined identifiers:
-    ^[a-zA-Z0-9_-]{1,38}$
-    """
-    e = re.compile("^[a-zA-Z0-9_-]{1,38}$")
-    for task in tasks:
-        for attrib in ("workerType", "provisionerId"):
-            if not e.match(task["task"][attrib]):
-                raise Exception(
-                    "task {}.{} is not a valid identifier: {}".format(
-                        task["label"], attrib, task["task"][attrib]
-                    )
-                )
-        yield task
 
 
 @transforms.add
@@ -1129,68 +802,3 @@ def check_caches_are_volumes(task):
         "(have you added them as VOLUMEs in the Dockerfile?)"
         % (task["label"], task["worker"]["docker-image"], ", ".join(sorted(missing)))
     )
-
-
-@transforms.add
-def check_run_task_caches(config, tasks):
-    """Audit for caches requiring run-task.
-
-    run-task manages caches in certain ways. If a cache managed by run-task
-    is used by a non run-task task, it could cause problems. So we audit for
-    that and make sure certain cache names are exclusive to run-task.
-
-    IF YOU ARE TEMPTED TO MAKE EXCLUSIONS TO THIS POLICY, YOU ARE LIKELY
-    CONTRIBUTING TECHNICAL DEBT AND WILL HAVE TO SOLVE MANY OF THE PROBLEMS
-    THAT RUN-TASK ALREADY SOLVES. THINK LONG AND HARD BEFORE DOING THAT.
-    """
-    re_reserved_caches = re.compile(
-        """^
-        (checkouts|tooltool-cache)
-    """,
-        re.VERBOSE,
-    )
-
-    cache_prefix = "{trust_domain}-level-{level}-".format(
-        trust_domain=config.graph_config["trust-domain"],
-        level=config.params["level"],
-    )
-
-    suffix = _run_task_suffix()
-
-    for task in tasks:
-        payload = task["task"].get("payload", {})
-        command = payload.get("command") or [""]
-
-        main_command = command[0] if isinstance(command[0], str) else ""
-        run_task = main_command.endswith("run-task")
-
-        for cache in payload.get("cache", {}):
-            if not cache.startswith(cache_prefix):
-                raise Exception(
-                    "{} is using a cache ({}) which is not appropriate "
-                    "for its trust-domain and level. It should start with {}.".format(
-                        task["label"], cache, cache_prefix
-                    )
-                )
-
-            cache = cache[len(cache_prefix) :]
-
-            if not re_reserved_caches.match(cache):
-                continue
-
-            if not run_task:
-                raise Exception(
-                    "%s is using a cache (%s) reserved for run-task "
-                    "change the task to use run-task or use a different "
-                    "cache name" % (task["label"], cache)
-                )
-
-            if not cache.endswith(suffix):
-                raise Exception(
-                    "%s is using a cache (%s) reserved for run-task "
-                    "but the cache name is not dependent on the contents "
-                    "of run-task; change the cache name to conform to the "
-                    "naming requirements" % (task["label"], cache)
-                )
-
-        yield task
