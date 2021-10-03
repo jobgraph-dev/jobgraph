@@ -118,7 +118,7 @@ def get_decision_parameters(graph_config, options):
             "owner",
             "level",
             "target_tasks_method",
-            "tasks_for",
+            "pipeline_source",
         ]
         if n in options
     }
@@ -165,7 +165,7 @@ def get_decision_parameters(graph_config, options):
     # ..but can be overridden by the commit message: if it contains the special
     # string "DONTBUILD" and this is an on-push decision task, then use the
     # special 'nothing' target task method.
-    if "DONTBUILD" in commit_message and options["tasks_for"] == "hg-push":
+    if "DONTBUILD" in commit_message and options["pipeline_source"] == "push":
         parameters["target_tasks_method"] = "nothing"
 
     if options.get("optimize_target_tasks") is not None:
@@ -183,9 +183,9 @@ def get_decision_parameters(graph_config, options):
         task_config_file = os.path.join(os.getcwd(), "try_task_config.json")
 
     # load try settings
-    if ("try" in project and options["tasks_for"] == "hg-push") or options[
-        "tasks_for"
-    ] == "github-pull-request":
+    if ("try" in project and options["pipeline_source"] == "push") or options[
+        "pipeline_source"
+    ] == "merge_request_event":
         set_try_config(parameters, task_config_file)
 
     result = Parameters(**parameters)

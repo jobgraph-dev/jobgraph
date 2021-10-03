@@ -100,7 +100,7 @@ task_description_schema = Schema(
                 "build_date",
             ),
         },
-        Optional("run-on-tasks-for"): [str],
+        Optional("run-on-pipeline-sources"): [str],
         Optional("run-on-git-branches"): [str],
         # The `always-target` attribute will cause the task to be included in the
         # target_task_graph regardless of filtering. Tasks included in this manner
@@ -524,7 +524,7 @@ def build_task(config, tasks):
         )
 
         attributes = task.get("attributes", {})
-        attributes["run_on_tasks_for"] = task.get("run-on-tasks-for", ["all"])
+        attributes["run_on_pipeline_sources"] = task.get("run-on-pipeline-sources", ["all"])
         attributes["run_on_git_branches"] = task.get("run-on-git-branches", ["all"])
         attributes["always_target"] = task["always-target"]
 

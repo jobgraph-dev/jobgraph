@@ -47,7 +47,7 @@ def make_decision_task(params, root, context, head_rev=None):
 
     # provide a similar JSON-e context to what mozilla-taskcluster provides:
     # https://docs.taskcluster.net/reference/integrations/mozilla-taskcluster/docs/taskcluster-yml
-    # but with a different tasks_for and an extra `cron` section
+    # but with a different pipeline_source and an extra `cron` section
     context = merge(
         {
             "repository": {

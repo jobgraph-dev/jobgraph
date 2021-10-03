@@ -59,7 +59,7 @@ def _match_run_on(key, run_on):
     return key in run_on
 
 
-match_run_on_tasks_for = _match_run_on
+match_run_on_pipeline_sources = _match_run_on
 
 
 def match_run_on_git_branches(git_branch, run_on_git_branches):

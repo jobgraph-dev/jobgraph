@@ -57,7 +57,7 @@ def add_optimization(
     # Chain-of-trust doesn't handle tasks not built on the tip of a
     # pull-request, so don't look for level-1 tasks if building a pull-request.
     min_level = int(config.params["level"])
-    if config.params["tasks_for"] == "github-pull-request":
+    if config.params["pipeline_source"] == "merge_request_event":
         min_level = max(min_level, 3)
     for level in reversed(range(min_level, 4)):
         subs["level"] = level

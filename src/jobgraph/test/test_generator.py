@@ -6,7 +6,7 @@ from jobgraph import (
     generator,
     graph,
 )
-from jobgraph.generator import load_tasks_for_kind
+from jobgraph.generator import load_pipeline_source_kind
 
 from .conftest import FakeKind, WithFakeKind, fake_load_graph_config
 

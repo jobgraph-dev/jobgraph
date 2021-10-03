@@ -56,7 +56,7 @@ base_schema = Schema(
         # target-kind is not included, since it should never be
         # used at run-time
         Required("target_tasks_method"): str,
-        Required("tasks_for"): str,
+        Required("pipeline_source"): str,
         Optional("code-review"): {
             Required("phabricator-build-target"): str,
         },
@@ -144,7 +144,7 @@ class Parameters(ReadOnlyDict):
             "pushlog_id": "0",
             "repository_type": _repo().tool,
             "target_tasks_method": "default",
-            "tasks_for": "",
+            "pipeline_source": "",
         }
 
         for name, default in defaults.items():
@@ -172,7 +172,7 @@ class Parameters(ReadOnlyDict):
         Determine whether this graph is being built on a try project or for
         `mach try fuzzy`.
         """
-        return "try" in self["project"] or self["tasks_for"] == "github-pull-request"
+        return "try" in self["project"] or self["pipeline_source"] == "merge_request_event"
 
     @property
     def moz_build_date(self):

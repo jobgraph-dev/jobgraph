@@ -4,7 +4,7 @@
 
 
 from jobgraph.util.attributes import (
-    match_run_on_tasks_for,
+    match_run_on_pipeline_sources,
     match_run_on_git_branches,
 )
 
@@ -33,9 +33,9 @@ def filter_out_cron(task, parameters):
     return not task.attributes.get("cron")
 
 
-def filter_for_tasks_for(task, parameters):
-    run_on_tasks_for = set(task.attributes.get("run_on_tasks_for", ["all"]))
-    return match_run_on_tasks_for(parameters["tasks_for"], run_on_tasks_for)
+def filter_for_pipeline_source(task, parameters):
+    run_on_pipeline_sources = set(task.attributes.get("run_on_pipeline_sources", ["all"]))
+    return match_run_on_pipeline_sources(parameters["pipeline_source"], run_on_pipeline_sources)
 
 
 def filter_for_git_branch(task, parameters):
@@ -46,7 +46,7 @@ def filter_for_git_branch(task, parameters):
         return True
 
     # Pull requests usually have arbitrary names, let's not filter git branches on them.
-    if parameters["tasks_for"] == "github-pull-request":
+    if parameters["pipeline_source"] == "merge_request_event":
         return True
 
     run_on_git_branches = set(task.attributes.get("run_on_git_branches", ["all"]))
@@ -62,7 +62,7 @@ def standard_filter(task, parameters):
         filter_func(task, parameters)
         for filter_func in (
             filter_out_cron,
-            filter_for_tasks_for,
+            filter_for_pipeline_source,
             filter_for_git_branch,
         )
     )

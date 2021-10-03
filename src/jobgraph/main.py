@@ -584,7 +584,7 @@ def image_digest(args):
 )
 @argument("--head-tag", help="Tag attached to the revision", default="")
 @argument(
-    "--tasks-for", required=True, help="the tasks_for value used to generate this task"
+    "--pipeline-source", required=True, help="the pipeline_source value used to generate this task"
 )
 @argument("--try-task-config-file", help="path to try task configuration file")
 def decision(options):

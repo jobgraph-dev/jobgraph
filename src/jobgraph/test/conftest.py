@@ -107,7 +107,7 @@ def maketgg(monkeypatch):
                 "_kinds": kinds,
                 "target_tasks_method": "test_method",
                 "try_mode": None,
-                "tasks_for": "hg-push",
+                "pipeline_source": "push",
             }
         )
         parameters.update(params)

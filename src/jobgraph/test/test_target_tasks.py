@@ -17,11 +17,11 @@ class TestTargetTasks(unittest.TestCase):
             attributes={},
             parameters={
                 "project": project,
-                "tasks_for": "hg-push",
+                "pipeline_source": "push",
             },
         )
 
-    def default_matches_tasks_for(self, tasks_for):
+    def default_matches_pipeline_source(self, pipeline_source):
         attributes = {}
 
         return self.default_matches(
@@ -29,18 +29,18 @@ class TestTargetTasks(unittest.TestCase):
             parameters={
                 "project": "mozilla-central",
                 "repository_type": "hg",
-                "tasks_for": tasks_for,
+                "pipeline_source": pipeline_source,
             },
         )
 
     def default_matches_git_branches(
-        self, run_on_tasks_for, tasks_for, run_on_git_branches, git_branch
+        self, run_on_pipeline_sources, pipeline_source, run_on_git_branches, git_branch
     ):
         attributes = {
             "run_git_branches": ["all"],
         }
-        if run_on_tasks_for is not None:
-            attributes["run_on_tasks_for"] = run_on_tasks_for
+        if run_on_pipeline_sources is not None:
+            attributes["run_on_pipeline_sources"] = run_on_pipeline_sources
         if run_on_git_branches is not None:
             attributes["run_on_git_branches"] = run_on_git_branches
 
@@ -49,7 +49,7 @@ class TestTargetTasks(unittest.TestCase):
             parameters={
                 "project": "fenix",
                 "repository_type": "git",
-                "tasks_for": tasks_for,
+                "pipeline_source": pipeline_source,
                 "head_ref": git_branch,
             },
         )
@@ -64,256 +64,256 @@ class TestTargetTasks(unittest.TestCase):
         )
         return "a" in method(graph, parameters, {})
 
-    def test_default_tasks_for(self):
-        self.assertTrue(self.default_matches_tasks_for(None, "hg-push"))
-        self.assertTrue(self.default_matches_tasks_for(None, "github-pull-request"))
+    def test_default_pipeline_source(self):
+        self.assertTrue(self.default_matches_pipeline_source(None, "push"))
+        self.assertTrue(self.default_matches_pipeline_source(None, "merge_request_event"))
 
-        self.assertFalse(self.default_matches_tasks_for([], "hg-push"))
-        self.assertFalse(self.default_matches_tasks_for([], "github-pull-request"))
+        self.assertFalse(self.default_matches_pipeline_source([], "push"))
+        self.assertFalse(self.default_matches_pipeline_source([], "merge_request_event"))
 
-        self.assertTrue(self.default_matches_tasks_for(["all"], "hg-push"))
-        self.assertTrue(self.default_matches_tasks_for(["all"], "github-pull-request"))
+        self.assertTrue(self.default_matches_pipeline_source(["all"], "push"))
+        self.assertTrue(self.default_matches_pipeline_source(["all"], "merge_request_event"))
 
-        self.assertTrue(self.default_matches_tasks_for(["hg-push"], "hg-push"))
+        self.assertTrue(self.default_matches_pipeline_source(["push"], "push"))
         self.assertFalse(
-            self.default_matches_tasks_for(["hg-push"], "github-pull-request")
+            self.default_matches_pipeline_source(["push"], "merge_request_event")
         )
 
         self.assertTrue(
-            self.default_matches_tasks_for(
-                ["github-pull-request"], "github-pull-request"
+            self.default_matches_pipeline_source(
+                ["merge_request_event"], "merge_request_event"
             )
         )
         self.assertFalse(
-            self.default_matches_tasks_for([r"github-pull-request"], "hg-pull")
+            self.default_matches_pipeline_source([r"merge_request_event"], "hg-pull")
         )
 
     def test_default_git_branches(self):
         self.assertTrue(
             self.default_matches_git_branches(
-                None, "github-pull-request", None, "master"
+                None, "merge_request_event", None, "master"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                None, "github-pull-request", None, "some-branch"
+                None, "merge_request_event", None, "some-branch"
             )
         )
         self.assertTrue(
-            self.default_matches_git_branches(None, "github-push", None, "master")
+            self.default_matches_git_branches(None, "push", None, "master")
         )
         self.assertTrue(
-            self.default_matches_git_branches(None, "github-push", None, "main")
+            self.default_matches_git_branches(None, "push", None, "main")
         )
         self.assertTrue(
-            self.default_matches_git_branches(None, "github-push", None, "some-branch")
+            self.default_matches_git_branches(None, "push", None, "some-branch")
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                None, "github-release", None, "release/v1.0"
+                None, "push", None, "release/v1.0"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                None, "github-release", None, "release_v2.0"
+                None, "push", None, "release_v2.0"
             )
         )
 
         self.assertFalse(
-            self.default_matches_git_branches([], "github-pull-request", None, "master")
+            self.default_matches_git_branches([], "merge_request_event", None, "master")
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                [], "github-pull-request", None, "some-branch"
+                [], "merge_request_event", None, "some-branch"
             )
         )
         self.assertFalse(
-            self.default_matches_git_branches([], "github-push", None, "master")
+            self.default_matches_git_branches([], "push", None, "master")
         )
         self.assertFalse(
-            self.default_matches_git_branches([], "github-push", None, "main")
+            self.default_matches_git_branches([], "push", None, "main")
         )
         self.assertFalse(
-            self.default_matches_git_branches([], "github-push", None, "some-branch")
+            self.default_matches_git_branches([], "push", None, "some-branch")
         )
         self.assertFalse(
-            self.default_matches_git_branches([], "github-release", None, "master")
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                [], "github-release", None, "release/v1.0"
-            )
+            self.default_matches_git_branches([], "push", None, "master")
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                [], "github-release", None, "release_v2.0"
-            )
-        )
-
-        self.assertTrue(
-            self.default_matches_git_branches(
-                ["all"], "github-pull-request", ["master"], "master"
-            )
-        )
-        self.assertTrue(
-            self.default_matches_git_branches(
-                ["all"], "github-pull-request", ["master"], "some-branch"
-            )
-        )
-        self.assertTrue(
-            self.default_matches_git_branches(
-                ["all"], "github-push", ["master"], "master"
+                [], "push", None, "release/v1.0"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-push", ["master"], "main"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "github-push", ["master"], "some-branch"
-            )
-        )
-        self.assertTrue(
-            self.default_matches_git_branches(
-                ["all"], "github-release", ["master"], "master"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "github-release", ["master"], "release/v1.0"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "github-release", ["master"], "release_v2.0"
+                [], "push", None, "release_v2.0"
             )
         )
 
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-pull-request", [r"release/.+"], "master"
+                ["all"], "merge_request_event", ["master"], "master"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-pull-request", [r"release/.+"], "some-branch"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "github-push", [r"release/.+"], "master"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "github-push", [r"release/.+"], "main"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "github-push", [r"release/.+"], "some-branch"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "github-release", [r"release/.+"], "master"
+                ["all"], "merge_request_event", ["master"], "some-branch"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-release", [r"release/.+"], "release/v1.0"
+                ["all"], "push", ["master"], "master"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-release", [r"release/.+"], "release_v2.0"
+                ["all"], "push", ["master"], "main"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", ["master"], "some-branch"
+            )
+        )
+        self.assertTrue(
+            self.default_matches_git_branches(
+                ["all"], "push", ["master"], "master"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", ["master"], "release/v1.0"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", ["master"], "release_v2.0"
             )
         )
 
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-pull-request", [r"release/.+"], "refs/heads/master"
+                ["all"], "merge_request_event", [r"release/.+"], "master"
+            )
+        )
+        self.assertTrue(
+            self.default_matches_git_branches(
+                ["all"], "merge_request_event", [r"release/.+"], "some-branch"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", [r"release/.+"], "master"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", [r"release/.+"], "main"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", [r"release/.+"], "some-branch"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", [r"release/.+"], "master"
+            )
+        )
+        self.assertTrue(
+            self.default_matches_git_branches(
+                ["all"], "push", [r"release/.+"], "release/v1.0"
+            )
+        )
+        self.assertFalse(
+            self.default_matches_git_branches(
+                ["all"], "push", [r"release/.+"], "release_v2.0"
+            )
+        )
+
+        self.assertTrue(
+            self.default_matches_git_branches(
+                ["all"], "merge_request_event", [r"release/.+"], "refs/heads/master"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
                 ["all"],
-                "github-pull-request",
+                "merge_request_event",
                 [r"release/.+"],
                 "refs/heads/some-branch",
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-push", [r"release/.+"], "refs/heads/master"
+                ["all"], "push", [r"release/.+"], "refs/heads/master"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-push", [r"release/.+"], "refs/heads/main"
+                ["all"], "push", [r"release/.+"], "refs/heads/main"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-push", [r"release/.+"], "refs/heads/some-branch"
+                ["all"], "push", [r"release/.+"], "refs/heads/some-branch"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-release", [r"release/.+"], "refs/heads/master"
+                ["all"], "push", [r"release/.+"], "refs/heads/master"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-release", [r"release/.+"], "refs/heads/release/v1.0"
+                ["all"], "push", [r"release/.+"], "refs/heads/release/v1.0"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-release", [r"release/.+"], "refs/heads/release_v2.0"
+                ["all"], "push", [r"release/.+"], "refs/heads/release_v2.0"
             )
         )
 
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-pull-request", ["master", r"release/.+"], "master"
+                ["all"], "merge_request_event", ["master", r"release/.+"], "master"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-pull-request", ["master", r"release/.+"], "some-branch"
+                ["all"], "merge_request_event", ["master", r"release/.+"], "some-branch"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-push", ["master", r"release/.+"], "master"
+                ["all"], "push", ["master", r"release/.+"], "master"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-push", ["master", r"release/.+"], "main"
+                ["all"], "push", ["master", r"release/.+"], "main"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-push", ["master", r"release/.+"], "some-branch"
+                ["all"], "push", ["master", r"release/.+"], "some-branch"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-release", ["master", r"release/.+"], "master"
+                ["all"], "push", ["master", r"release/.+"], "master"
             )
         )
         self.assertTrue(
             self.default_matches_git_branches(
-                ["all"], "github-release", ["master", r"release/.+"], "release/v1.0"
+                ["all"], "push", ["master", r"release/.+"], "release/v1.0"
             )
         )
         self.assertFalse(
             self.default_matches_git_branches(
-                ["all"], "github-release", ["master", r"release/.+"], "release_v2.0"
+                ["all"], "push", ["master", r"release/.+"], "release_v2.0"
             )
         )
 

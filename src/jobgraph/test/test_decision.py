@@ -56,7 +56,7 @@ class TestGetDecisionParameters(unittest.TestCase):
             "pushdate": 1503691511,
             "repository_type": "hg",
             "owner": "nobody@mozilla.com",
-            "tasks_for": "hg-push",
+            "pipeline_source": "push",
             "level": "3",
         }
 

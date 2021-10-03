@@ -38,7 +38,7 @@ class TestParameters(unittest.TestCase):
         "pushlog_id": "0",
         "repository_type": "hg",
         "target_tasks_method": "default",
-        "tasks_for": "github-push",
+        "pipeline_source": "push",
     }
 
     def test_Parameters_immutable(self):
