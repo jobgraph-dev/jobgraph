@@ -191,13 +191,8 @@ def verify_index(config, index):
             {"indexed": str},
         ),
         # worker features that should be enabled
-        Required("relengapi-proxy"): bool,
         Required("chain-of-trust"): bool,
-        Required("allow-ptrace"): bool,
-        Required("loopback-video"): bool,
-        Required("loopback-audio"): bool,
         Required("docker-in-docker"): bool,  # (aka 'dind')
-        Required("privileged"): bool,
         # Paths to Docker volumes.
         #
         # For in-tree Docker images, volumes can be parsed from Dockerfile.
@@ -424,13 +419,8 @@ def set_defaults(config, tasks):
 
         worker = task["worker"]
         if worker["implementation"] in ("kubernetes",):
-            worker.setdefault("relengapi-proxy", False)
             worker.setdefault("chain-of-trust", False)
-            worker.setdefault("allow-ptrace", False)
-            worker.setdefault("loopback-video", False)
-            worker.setdefault("loopback-audio", False)
             worker.setdefault("docker-in-docker", False)
-            worker.setdefault("privileged", False)
             worker.setdefault("volumes", [])
             worker.setdefault("env", {})
             if "caches" in worker:
