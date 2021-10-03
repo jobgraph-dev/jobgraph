@@ -52,7 +52,6 @@ job_description_schema = Schema(
         Optional("job-from"): task_description_schema["job-from"],
         Optional("dependencies"): task_description_schema["dependencies"],
         Optional("soft-dependencies"): task_description_schema["soft-dependencies"],
-        Optional("tags"): task_description_schema["tags"],
         Optional("extra"): task_description_schema["extra"],
         Optional("index"): task_description_schema["index"],
         Optional("run-on-projects"): task_description_schema["run-on-projects"],
@@ -130,10 +129,6 @@ def rewrite_when_to_optimization(config, jobs):
 def set_implementation(config, jobs):
     for job in jobs:
         impl, os = worker_type_implementation(config.graph_config, job["worker-type"])
-        if os:
-            job.setdefault("tags", {})["os"] = os
-        if impl:
-            job.setdefault("tags", {})["worker-implementation"] = impl
         worker = job.setdefault("worker", {})
         assert "implementation" not in worker
         worker["implementation"] = impl

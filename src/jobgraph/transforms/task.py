@@ -71,8 +71,6 @@ task_description_schema = Schema(
         },
         # Soft dependencies of this task, as a list of tasks labels
         Optional("soft-dependencies"): [str],
-        # Tags
-        Optional("tags"): {str: str},
         # custom "task.extra" content
         Optional("extra"): {str: object},
         # information for indexing this build so its artifacts can be discovered;
@@ -432,30 +430,6 @@ transforms = TransformSequence()
 
 
 @transforms.add
-def set_implementation(config, tasks):
-    """
-    Set the worker implementation based on the worker-type alias.
-    """
-    for task in tasks:
-        worker = task.setdefault("worker", {})
-        if "implementation" in task["worker"]:
-            yield task
-            continue
-
-        impl, os = worker_type_implementation(config.graph_config, task["worker-type"])
-
-        tags = task.setdefault("tags", {})
-        tags["worker-implementation"] = impl
-        if os:
-            task["tags"]["os"] = os
-        worker["implementation"] = impl
-        if os:
-            worker["os"] = os
-
-        yield task
-
-
-@transforms.add
 def set_defaults(config, tasks):
     for task in tasks:
         task.setdefault("always-target", False)
@@ -530,15 +504,6 @@ def build_task(config, tasks):
             task["priority"] = get_default_priority(
                 config.graph_config, config.params["project"]
             )
-
-        tags = task.get("tags", {})
-        tags.update(
-            {
-                "createdForUser": config.params["owner"],
-                "kind": config.kind,
-                "label": task["label"],
-            }
-        )
 
         task_def = {
             "image": "ubuntu:20.04",

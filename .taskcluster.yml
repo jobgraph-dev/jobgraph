@@ -34,16 +34,6 @@ tasks:
               provisionerId: "${trustDomain}-${repository.level}"
               workerType: "decision"
 
-              tags:
-                  $if: 'tasks_for == "hg-push"'
-                  then:
-                      createdForUser: "${ownerEmail}"
-                      kind: decision-task
-                  else:
-                      $if: 'tasks_for == "cron"'
-                      then:
-                        kind: cron-task
-
               dependencies: []
 
               priority:
