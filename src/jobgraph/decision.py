@@ -12,7 +12,7 @@ import time
 import yaml
 
 from .create import create_tasks
-from .generator import TaskGraphGenerator
+from .generator import JobGraphGenerator
 from .parameters import Parameters
 from .jobgraph import JobGraph
 from jobgraph.util.python_path import find_object
@@ -62,7 +62,7 @@ def taskgraph_decision(options, parameters=None):
     decision_task_id = os.environ["TASK_ID"]
 
     # create a TaskGraphGenerator instance
-    tgg = TaskGraphGenerator(
+    jgg = JobGraphGenerator(
         root_dir=options.get("root"),
         parameters=parameters,
         decision_task_id=decision_task_id,
@@ -70,29 +70,29 @@ def taskgraph_decision(options, parameters=None):
     )
 
     # write out the parameters used to generate this graph
-    write_artifact("parameters.yml", dict(**tgg.parameters))
+    write_artifact("parameters.yml", dict(**jgg.parameters))
 
     # write out the full graph for reference
-    full_task_json = tgg.full_task_graph.to_json()
+    full_task_json = jgg.full_task_graph.to_json()
     write_artifact("full-task-graph.json", full_task_json)
 
     # this is just a test to check whether the from_json() function is working
     _, _ = JobGraph.from_json(full_task_json)
 
     # write out the target task set to allow reproducing this as input
-    write_artifact("target-tasks.json", list(tgg.target_task_set.tasks.keys()))
+    write_artifact("target-tasks.json", list(jgg.target_task_set.tasks.keys()))
 
     # write out the optimized task graph to describe what will actually happen,
     # and the map of labels to taskids
-    write_artifact("task-graph.json", tgg.morphed_task_graph.to_json())
-    write_artifact("label-to-taskid.json", tgg.label_to_taskid)
+    write_artifact("task-graph.json", jgg.morphed_task_graph.to_json())
+    write_artifact("label-to-taskid.json", jgg.label_to_taskid)
 
     # actually create the graph
     create_tasks(
-        tgg.graph_config,
-        tgg.morphed_task_graph,
-        tgg.label_to_taskid,
-        tgg.parameters,
+        jgg.graph_config,
+        jgg.morphed_task_graph,
+        jgg.label_to_taskid,
+        jgg.parameters,
         decision_task_id=decision_task_id,
     )
 

@@ -6,7 +6,7 @@ from jobgraph import (
     target_tasks as target_tasks_mod,
 )
 from jobgraph.config import GraphConfig
-from jobgraph.generator import TaskGraphGenerator, Kind
+from jobgraph.generator import JobGraphGenerator, Kind
 from jobgraph.optimize import OptimizationStrategy
 from jobgraph.util.templates import merge
 
@@ -43,7 +43,7 @@ class FakeKind(Kind):
         return super().load_tasks(parameters, loaded_tasks, write_artifacts)
 
 
-class WithFakeKind(TaskGraphGenerator):
+class WithFakeKind(JobGraphGenerator):
     def _load_kinds(self, graph_config, target_kind=None):
         for kind_name, cfg in self.parameters["_kinds"]:
             config = {

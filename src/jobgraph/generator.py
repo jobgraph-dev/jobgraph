@@ -100,7 +100,7 @@ class Kind:
         return cls(kind_name, path, config, graph_config)
 
 
-class TaskGraphGenerator:
+class JobGraphGenerator:
     """
     The central controller for taskgraph.  This handles all phases of graph
     generation.  The task is generated from all of the kinds defined in
@@ -414,9 +414,9 @@ def load_tasks_for_kind(parameters, kind, root_dir=None):
     parameters = dict(parameters)
     parameters["target-kind"] = kind
     parameters = Parameters(strict=False, **parameters)
-    tgg = TaskGraphGenerator(root_dir=root_dir, parameters=parameters)
+    jgg = JobGraphGenerator(root_dir=root_dir, parameters=parameters)
     return {
         task.task["metadata"]["name"]: task
-        for task in tgg.full_task_set
+        for task in jgg.full_task_set
         if task.kind == kind
     }

@@ -99,9 +99,9 @@ FORMAT_METHODS = {
 
 def get_taskgraph_generator(root, parameters):
     """Helper function to make testing a little easier."""
-    from jobgraph.generator import TaskGraphGenerator
+    from jobgraph.generator import JobGraphGenerator
 
-    return TaskGraphGenerator(root_dir=root, parameters=parameters)
+    return JobGraphGenerator(root_dir=root, parameters=parameters)
 
 
 def format_taskgraph(options, parameters, logfile=None):
