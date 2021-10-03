@@ -69,33 +69,6 @@ task_description_schema = Schema(
                 ),
             ): object,
         },
-        # information for indexing this build so its artifacts can be discovered;
-        # if omitted, the build will not be indexed.
-        Optional("index"): {
-            # the name of the product this build produces
-            "product": str,
-            # the names to use for this job in the TaskCluster index
-            "job-name": str,
-            # Type of gecko v2 index to use
-            "type": str,
-            # The rank that the task will receive in the TaskCluster
-            # index.  A newly completed task supercedes the currently
-            # indexed task iff it has a higher rank.  If unspecified,
-            # 'by-tier' behavior will be used.
-            "rank": Any(
-                # Rank is equal the timestamp of the build_date for tier-1
-                # tasks, and zero for non-tier-1.  This sorts tier-{2,3}
-                # builds below tier-1 in the index.
-                "by-tier",
-                # Rank is given as an integer constant (e.g. zero to make
-                # sure a task is last in the index).
-                int,
-                # Rank is equal to the timestamp of the build_date.  This
-                # option can be used to override the 'by-tier' behavior
-                # for non-tier-1 tasks.
-                "build_date",
-            ),
-        },
         Optional("run-on-pipeline-sources"): [str],
         Optional("run-on-git-branches"): [str],
         # The `always-target` attribute will cause the task to be included in the
@@ -148,30 +121,6 @@ def payload_builder(name, schema):
     return wrap
 
 
-# define a collection of index builders, depending on the type implementation
-index_builders = {}
-
-
-def index_builder(name):
-    def wrap(func):
-        index_builders[name] = func
-        return func
-
-    return wrap
-
-
-UNSUPPORTED_INDEX_PRODUCT_ERROR = """\
-The index product {product} is not in the list of configured products in
-`taskcluster/ci/config.yml'.
-"""
-
-
-def verify_index(config, index):
-    product = index["product"]
-    if product not in config.graph_config["index"]["products"]:
-        raise Exception(UNSUPPORTED_INDEX_PRODUCT_ERROR.format(product=product))
-
-
 @payload_builder(
     "kubernetes",
     schema={
@@ -185,8 +134,6 @@ def verify_index(config, index):
             str,
             # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
             {"in-tree": str},
-            # an indexed docker image
-            {"indexed": str},
         ),
         # worker features that should be enabled
         Required("chain-of-trust"): bool,
@@ -275,12 +222,6 @@ def build_docker_worker_payload(config, task, task_def):
 
                 worker["volumes"].append(v)
 
-        elif "indexed" in image:
-            image = {
-                "path": "public/image.tar.zst",
-                "namespace": image["indexed"],
-                "type": "indexed-image",
-            }
         else:
             raise Exception("unknown docker image type")
 

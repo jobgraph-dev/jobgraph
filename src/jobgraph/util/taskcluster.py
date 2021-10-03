@@ -133,53 +133,6 @@ def get_artifact_path(task, path):
     return f"{get_artifact_prefix(task)}/{path}"
 
 
-def get_index_url(index_path, multiple=False):
-    index_tmpl = liburls.api(get_root_url(), "index", "v1", "task{}/{}")
-    return index_tmpl.format("s" if multiple else "", index_path)
-
-
-def find_task_id(index_path):
-    try:
-        response = _do_request(get_index_url(index_path))
-    except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 404:
-            raise KeyError(f"index path {index_path} not found")
-        raise
-    return response.json()["taskId"]
-
-
-def get_artifact_from_index(index_path, artifact_path):
-    full_path = index_path + "/artifacts/" + artifact_path
-    response = _do_request(get_index_url(full_path))
-    return _handle_artifact(full_path, response)
-
-
-def list_tasks(index_path):
-    """
-    Returns a list of task_ids where each task_id is indexed under a path
-    in the index. Results are sorted by expiration date from oldest to newest.
-    """
-    results = []
-    data = {}
-    while True:
-        response = _do_request(
-            get_index_url(index_path, multiple=True), json=data
-        )
-        response = response.json()
-        results += response["tasks"]
-        if response.get("continuationToken"):
-            data = {"continuationToken": response.get("continuationToken")}
-        else:
-            break
-
-    # We can sort on expires because in the general case
-    # all of these tasks should be created with the same expires time so they end up in
-    # order from earliest to latest action. If more correctness is needed, consider
-    # fetching each task and sorting on the created date.
-    results.sort(key=lambda t: parse_time(t["expires"]))
-    return [t["taskId"] for t in results]
-
-
 def parse_time(timestamp):
     """Turn a "JSON timestamp" as used in TC APIs into a datetime"""
     return datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")

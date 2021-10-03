@@ -8,7 +8,6 @@ Tools for interacting with existing taskgraphs.
 
 
 from jobgraph.util.taskcluster import (
-    find_task_id,
     get_artifact,
 )
 
@@ -16,26 +15,10 @@ from jobgraph.util.taskcluster import (
 def find_decision_task(parameters, graph_config):
     """Given the parameters for this action, find the taskId of the decision
     task"""
-    if parameters.get("repository_type", "hg") == "hg":
-        return find_task_id(
-            "{}.v2.{}.pushlog-id.{}.decision".format(
-                graph_config["trust-domain"],
-                parameters["project"],
-                parameters["pushlog_id"],
-            )
-        )
-    elif parameters["repository_type"] == "git":
-        return find_task_id(
-            "{}.v2.{}.revision.{}.taskgraph.decision".format(
-                graph_config["trust-domain"],
-                parameters["project"],
-                parameters["head_rev"],
-            )
-        )
-    else:
-        raise Exception(
-            "Unknown repository_type {}!".format(parameters["repository_type"])
-        )
+    # TODO: Use Gitlab API to find decision job ID
+    raise NotImplementedError(
+        "Unknown repository_type {}!".format(parameters["repository_type"])
+    )
 
 
 def find_existing_tasks_from_previous_kinds(

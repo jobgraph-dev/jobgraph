@@ -7,13 +7,6 @@ import hashlib
 import time
 
 
-TARGET_CACHE_INDEX = "{cache_prefix}.cache.level-{level}.{type}.{name}.hash.{digest}"
-EXTRA_CACHE_INDEXES = [
-    "{cache_prefix}.cache.level-{level}.{type}.{name}.latest",
-    "{cache_prefix}.cache.level-{level}.{type}.{name}.pushdate.{build_date_long}",
-]
-
-
 def add_optimization(
     config, taskdesc, cache_type, cache_name, digest=None, digest_data=None
 ):

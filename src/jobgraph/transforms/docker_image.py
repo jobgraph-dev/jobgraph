@@ -54,10 +54,6 @@ docker_image_schema = Schema(
         # List of package tasks this docker image depends on.
         Optional("packages"): [str],
         Optional(
-            "index",
-            description="information for indexing this build so its artifacts can be discovered",
-        ): task_description_schema["index"],
-        Optional(
             "cache",
             description="Whether this image should be cached based on inputs.",
         ): bool,
@@ -176,9 +172,6 @@ def fill_template(config, tasks):
                 "max-run-time": 7200,
             },
         }
-        if "index" in task:
-            taskdesc["index"] = task["index"]
-
         worker = taskdesc["worker"]
 
         worker["docker-image"] = IMAGE_BUILDER_IMAGE

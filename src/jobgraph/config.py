@@ -36,11 +36,6 @@ graph_config_schema = Schema(
                 description="Python function to call to register extensions.",
             ): str,
             Optional("decision-parameters"): str,
-            Optional(
-                "cached-task-prefix",
-                description="The taskcluster index prefix to use for caching tasks. "
-                "Defaults to `trust-domain`.",
-            ): str,
             Required("repositories"): All(
                 {
                     str: {

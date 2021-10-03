@@ -1,10 +1,6 @@
 ---
 trust-domain: taskgraph
 
-index:
-    products:
-        - taskgraph
-
 taskgraph:
     repositories:
         ci:

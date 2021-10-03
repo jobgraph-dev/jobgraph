@@ -51,7 +51,6 @@ job_description_schema = Schema(
         Optional("attributes"): task_description_schema["attributes"],
         Optional("job-from"): task_description_schema["job-from"],
         Optional("dependencies"): task_description_schema["dependencies"],
-        Optional("index"): task_description_schema["index"],
         Optional("run-on-pipeline-sources"): task_description_schema["run-on-pipeline-sources"],
         Optional("run-on-git-branches"): task_description_schema["run-on-git-branches"],
         Optional("always-target"): task_description_schema["always-target"],

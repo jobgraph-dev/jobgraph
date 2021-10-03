@@ -16,7 +16,7 @@ from jobgraph.util.taskcluster import (
 
 
 def get_image_digest(image_name):
-    from jobgraph.generator import load_pipeline_source_kind
+    from jobgraph.generator import load_tasks_for_kind
     from jobgraph.parameters import Parameters
 
     params = Parameters(
@@ -26,34 +26,6 @@ def get_image_digest(image_name):
     tasks = load_tasks_for_kind(params, "docker-image")
     task = tasks[f"build-docker-image-{image_name}"]
     return task.attributes["cached_task"]["digest"]
-
-
-def load_image_by_name(image_name, tag=None):
-    from jobgraph.generator import load_tasks_for_kind
-    from jobgraph.optimize import IndexSearch
-    from jobgraph.parameters import Parameters
-
-    params = Parameters(
-        level=os.environ.get("MOZ_SCM_LEVEL", "3"),
-        strict=False,
-    )
-    tasks = load_tasks_for_kind(params, "docker-image")
-    task = tasks[f"build-docker-image-{image_name}"]
-    task_id = IndexSearch().should_replace_task(
-        task, {}, task.optimization.get("index-search", [])
-    )
-
-    if task_id in (True, False):
-        print(
-            "Could not find artifacts for a docker image "
-            "named `{image_name}`. Local commits and other changes "
-            "in your checkout may cause this error. Try "
-            "updating to a fresh checkout of mozilla-central "
-            "to download image.".format(image_name=image_name)
-        )
-        return False
-
-    return load_image_by_task_id(task_id, tag)
 
 
 def load_image_by_task_id(task_id, tag=None):

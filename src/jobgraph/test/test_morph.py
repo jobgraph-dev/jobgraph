@@ -31,35 +31,3 @@ def make_taskgraph():
         return taskgraph, label_to_taskid
 
     return inner
-
-
-def test_make_index_tasks(make_taskgraph, graph_config):
-    task_def = {
-        "deadline": "soon",
-        "metadata": {
-            "description": "desc",
-            "owner": "owner@foo.com",
-            "source": "https://source",
-        },
-    }
-    task = Job(kind="test", label="a", attributes={}, task=task_def)
-    docker_task = Job(
-        kind="docker-image",
-        label="build-docker-image-index-task",
-        attributes={},
-        task={},
-    )
-    taskgraph, label_to_taskid = make_taskgraph(
-        {
-            task.label: task,
-            docker_task.label: docker_task,
-        }
-    )
-
-    index_task, _, _ = morph.make_index_task(
-        task, taskgraph, label_to_taskid, Parameters(strict=False), graph_config
-    )
-
-    assert index_task.task["payload"]["command"][0] == "insert-indexes.js"
-    assert index_task.task["payload"]["env"]["TARGET_TASKID"] == "a-tid"
-    assert index_task.task["payload"]["env"]["INDEX_RANK"] == 1540722354

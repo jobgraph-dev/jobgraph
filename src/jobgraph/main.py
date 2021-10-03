@@ -512,7 +512,7 @@ def build_image(args):
     "or mozilla-inbound)",
 )
 def load_image(args):
-    from jobgraph.docker import load_image_by_name, load_image_by_task_id
+    from jobgraph.docker import load_image_by_task_id
 
     if not args.get("image_name") and not args.get("task_id"):
         print("Specify either IMAGE-NAME or TASK-ID")
@@ -520,8 +520,6 @@ def load_image(args):
     try:
         if args["task_id"]:
             ok = load_image_by_task_id(args["task_id"], args.get("tag"))
-        else:
-            ok = load_image_by_name(args["image_name"], args.get("tag"))
         if not ok:
             sys.exit(1)
     except Exception:

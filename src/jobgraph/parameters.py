@@ -250,7 +250,7 @@ def load_parameters_file(spec, strict=True, overrides=None, trust_domain=None):
         task-id=fdtgsD5DQUmAQZEaGMvQ4Q
         project=mozilla-central
     """
-    from jobgraph.util.taskcluster import get_artifact_url, find_task_id
+    from jobgraph.util.taskcluster import get_artifact_url
     from jobgraph.util import yaml
 
     if overrides is None:
@@ -274,12 +274,6 @@ def load_parameters_file(spec, strict=True, overrides=None, trust_domain=None):
                     "Can't specify parameters by project "
                     "if trust domain isn't supplied.",
                 )
-            index = "{trust_domain}.v2.{project}.latest.taskgraph.decision".format(
-                trust_domain=trust_domain,
-                project=spec.split("=")[1],
-            )
-            task_id = find_task_id(index)
-
         if task_id:
             spec = get_artifact_url(task_id, "public/parameters.yml")
         f = urlopen(spec)

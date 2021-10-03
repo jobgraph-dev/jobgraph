@@ -21,7 +21,6 @@ from slugid import nice as slugid
 from .graph import Graph
 from . import files_changed
 from .jobgraph import JobGraph
-from .util.taskcluster import find_task_id
 from .util.parameterization import resolve_task_references
 
 logger = logging.getLogger(__name__)
@@ -83,7 +82,6 @@ def optimize_task_graph(
 def _make_default_strategies():
     return {
         "never": OptimizationStrategy(),  # "never" is the default behavior
-        "index-search": IndexSearch(),
         "skip-unless-changed": SkipUnlessChanged(),
     }
 
@@ -325,31 +323,6 @@ class Either(OptimizationStrategy):
         return self._for_substrategies(
             arg, lambda sub, arg: sub.should_replace_task(task, params, arg)
         )
-
-
-class IndexSearch(OptimizationStrategy):
-
-    # A task with no dependencies remaining after optimization will be replaced
-    # if artifacts exist for the corresponding index_paths.
-    # Otherwise, we're in one of the following cases:
-    # - the task has un-optimized dependencies
-    # - the artifacts have expired
-    # - some changes altered the index_paths and new artifacts need to be
-    # created.
-    # In every of those cases, we need to run the task to create or refresh
-    # artifacts.
-
-    def should_replace_task(self, task, params, index_paths):
-        "Look for a task with one of the given index paths"
-        for index_path in index_paths:
-            try:
-                task_id = find_task_id(index_path)
-                return task_id
-            except KeyError:
-                # 404 will end up here and go on to the next index path
-                pass
-
-        return False
 
 
 class SkipUnlessChanged(OptimizationStrategy):
