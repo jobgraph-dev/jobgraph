@@ -9,12 +9,6 @@ RUN mkdir /builds && \
 
 # %include-run-task
 
-# %include gitlab-ci/scripts/external_tools/tooltool.py
-ADD topsrcdir/gitlab-ci/scripts/external_tools/tooltool.py /setup/tooltool.py
-
-# %include gitlab-ci/docker/recipes/install-mercurial.sh
-ADD topsrcdir/gitlab-ci/docker/recipes/install-mercurial.sh /setup/install-mercurial.sh
-
 # Add taskgraph package.
 # %include requirements/base.txt
 ADD topsrcdir/requirements/base.txt /setup/requirements.txt

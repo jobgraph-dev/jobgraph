@@ -1,8 +1,7 @@
 [tool.black]
 line-length = 88
 extend-exclude = """(\
-  src/taskgraph/run-task|\
-  taskcluster/scripts/external_tools)\
+  src/jobgraph/run-task)\
   """
 
 [tool.pytest.ini_options]
