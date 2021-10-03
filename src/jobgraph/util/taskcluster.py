@@ -31,23 +31,10 @@ CONCURRENCY = 50
 
 
 @memoize
-def get_root_url(use_proxy):
+def get_root_url():
     """Get the current TASKCLUSTER_ROOT_URL.  When running in a task, this must
     come from $TASKCLUSTER_ROOT_URL; when run on the command line, we apply a
-    defualt that points to the production deployment of Taskcluster.  If use_proxy
-    is set, this attempts to get TASKCLUSTER_PROXY_URL instead, failing if it
-    is not set."""
-    if use_proxy:
-        try:
-            return os.environ["TASKCLUSTER_PROXY_URL"]
-        except KeyError:
-            if "TASK_ID" not in os.environ:
-                raise RuntimeError(
-                    "taskcluster-proxy is not available when not executing in a task"
-                )
-            else:
-                raise RuntimeError("taskcluster-proxy is not enabled for this task")
-
+    defualt that points to the production deployment of Taskcluster. """
     if "TASKCLUSTER_ROOT_URL" not in os.environ:
         if "TASK_ID" in os.environ:
             raise RuntimeError(
@@ -57,9 +44,8 @@ def get_root_url(use_proxy):
             logger.debug("Using default TASKCLUSTER_ROOT_URL (Firefox CI production)")
             return PRODUCTION_TASKCLUSTER_ROOT_URL
     logger.debug(
-        "Running in Taskcluster instance {}{}".format(
+        "Running in Taskcluster instance {}".format(
             os.environ["TASKCLUSTER_ROOT_URL"],
-            " with taskcluster-proxy" if "TASKCLUSTER_PROXY_URL" in os.environ else "",
         )
     )
     return os.environ["TASKCLUSTER_ROOT_URL"]
@@ -106,27 +92,15 @@ def _handle_artifact(path, response):
     return response.raw
 
 
-def get_artifact_url(task_id, path, use_proxy=False):
+def get_artifact_url(task_id, path):
     artifact_tmpl = liburls.api(
         get_root_url(False), "queue", "v1", "task/{}/artifacts/{}"
     )
     data = artifact_tmpl.format(task_id, path)
-    if use_proxy:
-        # Until Bug 1405889 is deployed, we can't download directly
-        # from the taskcluster-proxy.  Work around by using the /bewit
-        # endpoint instead.
-        # The bewit URL is the body of a 303 redirect, which we don't
-        # want to follow (which fetches a potentially large resource).
-        response = _do_request(
-            os.environ["TASKCLUSTER_PROXY_URL"] + "/bewit",
-            data=data,
-            allow_redirects=False,
-        )
-        return response.text
     return data
 
 
-def get_artifact(task_id, path, use_proxy=False):
+def get_artifact(task_id, path):
     """
     Returns the artifact with the given path for the given task id.
 
@@ -135,12 +109,12 @@ def get_artifact(task_id, path, use_proxy=False):
     dict) is returned.
     For other types of content, a file-like object is returned.
     """
-    response = _do_request(get_artifact_url(task_id, path, use_proxy))
+    response = _do_request(get_artifact_url(task_id, path))
     return _handle_artifact(path, response)
 
 
-def list_artifacts(task_id, use_proxy=False):
-    response = _do_request(get_artifact_url(task_id, "", use_proxy).rstrip("/"))
+def list_artifacts(task_id):
+    response = _do_request(get_artifact_url(task_id, "").rstrip("/"))
     return response.json()["artifacts"]
 
 
@@ -159,14 +133,14 @@ def get_artifact_path(task, path):
     return f"{get_artifact_prefix(task)}/{path}"
 
 
-def get_index_url(index_path, use_proxy=False, multiple=False):
-    index_tmpl = liburls.api(get_root_url(use_proxy), "index", "v1", "task{}/{}")
+def get_index_url(index_path, multiple=False):
+    index_tmpl = liburls.api(get_root_url(), "index", "v1", "task{}/{}")
     return index_tmpl.format("s" if multiple else "", index_path)
 
 
-def find_task_id(index_path, use_proxy=False):
+def find_task_id(index_path):
     try:
-        response = _do_request(get_index_url(index_path, use_proxy))
+        response = _do_request(get_index_url(index_path))
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
             raise KeyError(f"index path {index_path} not found")
@@ -174,13 +148,13 @@ def find_task_id(index_path, use_proxy=False):
     return response.json()["taskId"]
 
 
-def get_artifact_from_index(index_path, artifact_path, use_proxy=False):
+def get_artifact_from_index(index_path, artifact_path):
     full_path = index_path + "/artifacts/" + artifact_path
-    response = _do_request(get_index_url(full_path, use_proxy))
+    response = _do_request(get_index_url(full_path))
     return _handle_artifact(full_path, response)
 
 
-def list_tasks(index_path, use_proxy=False):
+def list_tasks(index_path):
     """
     Returns a list of task_ids where each task_id is indexed under a path
     in the index. Results are sorted by expiration date from oldest to newest.
@@ -189,7 +163,7 @@ def list_tasks(index_path, use_proxy=False):
     data = {}
     while True:
         response = _do_request(
-            get_index_url(index_path, use_proxy, multiple=True), json=data
+            get_index_url(index_path, multiple=True), json=data
         )
         response = response.json()
         results += response["tasks"]
@@ -211,32 +185,32 @@ def parse_time(timestamp):
     return datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
-def get_task_url(task_id, use_proxy=False):
-    task_tmpl = liburls.api(get_root_url(use_proxy), "queue", "v1", "task/{}")
+def get_task_url(task_id):
+    task_tmpl = liburls.api(get_root_url(), "queue", "v1", "task/{}")
     return task_tmpl.format(task_id)
 
 
-def get_task_definition(task_id, use_proxy=False):
-    response = _do_request(get_task_url(task_id, use_proxy))
+def get_task_definition(task_id):
+    response = _do_request(get_task_url(task_id))
     return response.json()
 
 
-def cancel_task(task_id, use_proxy=False):
+def cancel_task(task_id):
     """Cancels a task given a task_id. In testing mode, just logs that it would
     have cancelled."""
     if testing:
         logger.info(f"Would have cancelled {task_id}.")
     else:
-        _do_request(get_task_url(task_id, use_proxy) + "/cancel", json={})
+        _do_request(get_task_url(task_id) + "/cancel", json={})
 
 
-def status_task(task_id, use_proxy=False):
+def status_task(task_id):
     """Gets the status of a task given a task_id. In testing mode, just logs that it would
     have retrieved status."""
     if testing:
         logger.info(f"Would have gotten status for {task_id}.")
     else:
-        resp = _do_request(get_task_url(task_id, use_proxy) + "/status")
+        resp = _do_request(get_task_url(task_id) + "/status")
         status = resp.json().get("status", {}).get("state") or "unknown"
         return status
 
@@ -247,17 +221,17 @@ def rerun_task(task_id):
     if testing:
         logger.info(f"Would have rerun {task_id}.")
     else:
-        _do_request(get_task_url(task_id, use_proxy=True) + "/rerun", json={})
+        _do_request(get_task_url(task_id) + "/rerun", json={})
 
 
-def get_purge_cache_url(worker_type, use_proxy=False):
+def get_purge_cache_url(worker_type):
     url_tmpl = liburls.api(
-        get_root_url(use_proxy), "purge-cache", "v1", "purge-cache/{}/{}"
+        get_root_url(), "purge-cache", "v1", "purge-cache/{}/{}"
     )
     return url_tmpl.format(worker_type)
 
 
-def purge_cache(worker_type, cache_name, use_proxy=False):
+def purge_cache(worker_type, cache_name):
     """Requests a cache purge from the purge-caches service."""
     if testing:
         logger.info(
@@ -267,14 +241,14 @@ def purge_cache(worker_type, cache_name, use_proxy=False):
         )
     else:
         logger.info(f"Purging {worker_type}/{cache_name}.")
-        purge_cache_url = get_purge_cache_url(worker_type, use_proxy)
+        purge_cache_url = get_purge_cache_url(worker_type)
         _do_request(purge_cache_url, json={"cacheName": cache_name})
 
 
-def send_email(address, subject, content, link, use_proxy=False):
+def send_email(address, subject, content, link):
     """Sends an email using the notify service"""
     logger.info(f"Sending email to {address}.")
-    url = liburls.api(get_root_url(use_proxy), "notify", "v1", "email")
+    url = liburls.api(get_root_url(), "notify", "v1", "email")
     _do_request(
         url,
         json={

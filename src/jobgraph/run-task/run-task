@@ -861,10 +861,6 @@ def main(args):
     for repository, name in repositories.items():
         add_vcs_arguments(parser, repository, name)
 
-    parser.add_argument('--fetch-hgfingerprint', action='store_true',
-                        help='Fetch the latest hgfingerprint from the secrets store, '
-                        'using the taskclsuerProxy')
-
     args = parser.parse_args(our_args)
 
     repositories = [

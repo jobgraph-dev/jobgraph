@@ -343,9 +343,7 @@ class IndexSearch(OptimizationStrategy):
         "Look for a task with one of the given index paths"
         for index_path in index_paths:
             try:
-                task_id = find_task_id(
-                    index_path, use_proxy=bool(os.environ.get("TASK_ID"))
-                )
+                task_id = find_task_id(index_path)
                 return task_id
             except KeyError:
                 # 404 will end up here and go on to the next index path

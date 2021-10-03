@@ -78,9 +78,7 @@ def derive_index_task(task, taskgraph, label_to_taskid, parameters, graph_config
                 "namespace": "taskgraph.cache.level-3.docker-images.v2.index-task.latest",
                 "type": "indexed-image",
             },
-            "features": {
-                "taskclusterProxy": True,
-            },
+            "features": {},
             "maxRunTime": 600,
         },
     }

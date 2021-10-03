@@ -171,7 +171,3 @@ def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):
                 if value is not None
             }
         )
-
-    # only some worker platforms have taskcluster-proxy enabled
-    if job["worker"]["implementation"] in ("kubernetes",):
-        taskdesc["worker"]["taskcluster-proxy"] = True

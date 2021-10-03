@@ -193,7 +193,6 @@ def verify_index(config, index):
         # worker features that should be enabled
         Required("relengapi-proxy"): bool,
         Required("chain-of-trust"): bool,
-        Required("taskcluster-proxy"): bool,
         Required("allow-ptrace"): bool,
         Required("loopback-video"): bool,
         Required("loopback-audio"): bool,
@@ -427,7 +426,6 @@ def set_defaults(config, tasks):
         if worker["implementation"] in ("kubernetes",):
             worker.setdefault("relengapi-proxy", False)
             worker.setdefault("chain-of-trust", False)
-            worker.setdefault("taskcluster-proxy", False)
             worker.setdefault("allow-ptrace", False)
             worker.setdefault("loopback-video", False)
             worker.setdefault("loopback-audio", False)

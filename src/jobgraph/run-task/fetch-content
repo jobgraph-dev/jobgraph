@@ -595,11 +595,6 @@ def command_task_artifacts(args):
             path = 'task/{task}/artifacts/{artifact}'.format(
                     task=fetch['task'], artifact=fetch['artifact'])
             url = api(root_url, 'queue', 'v1', path)
-        else:
-            url = ('{proxy_url}/api/queue/v1/task/{task}/artifacts/{artifact}').format(
-                    proxy_url=os.environ['TASKCLUSTER_PROXY_URL'],
-                    task=fetch['task'],
-                    artifact=fetch['artifact'])
         downloads.append((url, extdir, fetch['extract']))
 
     fetch_urls(downloads)
