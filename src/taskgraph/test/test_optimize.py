@@ -9,7 +9,7 @@ from functools import partial
 from slugid import nice as slugid
 
 from taskgraph import optimize
-from taskgraph.taskgraph import TaskGraph
+from taskgraph.jobgraph import JobGraph
 from taskgraph import graph
 from taskgraph.task import Task
 
@@ -52,12 +52,12 @@ class TestOptimize(unittest.TestCase):
     def make_graph(self, *tasks_and_edges):
         tasks = {t.label: t for t in tasks_and_edges if isinstance(t, Task)}
         edges = {e for e in tasks_and_edges if not isinstance(e, Task)}
-        return TaskGraph(tasks, graph.Graph(set(tasks), edges))
+        return JobGraph(tasks, graph.Graph(set(tasks), edges))
 
     def make_opt_graph(self, *tasks_and_edges):
         tasks = {t.task_id: t for t in tasks_and_edges if isinstance(t, Task)}
         edges = {e for e in tasks_and_edges if not isinstance(e, Task)}
-        return TaskGraph(tasks, graph.Graph(set(tasks), edges))
+        return JobGraph(tasks, graph.Graph(set(tasks), edges))
 
     def make_triangle(self, **opts):
         """

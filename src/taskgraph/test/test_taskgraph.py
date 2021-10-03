@@ -7,7 +7,7 @@ import unittest
 
 from taskgraph.graph import Graph
 from taskgraph.task import Task
-from taskgraph.taskgraph import TaskGraph
+from taskgraph.jobgraph import JobGraph
 
 
 class TestTaskGraph(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestTaskGraph(unittest.TestCase):
             ),
         }
         graph = Graph(nodes=set("ab"), edges={("a", "b", "edgelabel")})
-        taskgraph = TaskGraph(tasks, graph)
+        taskgraph = JobGraph(tasks, graph)
 
         res = taskgraph.to_json()
 
@@ -63,7 +63,7 @@ class TestTaskGraph(unittest.TestCase):
         )
 
     def test_round_trip(self):
-        graph = TaskGraph(
+        graph = JobGraph(
             tasks={
                 "a": Task(
                     kind="fancy",
@@ -85,10 +85,10 @@ class TestTaskGraph(unittest.TestCase):
             graph=Graph(nodes={"a", "b"}, edges={("a", "b", "prereq")}),
         )
 
-        tasks, new_graph = TaskGraph.from_json(graph.to_json())
+        tasks, new_graph = JobGraph.from_json(graph.to_json())
         self.assertEqual(graph, new_graph)
 
-    simple_graph = TaskGraph(
+    simple_graph = JobGraph(
         tasks={
             "a": Task(
                 kind="fancy",

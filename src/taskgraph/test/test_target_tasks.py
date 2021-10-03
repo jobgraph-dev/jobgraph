@@ -7,7 +7,7 @@ import unittest
 
 from taskgraph import target_tasks
 from taskgraph.graph import Graph
-from taskgraph.taskgraph import TaskGraph
+from taskgraph.jobgraph import JobGraph
 from taskgraph.task import Task
 
 
@@ -61,7 +61,7 @@ class TestTargetTasks(unittest.TestCase):
 
     def default_matches(self, attributes, parameters):
         method = target_tasks.get_method("default")
-        graph = TaskGraph(
+        graph = JobGraph(
             tasks={
                 "a": Task(kind="build", label="a", attributes=attributes, task={}),
             },
@@ -343,4 +343,4 @@ class TestTargetTasks(unittest.TestCase):
             ),
         }
         graph = Graph(nodes=set("abc"), edges=set())
-        return TaskGraph(tasks, graph)
+        return JobGraph(tasks, graph)

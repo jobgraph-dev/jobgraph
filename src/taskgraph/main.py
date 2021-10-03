@@ -67,7 +67,7 @@ def get_filtered_taskgraph(taskgraph, tasksregex):
     and returns a new TaskGraph object
     """
     from taskgraph.graph import Graph
-    from taskgraph.taskgraph import TaskGraph
+    from taskgraph.jobgraph import JobGraph
 
     # return original taskgraph if no regular expression is passed
     if not tasksregex:
@@ -84,7 +84,7 @@ def get_filtered_taskgraph(taskgraph, tasksregex):
             for depname, dep in named_links_dict[key].items():
                 if regexprogram.match(dep):
                     filterededges.add((key, dep, depname))
-    filtered_taskgraph = TaskGraph(
+    filtered_taskgraph = JobGraph(
         filteredtasks, Graph(set(filteredtasks), filterededges)
     )
     return filtered_taskgraph

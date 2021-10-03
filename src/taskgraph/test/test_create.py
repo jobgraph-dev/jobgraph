@@ -10,7 +10,7 @@ from unittest import mock
 from taskgraph import create
 from taskgraph.config import GraphConfig
 from taskgraph.graph import Graph
-from taskgraph.taskgraph import TaskGraph
+from taskgraph.jobgraph import JobGraph
 from taskgraph.task import Task
 
 GRAPH_CONFIG = GraphConfig({"trust-domain": "domain"}, "/var/empty")
@@ -39,7 +39,7 @@ class TestCreate(unittest.TestCase):
         }
         label_to_taskid = {"a": "tid-a", "b": "tid-b"}
         graph = Graph(nodes={"tid-a", "tid-b"}, edges={("tid-a", "tid-b", "edge")})
-        taskgraph = TaskGraph(tasks, graph)
+        taskgraph = JobGraph(tasks, graph)
 
         create.create_tasks(
             GRAPH_CONFIG,
@@ -68,7 +68,7 @@ class TestCreate(unittest.TestCase):
         }
         label_to_taskid = {"a": "tid-a"}
         graph = Graph(nodes={"tid-a"}, edges=set())
-        taskgraph = TaskGraph(tasks, graph)
+        taskgraph = JobGraph(tasks, graph)
 
         create.create_tasks(
             GRAPH_CONFIG,
@@ -91,7 +91,7 @@ class TestCreate(unittest.TestCase):
         }
         label_to_taskid = {"a": "tid-a"}
         graph = Graph(nodes={"tid-a"}, edges=set())
-        taskgraph = TaskGraph(tasks, graph)
+        taskgraph = JobGraph(tasks, graph)
 
         def fail(*args):
             print("UHOH")

@@ -26,7 +26,7 @@ from slugid import nice as slugid
 
 from .task import Task
 from .graph import Graph
-from .taskgraph import TaskGraph
+from .jobgraph import JobGraph
 from .util.workertypes import get_worker_type
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -45,7 +45,7 @@ def amend_taskgraph(taskgraph, label_to_taskid, to_add):
         for depname, dep in task.dependencies.items():
             new_edges.add((task.task_id, dep, depname))
 
-    taskgraph = TaskGraph(new_tasks, Graph(set(new_tasks), new_edges))
+    taskgraph = JobGraph(new_tasks, Graph(set(new_tasks), new_edges))
     return taskgraph, label_to_taskid
 
 

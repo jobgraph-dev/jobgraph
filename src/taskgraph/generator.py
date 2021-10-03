@@ -10,7 +10,7 @@ from typing import AnyStr
 
 from . import filter_tasks
 from .graph import Graph
-from .taskgraph import TaskGraph
+from .jobgraph import JobGraph
 from .task import Task
 from .optimize import optimize_task_graph
 from .parameters import Parameters
@@ -314,7 +314,7 @@ class TaskGraphGenerator:
                     raise Exception("duplicate tasks with label " + task.label)
                 all_tasks[task.label] = task
             logger.info(f"Generated {len(new_tasks)} tasks for kind {kind_name}")
-        full_task_set = TaskGraph(all_tasks, Graph(set(all_tasks), set()))
+        full_task_set = JobGraph(all_tasks, Graph(set(all_tasks), set()))
         yield verifications("full_task_set", full_task_set, graph_config)
 
         logger.info("Generating full task graph")
@@ -323,7 +323,7 @@ class TaskGraphGenerator:
             for depname, dep in t.dependencies.items():
                 edges.add((t.label, dep, depname))
 
-        full_task_graph = TaskGraph(all_tasks, Graph(full_task_set.graph.nodes, edges))
+        full_task_graph = JobGraph(all_tasks, Graph(full_task_set.graph.nodes, edges))
         logger.info(
             "Full task graph contains %d tasks and %d dependencies"
             % (len(full_task_set.graph.nodes), len(edges))
@@ -331,13 +331,13 @@ class TaskGraphGenerator:
         yield verifications("full_task_graph", full_task_graph, graph_config)
 
         logger.info("Generating target task set")
-        target_task_set = TaskGraph(
+        target_task_set = JobGraph(
             dict(all_tasks), Graph(set(all_tasks.keys()), set())
         )
         for fltr in filters:
             old_len = len(target_task_set.graph.nodes)
             target_tasks = set(fltr(target_task_set, parameters, graph_config))
-            target_task_set = TaskGraph(
+            target_task_set = JobGraph(
                 {l: all_tasks[l] for l in target_tasks}, Graph(target_tasks, set())
             )
             logger.info(
@@ -367,7 +367,7 @@ class TaskGraphGenerator:
         target_graph = full_task_graph.graph.transitive_closure(
             target_tasks | docker_image_tasks | always_target_tasks
         )
-        target_task_graph = TaskGraph(
+        target_task_graph = JobGraph(
             {l: all_tasks[l] for l in target_graph.nodes}, target_graph
         )
         yield verifications("target_task_graph", target_task_graph, graph_config)

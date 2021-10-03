@@ -20,7 +20,7 @@ from slugid import nice as slugid
 
 from .graph import Graph
 from . import files_changed
-from .taskgraph import TaskGraph
+from .jobgraph import JobGraph
 from .util.taskcluster import find_task_id
 from .util.parameterization import resolve_task_references
 
@@ -279,7 +279,7 @@ def get_subgraph(
         if left in tasks_by_taskid and right in tasks_by_taskid
     }
 
-    return TaskGraph(tasks_by_taskid, Graph(set(tasks_by_taskid), edges_by_taskid))
+    return JobGraph(tasks_by_taskid, Graph(set(tasks_by_taskid), edges_by_taskid))
 
 
 class OptimizationStrategy:

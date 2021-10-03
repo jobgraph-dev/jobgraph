@@ -11,7 +11,7 @@ from taskgraph import morph
 from taskgraph.config import load_graph_config
 from taskgraph.graph import Graph
 from taskgraph.parameters import Parameters
-from taskgraph.taskgraph import TaskGraph
+from taskgraph.jobgraph import JobGraph
 from taskgraph.task import Task
 
 
@@ -27,7 +27,7 @@ def make_taskgraph():
         for label, task_id in label_to_taskid.items():
             tasks[label].task_id = task_id
         graph = Graph(nodes=set(tasks), edges=set())
-        taskgraph = TaskGraph(tasks, graph)
+        taskgraph = JobGraph(tasks, graph)
         return taskgraph, label_to_taskid
 
     return inner

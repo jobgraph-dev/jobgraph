@@ -10,7 +10,7 @@ import attr
 
 
 @attr.s(frozen=True)
-class TaskGraph:
+class JobGraph:
     """
     Representation of a task graph.
 

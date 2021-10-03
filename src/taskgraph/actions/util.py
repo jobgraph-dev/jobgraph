@@ -14,7 +14,7 @@ from requests.exceptions import HTTPError
 
 from taskgraph import create
 from taskgraph.decision import read_artifact, write_artifact, rename_artifact
-from taskgraph.taskgraph import TaskGraph
+from taskgraph.jobgraph import JobGraph
 from taskgraph.optimize import optimize_task_graph
 from taskgraph.util.taskcluster import (
     get_session,
@@ -39,7 +39,7 @@ def fetch_graph_and_labels(parameters, graph_config):
 
     # First grab the graph and labels generated during the initial decision task
     full_task_graph = get_artifact(decision_task_id, "public/full-task-graph.json")
-    _, full_task_graph = TaskGraph.from_json(full_task_graph)
+    _, full_task_graph = JobGraph.from_json(full_task_graph)
     label_to_taskid = get_artifact(decision_task_id, "public/label-to-taskid.json")
 
     # fetch everything in parallel; this avoids serializing any delay in downloading
@@ -154,7 +154,7 @@ def create_tasks(
     label_to_taskid = label_to_taskid.copy()
 
     target_graph = full_task_graph.graph.transitive_closure(to_run)
-    target_task_graph = TaskGraph(
+    target_task_graph = JobGraph(
         {l: modifier(full_task_graph[l]) for l in target_graph.nodes}, target_graph
     )
     target_task_graph.for_each_task(update_parent)
