@@ -45,7 +45,6 @@ tasks:
                         kind: cron-task
 
               dependencies: []
-              requires: all-completed
 
               priority:
                   # Most times, there is plenty of worker capacity so everything runs

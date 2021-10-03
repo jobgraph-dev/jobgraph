@@ -137,7 +137,6 @@ def add_code_review_task(taskgraph, label_to_taskid, parameters, graph_config):
             # This option permits to run the task
             # regardless of the dependencies tasks exit status
             # as we are interested in the task failures
-            "requires": "all-resolved",
             "created": {"relative-datestamp": "0 seconds"},
             "deadline": {"relative-datestamp": "1 day"},
             # no point existing past the parent task's deadline

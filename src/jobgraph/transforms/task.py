@@ -71,7 +71,6 @@ task_description_schema = Schema(
         },
         # Soft dependencies of this task, as a list of tasks labels
         Optional("soft-dependencies"): [str],
-        Optional("requires"): Any("all-completed", "all-resolved"),
         # Tags
         Optional("tags"): {str: str},
         # custom "task.extra" content

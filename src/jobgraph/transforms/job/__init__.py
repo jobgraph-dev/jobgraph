@@ -52,7 +52,6 @@ job_description_schema = Schema(
         Optional("job-from"): task_description_schema["job-from"],
         Optional("dependencies"): task_description_schema["dependencies"],
         Optional("soft-dependencies"): task_description_schema["soft-dependencies"],
-        Optional("requires"): task_description_schema["requires"],
         Optional("tags"): task_description_schema["tags"],
         Optional("extra"): task_description_schema["extra"],
         Optional("index"): task_description_schema["index"],
