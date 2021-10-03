@@ -2,13 +2,10 @@
 # This file is rendered via JSON-e by
 # - hg-push - https://hg.mozilla.org/ci/ci-admin/file/default/build-decision/
 # - cron tasks - https://hg.mozilla.org/ci/ci-admin/file/default/build-decision/
-# - action tasks - taskcluster/taskgraph/actions/registry.py
 ---
 version: 1
 tasks:
-    # NOTE: support for actions in ci-admin requires that the `tasks` property be an array *before* JSON-e rendering
-    # takes place.
-    - $if: 'tasks_for in ["hg-push", "action", "cron"]'
+    - $if: 'tasks_for in ["hg-push", "cron"]'
       then:
           $let:
               # sometimes the push user is just `ffxbld` or the like, but we want an email-like field..
@@ -17,13 +14,8 @@ tasks:
               repoUrl: {$if: 'repository.url[-1] == "/"', then: {$eval: 'repository.url[:-1]'}, else: {$eval: 'repository.url'}}
               trustDomain: taskgraph
           in:
-              taskId: {$if: 'tasks_for != "action"', then: '${ownTaskId}'}
-              taskGroupId:
-                  $if: 'tasks_for == "action"'
-                  then:
-                      '${action.taskGroupId}'
-                  else:
-                      '${ownTaskId}'  # same as taskId; this is how automation identifies a decision task
+              taskId: '${ownTaskId}'
+              taskGroupId: '${ownTaskId}'  # same as taskId; this is how automation identifies a decision task
               schedulerId: '${trustDomain}-level-${repository.level}'
 
               created: {$fromNow: ''}
@@ -38,16 +30,8 @@ tasks:
                             name: "Decision Task"
                             description: 'The task that creates all of the other tasks in the task graph'
                         else:
-                            $if: 'tasks_for == "action"'
-                            then:
-                                name: "Action: ${action.title}"
-                                description: |
-                                    ${action.description}
-
-                                    Action triggered by clientID `${clientId}`
-                            else:
-                                name: "Decision Task for cron job ${cron.job_name}"
-                                description: 'Created by a [cron task](https://firefox-ci-tc.services.mozilla.com/tasks/${cron.task_id})'
+                            name: "Decision Task for cron job ${cron.job_name}"
+                            description: 'Created by a [cron task](https://firefox-ci-tc.services.mozilla.com/tasks/${cron.task_id})'
 
               provisionerId: "${trustDomain}-${repository.level}"
               workerType: "decision"
@@ -58,14 +42,9 @@ tasks:
                       createdForUser: "${ownerEmail}"
                       kind: decision-task
                   else:
-                      $if: 'tasks_for == "action"'
+                      $if: 'tasks_for == "cron"'
                       then:
-                          createdForUser: '${ownerEmail}'
-                          kind: 'action-callback'
-                      else:
-                          $if: 'tasks_for == "cron"'
-                          then:
-                              kind: cron-task
+                        kind: cron-task
 
               routes:
                   $flatten:
@@ -74,29 +53,17 @@ tasks:
                             - "index.${trustDomain}.v2.${repository.project}.latest.taskgraph.decision"
                             - "index.${trustDomain}.v2.${repository.project}.revision.${push.revision}.taskgraph.decision"
                             - "index.${trustDomain}.v2.${repository.project}.pushlog-id.${push.pushlog_id}.decision"
-                        else:
-                            $if: 'tasks_for == "action"'
-                            then:
-                                - "index.${trustDomain}.v2.${repository.project}.revision.${push.revision}.taskgraph.actions.${ownTaskId}"
-                                - "index.${trustDomain}.v2.${repository.project}.pushlog-id.${push.pushlog_id}.actions.${ownTaskId}"
-                            else:  # cron
-                                - "index.${trustDomain}.v2.${repository.project}.latest.taskgraph.decision-${cron.job_name}"
-                                - "index.${trustDomain}.v2.${repository.project}.revision.${push.revision}.taskgraph.decision-${cron.job_name}"
-                                - "index.${trustDomain}.v2.${repository.project}.pushlog-id.${push.pushlog_id}.decision-${cron.job_name}"
-                                # list each cron task on this revision, so actions can find them
-                                - 'index.${trustDomain}.v2.${repository.project}.revision.${push.revision}.cron.${ownTaskId}'
+                        else:     # cron
+                            - "index.${trustDomain}.v2.${repository.project}.latest.taskgraph.decision-${cron.job_name}"
+                            - "index.${trustDomain}.v2.${repository.project}.revision.${push.revision}.taskgraph.decision-${cron.job_name}"
+                            - "index.${trustDomain}.v2.${repository.project}.pushlog-id.${push.pushlog_id}.decision-${cron.job_name}"
 
               scopes:
                   $if: 'tasks_for == "hg-push"'
                   then:
                       - 'assume:repo:${repoUrl[8:]}:branch:default'
-                      - 'in-tree:hook-action:project-${trustDomain}/in-tree-action-${repository.level}-*'
                   else:
-                      $if: 'tasks_for == "action"'
-                      then:
-                          - 'assume:repo:${repoUrl[8:]}:action:${action.action_perm}'
-                      else:
-                          - 'assume:repo:${repoUrl[8:]}:cron:${cron.job_name}'
+                      - 'assume:repo:${repoUrl[8:]}:cron:${cron.job_name}'
 
               dependencies: []
               requires: all-completed
@@ -121,22 +88,13 @@ tasks:
 
               payload:
                   env:
-                      # run-task uses these to check out the source; the inputs
-                      # to `mach taskgraph decision` are all on the command line.
-                      $merge:
-                          - TASKGRAPH_BASE_REPOSITORY: '${repoUrl}'
-                            TASKGRAPH_HEAD_REPOSITORY: '${repoUrl}'
-                            TASKGRAPH_HEAD_REF: '${push.revision}'
-                            TASKGRAPH_HEAD_REV: '${push.revision}'
-                            TASKGRAPH_REPOSITORY_TYPE: hg
-                            REPOSITORIES: {$json: {taskgraph: Taskgraph}}
-                            HG_STORE_PATH: /builds/worker/checkouts/hg-store
-                          - $if: 'tasks_for == "action"'
-                            then:
-                                ACTION_TASK_GROUP_ID: '${action.taskGroupId}'  # taskGroupId of the target task
-                                ACTION_TASK_ID: {$json: {$eval: 'taskId'}}  # taskId of the target task (JSON-encoded)
-                                ACTION_INPUT: {$json: {$eval: 'input'}}
-                                ACTION_CALLBACK: '${action.cb_name}'
+                    TASKGRAPH_BASE_REPOSITORY: '${repoUrl}'
+                    TASKGRAPH_HEAD_REPOSITORY: '${repoUrl}'
+                    TASKGRAPH_HEAD_REF: '${push.revision}'
+                    TASKGRAPH_HEAD_REV: '${push.revision}'
+                    TASKGRAPH_REPOSITORY_TYPE: hg
+                    REPOSITORIES: {$json: {taskgraph: Taskgraph}}
+                    HG_STORE_PATH: /builds/worker/checkouts/hg-store
 
                   cache:
                       "${trustDomain}-level-${repository.level}-checkouts-sparse-v2": /builds/worker/checkouts
@@ -158,30 +116,22 @@ tasks:
                       - $let:
                             extraArgs: {$if: 'tasks_for == "cron"', then: '${cron.quoted_args}', else: ''}
                         in:
-                            $if: 'tasks_for == "action"'
-                            then: >
-                                cd /builds/worker/checkouts/src &&
-                                ln -s /builds/worker/artifacts artifacts &&
-                                pip3 install -r requirements/base.txt &&
-                                pip3 install --user --no-deps . &&
-                                ~/.local/bin/taskgraph action-callback
-                            else: >
-                                cd /builds/worker/checkouts/src &&
-                                ln -s /builds/worker/artifacts artifacts &&
-                                pip3 install --user . &&
-                                ~/.local/bin/taskgraph decision
-                                --pushlog-id='${push.pushlog_id}'
-                                --pushdate='${push.pushdate}'
-                                --project='${repository.project}'
-                                --owner='${ownerEmail}'
-                                --level='${repository.level}'
-                                --repository-type=hg
-                                --tasks-for='${tasks_for}'
-                                --base-repository="${repoUrl}"
-                                --head-repository="${repoUrl}"
-                                --head-ref="${push.revision}"
-                                --head-rev="${push.revision}"
-                                ${extraArgs}
+                            cd /builds/worker/checkouts/src &&
+                            ln -s /builds/worker/artifacts artifacts &&
+                            pip3 install --user . &&
+                            ~/.local/bin/taskgraph decision
+                            --pushlog-id='${push.pushlog_id}'
+                            --pushdate='${push.pushdate}'
+                            --project='${repository.project}'
+                            --owner='${ownerEmail}'
+                            --level='${repository.level}'
+                            --repository-type=hg
+                            --tasks-for='${tasks_for}'
+                            --base-repository="${repoUrl}"
+                            --head-repository="${repoUrl}"
+                            --head-ref="${push.revision}"
+                            --head-rev="${push.revision}"
+                            ${extraArgs}
 
                   artifacts:
                       'public':
@@ -199,16 +149,6 @@ tasks:
 
               extra:
                   $merge:
-                      - $if: 'tasks_for == "action"'
-                        then:
-                            parent: '${action.taskGroupId}'
-                            action:
-                                name: '${action.name}'
-                                context:
-                                    taskGroupId: '${action.taskGroupId}'
-                                    taskId: {$eval: 'taskId'}
-                                    input: {$eval: 'input'}
-                                    clientId: {$eval: 'clientId'}
                       - $if: 'tasks_for == "cron"'
                         then:
                             cron: {$json: {$eval: 'cron'}}
