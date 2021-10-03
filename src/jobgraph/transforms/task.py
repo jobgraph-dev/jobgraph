@@ -609,6 +609,7 @@ def build_task(config, tasks):
 
         yield {
             "label": task["label"],
+            "description": task["description"],
             "task": task_def,
             "dependencies": task.get("dependencies", {}),
             "soft-dependencies": task.get("soft-dependencies", []),

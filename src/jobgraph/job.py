@@ -31,6 +31,7 @@ class Job:
 
     kind = attr.ib()
     label = attr.ib()
+    description = attr.ib()
     attributes = attr.ib()
     task = attr.ib()
     task_id = attr.ib(default=None, init=False)
@@ -45,6 +46,7 @@ class Job:
         rv = {
             "kind": self.kind,
             "label": self.label,
+            "description": self.description,
             "attributes": self.attributes,
             "dependencies": self.dependencies,
             "soft_dependencies": self.soft_dependencies,
@@ -56,21 +58,22 @@ class Job:
         return rv
 
     @classmethod
-    def from_json(cls, task_dict):
+    def from_json(cls, job_dict):
         """
         Given a data structure as produced by taskgraph.to_json, re-construct
         the original Task object.  This is used to "resume" the task-graph
         generation process, for example in Action tasks.
         """
         rv = cls(
-            kind=task_dict["kind"],
-            label=task_dict["label"],
-            attributes=task_dict["attributes"],
-            task=task_dict["task"],
-            optimization=task_dict["optimization"],
-            dependencies=task_dict.get("dependencies"),
-            soft_dependencies=task_dict.get("soft_dependencies"),
+            kind=job_dict["kind"],
+            label=job_dict["label"],
+            description=job_dict["description"],
+            attributes=job_dict["attributes"],
+            task=job_dict["task"],
+            optimization=job_dict["optimization"],
+            dependencies=job_dict.get("dependencies"),
+            soft_dependencies=job_dict.get("soft_dependencies"),
         )
-        if "task_id" in task_dict:
-            rv.task_id = task_dict["task_id"]
+        if "task_id" in job_dict:
+            rv.task_id = job_dict["task_id"]
         return rv

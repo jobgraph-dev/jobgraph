@@ -76,14 +76,15 @@ class Kind:
         tasks = [
             Job(
                 self.name,
-                label=task_dict["label"],
-                attributes=task_dict["attributes"],
-                task=task_dict["task"],
-                optimization=task_dict.get("optimization"),
-                dependencies=task_dict.get("dependencies"),
-                soft_dependencies=task_dict.get("soft-dependencies"),
+                label=job_dict["label"],
+                description=job_dict["description"],
+                attributes=job_dict["attributes"],
+                task=job_dict["task"],
+                optimization=job_dict.get("optimization"),
+                dependencies=job_dict.get("dependencies"),
+                soft_dependencies=job_dict.get("soft-dependencies"),
             )
-            for task_dict in transforms(trans_config, inputs)
+            for job_dict in transforms(trans_config, inputs)
         ]
         return tasks
 
