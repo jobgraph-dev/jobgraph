@@ -72,10 +72,6 @@ task_description_schema = Schema(
         # Soft dependencies of this task, as a list of tasks labels
         Optional("soft-dependencies"): [str],
         Optional("requires"): Any("all-completed", "all-resolved"),
-        # expiration and deadline times, relative to task creation, with units
-        # (e.g., "14 days").  Defaults are set based on the project.
-        Optional("expires-after"): str,
-        Optional("deadline-after"): str,
         # Tags
         Optional("tags"): {str: str},
         # custom "task.extra" content
@@ -531,12 +527,6 @@ def build_task(config, tasks):
         extra = task.get("extra", {})
         extra["parent"] = os.environ.get("TASK_ID", "")
 
-        if "expires-after" not in task:
-            task["expires-after"] = "28 days" if config.params.is_try() else "1 year"
-
-        if "deadline-after" not in task:
-            task["deadline-after"] = "1 day"
-
         if "priority" not in task:
             task["priority"] = get_default_priority(
                 config.graph_config, config.params["project"]
@@ -564,7 +554,7 @@ def build_task(config, tasks):
             },
             "tags": [worker_type],
             "cache": {},
-            "timeout": task["deadline-after"],
+            "timeout": task["worker"]["max-run-time"],
             "needs": [],
         }
 

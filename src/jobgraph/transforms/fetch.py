@@ -133,7 +133,6 @@ def make_task(config, jobs):
             "attributes": attributes,
             "name": name,
             "description": job["description"],
-            "expires-after": expires,
             "label": "fetch-%s" % name,
             "run-on-projects": [],
             "run": {
