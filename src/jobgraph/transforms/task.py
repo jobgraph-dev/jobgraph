@@ -128,13 +128,6 @@ def get_branch_rev(config):
     return config.params["head_rev"]
 
 
-@memoize
-def get_default_priority(graph_config, project):
-    return evaluate_keyed_by(
-        graph_config["task-priority"], "Graph Config", {"project": project}
-    )
-
-
 # define a collection of payload builders, depending on the worker implementation
 payload_builders = {}
 
@@ -493,11 +486,6 @@ def build_task(config, tasks):
         # set up extra
         extra = task.get("extra", {})
         extra["parent"] = os.environ.get("TASK_ID", "")
-
-        if "priority" not in task:
-            task["priority"] = get_default_priority(
-                config.graph_config, config.params["project"]
-            )
 
         task_def = {
             "image": "ubuntu:20.04",

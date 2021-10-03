@@ -5,8 +5,6 @@ index:
     products:
         - taskgraph
 
-task-priority: low
-
 taskgraph:
     repositories:
         ci:
