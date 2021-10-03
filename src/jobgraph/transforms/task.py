@@ -69,8 +69,6 @@ task_description_schema = Schema(
                 ),
             ): object,
         },
-        # Soft dependencies of this task, as a list of tasks labels
-        Optional("soft-dependencies"): [str],
         # custom "task.extra" content
         Optional("extra"): {str: object},
         # information for indexing this build so its artifacts can be discovered;
@@ -533,7 +531,6 @@ def build_task(config, tasks):
             "description": task["description"],
             "task": task_def,
             "dependencies": task.get("dependencies", {}),
-            "soft-dependencies": task.get("soft-dependencies", []),
             "attributes": attributes,
             "optimization": task.get("optimization", None),
         }

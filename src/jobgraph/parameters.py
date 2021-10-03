@@ -57,9 +57,6 @@ base_schema = Schema(
         # used at run-time
         Required("target_tasks_method"): str,
         Required("pipeline_source"): str,
-        Optional("code-review"): {
-            Required("phabricator-build-target"): str,
-        },
     }
 )
 

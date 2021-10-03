@@ -82,7 +82,6 @@ class Kind:
                 task=job_dict["task"],
                 optimization=job_dict.get("optimization"),
                 dependencies=job_dict.get("dependencies"),
-                soft_dependencies=job_dict.get("soft-dependencies"),
             )
             for job_dict in transforms(trans_config, inputs)
         ]

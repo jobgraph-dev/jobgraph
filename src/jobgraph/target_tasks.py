@@ -76,16 +76,6 @@ def target_tasks_default(full_task_graph, parameters, graph_config):
     ]
 
 
-@_target_task("codereview")
-def target_tasks_codereview(full_task_graph, parameters, graph_config):
-    """Target the tasks which have indicated they should be run based on attributes."""
-    return [
-        l
-        for l, t in full_task_graph.jobs.items()
-        if standard_filter(t, parameters) and t.attributes.get("code-review")
-    ]
-
-
 @_target_task("nothing")
 def target_tasks_nothing(full_task_graph, parameters, graph_config):
     """Select nothing, for DONTBUILD pushes"""

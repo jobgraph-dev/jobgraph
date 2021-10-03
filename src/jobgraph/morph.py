@@ -117,66 +117,10 @@ def _get_morph_url():
     return f"{taskgraph_repo}/raw-file/{taskgraph_rev}/src/jobgraph/morph.py"
 
 
-def add_code_review_task(taskgraph, label_to_taskid, parameters, graph_config):
-    logger.debug("Morphing: adding index tasks")
-
-    review_config = parameters.get("code-review")
-    if not review_config:
-        return taskgraph, label_to_taskid
-
-    code_review_tasks = {}
-    for label, task in taskgraph.tasks.items():
-        if task.attributes.get("code-review"):
-            code_review_tasks[task.label] = task.task_id
-
-    if code_review_tasks:
-        code_review_task_def = {
-            "provisionerId": "built-in",
-            "workerType": "succeed",
-            "dependencies": sorted(code_review_tasks.values()),
-            # This option permits to run the task
-            # regardless of the dependencies tasks exit status
-            # as we are interested in the task failures
-            "created": {"relative-datestamp": "0 seconds"},
-            "deadline": {"relative-datestamp": "1 day"},
-            # no point existing past the parent task's deadline
-            "expires": {"relative-datestamp": "1 day"},
-            "metadata": {
-                "name": "code-review",
-                "description": "List all issues found in static analysis and linting tasks",
-                "owner": parameters["owner"],
-                "source": _get_morph_url(),
-            },
-            "payload": {},
-            "extra": {
-                "code-review": {
-                    "phabricator-build-target": review_config[
-                        "phabricator-build-target"
-                    ],
-                    "repository": parameters["head_repository"],
-                    "revision": parameters["head_rev"],
-                }
-            },
-        }
-        task = Job(
-            kind="misc",
-            label="code-review",
-            attributes={},
-            task=code_review_task_def,
-            dependencies=code_review_tasks,
-        )
-        task.task_id = slugid()
-        taskgraph, label_to_taskid = amend_taskgraph(taskgraph, label_to_taskid, [task])
-        logger.info("Added code review task.")
-
-    return taskgraph, label_to_taskid
-
-
 def morph(taskgraph, label_to_taskid, parameters, graph_config):
     """Apply all morphs"""
     morphs = [
         add_index_tasks,
-        add_code_review_task,
     ]
 
     for m in morphs:
