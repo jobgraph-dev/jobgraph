@@ -46,15 +46,6 @@ def add_cache(job, taskdesc, name, mount_point, skip_untrusted=False):
                 "skip-untrusted": skip_untrusted,
             }
         )
-
-    elif worker["implementation"] == "generic-worker":
-        taskdesc["worker"].setdefault("mounts", []).append(
-            {
-                "cache-name": name,
-                "directory": mount_point,
-            }
-        )
-
     else:
         # Caches not implemented
         pass
@@ -100,14 +91,6 @@ def docker_worker_add_artifacts(config, job, taskdesc):
     path = "{workdir}/artifacts/".format(**job["run"])
     taskdesc["worker"]["env"]["UPLOAD_DIR"] = path
     add_artifacts(config, job, taskdesc, path)
-
-
-def generic_worker_add_artifacts(config, job, taskdesc):
-    """Adds an artifact directory to the task"""
-    # The path is the location on disk; it doesn't necessarily
-    # mean the artifacts will be public or private; that is set via the name
-    # attribute in add_artifacts.
-    add_artifacts(config, job, taskdesc, path=get_artifact_prefix(taskdesc))
 
 
 def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):

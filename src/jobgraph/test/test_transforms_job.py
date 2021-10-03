@@ -60,10 +60,6 @@ def transform(monkeypatch, config):
     This gives test functions an easy way to generate the inputs required for
     many of the `run_using` subsystems.
     """
-    # Needed by 'generic_worker_run_task'
-    monkeypatch.setenv("TASKGRAPH_HEAD_REPOSITORY", config.params["head_repository"])
-    monkeypatch.setenv("TASKGRAPH_HEAD_REV", config.params["head_rev"])
-
     def inner(task_input):
         task = deepcopy(TASK_DEFAULTS)
         task.update(task_input)
@@ -94,14 +90,14 @@ def transform(monkeypatch, config):
             marks=pytest.mark.xfail,
         ),
     ],
-    ids=["docker-worker", "generic-worker"],
+    ids=["docker-worker"],
 )
 def test_worker_caches(task, transform):
     config, job, taskdesc, impl = transform(task)
     add_cache(job, taskdesc, "cache1", "/cache1")
     add_cache(job, taskdesc, "cache2", "/cache2", skip_untrusted=True)
 
-    if impl not in ("docker-worker", "generic-worker"):
+    if impl not in ("docker-worker"):
         pytest.xfail(f"caches not implemented for '{impl}'")
 
     key = "caches" if impl == "docker-worker" else "mounts"

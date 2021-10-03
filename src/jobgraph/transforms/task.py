@@ -482,24 +482,6 @@ def set_defaults(config, tasks):
             if "caches" in worker:
                 for c in worker["caches"]:
                     c.setdefault("skip-untrusted", False)
-        elif worker["implementation"] == "generic-worker":
-            worker.setdefault("env", {})
-            worker.setdefault("os-groups", [])
-            if worker["os-groups"] and worker["os"] != "windows":
-                raise Exception(
-                    "os-groups feature of generic-worker is only supported on "
-                    "Windows, not on {}".format(worker["os"])
-                )
-            worker.setdefault("chain-of-trust", False)
-        elif worker["implementation"] in (
-            "scriptworker-signing",
-            "beetmover",
-            "beetmover-push-to-release",
-            "beetmover-maven",
-        ):
-            worker.setdefault("max-run-time", 600)
-        elif worker["implementation"] == "push-apk":
-            worker.setdefault("commit", False)
 
         yield task
 

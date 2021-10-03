@@ -333,7 +333,7 @@ def make_task_description(config, jobs):
     import_all()
     for job in jobs:
         # always-optimized tasks never execute, so have no workdir
-        if job["worker"]["implementation"] in ("docker-worker", "generic-worker"):
+        if job["worker"]["implementation"] in ("docker-worker"):
             job["run"].setdefault("workdir", "/builds/worker")
 
         taskdesc = copy.deepcopy(job)
