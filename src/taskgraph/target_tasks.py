@@ -81,7 +81,7 @@ def target_tasks_default(full_task_graph, parameters, graph_config):
     """Target the tasks which have indicated they should be run on this project
     via the `run_on_projects` attributes."""
     return [
-        l for l, t in full_task_graph.tasks.items() if standard_filter(t, parameters)
+        l for l, t in full_task_graph.jobs.items() if standard_filter(t, parameters)
     ]
 
 
@@ -91,7 +91,7 @@ def target_tasks_codereview(full_task_graph, parameters, graph_config):
     via the `run_on_projects` attributes."""
     return [
         l
-        for l, t in full_task_graph.tasks.items()
+        for l, t in full_task_graph.jobs.items()
         if standard_filter(t, parameters) and t.attributes.get("code-review")
     ]
 

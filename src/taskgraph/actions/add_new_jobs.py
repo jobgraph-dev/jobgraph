@@ -44,7 +44,7 @@ def add_new_jobs_action(parameters, graph_config, input, task_group_id, task_id)
 
     to_run = []
     for elem in input["tasks"]:
-        if elem in full_task_graph.tasks:
+        if elem in full_task_graph.jobs:
             to_run.append(elem)
         else:
             raise Exception(f"{elem} was not found in the task-graph")

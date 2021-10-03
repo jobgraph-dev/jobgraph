@@ -12,7 +12,7 @@ from taskgraph.config import load_graph_config
 from taskgraph.graph import Graph
 from taskgraph.parameters import Parameters
 from taskgraph.jobgraph import JobGraph
-from taskgraph.task import Task
+from taskgraph.job import Job
 
 
 @pytest.fixture(scope="module")
@@ -48,8 +48,8 @@ def test_make_index_tasks(make_taskgraph, graph_config):
             "index": {"rank": 1540722354},
         },
     }
-    task = Task(kind="test", label="a", attributes={}, task=task_def)
-    docker_task = Task(
+    task = Job(kind="test", label="a", attributes={}, task=task_def)
+    docker_task = Job(
         kind="docker-image",
         label="build-docker-image-index-task",
         attributes={},

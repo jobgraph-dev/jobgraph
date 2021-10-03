@@ -11,7 +11,7 @@ from slugid import nice as slugid
 from taskgraph import optimize
 from taskgraph.jobgraph import JobGraph
 from taskgraph import graph
-from taskgraph.task import Task
+from taskgraph.job import Job
 
 
 class Remove(optimize.OptimizationStrategy):
@@ -42,7 +42,7 @@ class TestOptimize(unittest.TestCase):
         dependencies=None,
     ):
         task_def = task_def or {"sample": "task-def"}
-        task = Task(kind="test", label=label, attributes={}, task=task_def)
+        task = Job(kind="test", label=label, attributes={}, task=task_def)
         task.optimization = optimization
         task.task_id = task_id
         if dependencies is not None:
@@ -50,13 +50,13 @@ class TestOptimize(unittest.TestCase):
         return task
 
     def make_graph(self, *tasks_and_edges):
-        tasks = {t.label: t for t in tasks_and_edges if isinstance(t, Task)}
-        edges = {e for e in tasks_and_edges if not isinstance(e, Task)}
+        tasks = {t.label: t for t in tasks_and_edges if isinstance(t, Job)}
+        edges = {e for e in tasks_and_edges if not isinstance(e, Job)}
         return JobGraph(tasks, graph.Graph(set(tasks), edges))
 
     def make_opt_graph(self, *tasks_and_edges):
-        tasks = {t.task_id: t for t in tasks_and_edges if isinstance(t, Task)}
-        edges = {e for e in tasks_and_edges if not isinstance(e, Task)}
+        tasks = {t.task_id: t for t in tasks_and_edges if isinstance(t, Job)}
+        edges = {e for e in tasks_and_edges if not isinstance(e, Job)}
         return JobGraph(tasks, graph.Graph(set(tasks), edges))
 
     def make_triangle(self, **opts):
@@ -206,7 +206,7 @@ class TestOptimize(unittest.TestCase):
         finally:
             optimize.slugid = slugid
         self.assertEqual(got_subgraph.graph, exp_subgraph.graph)
-        self.assertEqual(got_subgraph.tasks, exp_subgraph.tasks)
+        self.assertEqual(got_subgraph.jobs, exp_subgraph.tasks)
         self.assertEqual(label_to_taskid, exp_label_to_taskid)
 
     def test_get_subgraph_no_change(self):

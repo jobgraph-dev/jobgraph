@@ -24,7 +24,7 @@ import re
 
 from slugid import nice as slugid
 
-from .task import Task
+from .job import Job
 from .graph import Graph
 from .jobgraph import JobGraph
 from .util.workertypes import get_worker_type
@@ -93,7 +93,7 @@ def derive_index_task(task, taskgraph, label_to_taskid, parameters, graph_config
     # task_def['dependencies'] unconditionally.
     dependencies = {"parent": task.task_id}
 
-    task = Task(
+    task = Job(
         kind="misc",
         label=label,
         attributes={},
@@ -240,7 +240,7 @@ def add_code_review_task(taskgraph, label_to_taskid, parameters, graph_config):
                 }
             },
         }
-        task = Task(
+        task = Job(
             kind="misc",
             label="code-review",
             attributes={},

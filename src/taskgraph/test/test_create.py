@@ -11,7 +11,7 @@ from taskgraph import create
 from taskgraph.config import GraphConfig
 from taskgraph.graph import Graph
 from taskgraph.jobgraph import JobGraph
-from taskgraph.task import Task
+from taskgraph.job import Job
 
 GRAPH_CONFIG = GraphConfig({"trust-domain": "domain"}, "/var/empty")
 
@@ -30,10 +30,10 @@ class TestCreate(unittest.TestCase):
 
     def test_create_tasks(self):
         tasks = {
-            "tid-a": Task(
+            "tid-a": Job(
                 kind="test", label="a", attributes={}, task={"payload": "hello world"}
             ),
-            "tid-b": Task(
+            "tid-b": Job(
                 kind="test", label="b", attributes={}, task={"payload": "hello world"}
             ),
         }
@@ -62,7 +62,7 @@ class TestCreate(unittest.TestCase):
     def test_create_task_without_dependencies(self):
         "a task with no dependencies depends on the decision task"
         tasks = {
-            "tid-a": Task(
+            "tid-a": Job(
                 kind="test", label="a", attributes={}, task={"payload": "hello world"}
             ),
         }
@@ -85,7 +85,7 @@ class TestCreate(unittest.TestCase):
     def test_create_tasks_fails_if_create_fails(self, create_task):
         "creat_tasks fails if a single create_task call fails"
         tasks = {
-            "tid-a": Task(
+            "tid-a": Job(
                 kind="test", label="a", attributes={}, task={"payload": "hello world"}
             ),
         }

@@ -11,7 +11,7 @@ from typing import AnyStr
 from . import filter_tasks
 from .graph import Graph
 from .jobgraph import JobGraph
-from .task import Task
+from .job import Job
 from .optimize import optimize_task_graph
 from .parameters import Parameters
 from .morph import morph
@@ -74,7 +74,7 @@ class Kind:
             write_artifacts=write_artifacts,
         )
         tasks = [
-            Task(
+            Job(
                 self.name,
                 label=task_dict["label"],
                 attributes=task_dict["attributes"],
@@ -351,13 +351,13 @@ class TaskGraphGenerator:
         # include all docker-image build tasks here, in case they are needed for a graph morph
         docker_image_tasks = {
             t.label
-            for t in full_task_graph.tasks.values()
+            for t in full_task_graph.jobs.values()
             if t.attributes["kind"] == "docker-image"
         }
         # include all tasks with `always_target` set
         always_target_tasks = {
             t.label
-            for t in full_task_graph.tasks.values()
+            for t in full_task_graph.jobs.values()
             if t.attributes.get("always_target")
         }
         logger.info(

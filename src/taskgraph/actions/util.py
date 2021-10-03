@@ -157,9 +157,9 @@ def create_tasks(
     target_task_graph = JobGraph(
         {l: modifier(full_task_graph[l]) for l in target_graph.nodes}, target_graph
     )
-    target_task_graph.for_each_task(update_parent)
+    target_task_graph.for_each_job(update_parent)
     if decision_task_id and decision_task_id != os.environ.get("TASK_ID"):
-        target_task_graph.for_each_task(update_dependencies)
+        target_task_graph.for_each_job(update_dependencies)
     optimized_task_graph, label_to_taskid = optimize_task_graph(
         target_task_graph,
         params,

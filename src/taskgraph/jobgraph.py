@@ -4,7 +4,7 @@
 
 
 from .graph import Graph
-from .task import Task
+from .job import Job
 
 import attr
 
@@ -12,58 +12,58 @@ import attr
 @attr.s(frozen=True)
 class JobGraph:
     """
-    Representation of a task graph.
+    Representation of a job graph.
 
-    A task graph is a combination of a Graph and a dictionary of tasks indexed
-    by label. TaskGraph instances should be treated as immutable.
+    A job graph is a combination of a Graph and a dictionary of jobs indexed
+    by label. JobGraph instances should be treated as immutable.
     """
 
-    tasks = attr.ib()
+    jobs = attr.ib()
     graph = attr.ib()
 
     def __attrs_post_init__(self):
-        assert set(self.tasks) == self.graph.nodes
+        assert set(self.jobs) == self.graph.nodes
 
-    def for_each_task(self, f, *args, **kwargs):
-        for task_label in self.graph.visit_postorder():
-            task = self.tasks[task_label]
-            f(task, self, *args, **kwargs)
+    def for_each_job(self, f, *args, **kwargs):
+        for job_label in self.graph.visit_postorder():
+            job = self.jobs[job_label]
+            f(job, self, *args, **kwargs)
 
     def __getitem__(self, label):
-        "Get a task by label"
-        return self.tasks[label]
+        "Get a job by label"
+        return self.jobs[label]
 
     def __contains__(self, label):
-        return label in self.tasks
+        return label in self.jobs
 
     def __iter__(self):
-        "Iterate over tasks in undefined order"
-        return iter(self.tasks.values())
+        "Iterate over jobs in undefined order"
+        return iter(self.jobs.values())
 
     def to_json(self):
-        "Return a JSON-able object representing the task graph, as documented"
+        "Return a JSON-able object representing the job graph, as documented"
         named_links_dict = self.graph.named_links_dict()
         # this dictionary may be keyed by label or by taskid, so let's just call it 'key'
-        tasks = {}
+        jobs = {}
         for key in self.graph.visit_postorder():
-            tasks[key] = self.tasks[key].to_json()
-            # overwrite dependencies with the information in the taskgraph's edges.
-            tasks[key]["dependencies"] = named_links_dict.get(key, {})
-        return tasks
+            jobs[key] = self.jobs[key].to_json()
+            # overwrite dependencies with the information in the jobgraph's edges.
+            jobs[key]["dependencies"] = named_links_dict.get(key, {})
+        return jobs
 
     @classmethod
-    def from_json(cls, tasks_dict):
+    def from_json(cls, jobs_dict):
         """
-        This code is used to generate the a TaskGraph using a dictionary
-        which is representative of the TaskGraph.
+        This code is used to generate the a JobGraph using a dictionary
+        which is representative of the JobGraph.
         """
-        tasks = {}
+        jobs = {}
         edges = set()
-        for key, value in tasks_dict.items():
-            tasks[key] = Task.from_json(value)
+        for key, value in jobs_dict.items():
+            jobs[key] = Job.from_json(value)
             if "task_id" in value:
-                tasks[key].task_id = value["task_id"]
+                jobs[key].task_id = value["task_id"]
             for depname, dep in value["dependencies"].items():
                 edges.add((key, dep, depname))
-        task_graph = cls(tasks, Graph(set(tasks), edges))
-        return tasks, task_graph
+        job_graph = cls(jobs, Graph(set(jobs), edges))
+        return jobs, job_graph

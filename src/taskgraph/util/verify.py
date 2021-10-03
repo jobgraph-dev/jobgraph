@@ -26,7 +26,7 @@ class VerificationSequence:
     def __call__(self, graph_name, graph, graph_config):
         for verification in self._verifications.get(graph_name, []):
             scratch_pad = {}
-            graph.for_each_task(
+            graph.for_each_job(
                 verification, scratch_pad=scratch_pad, graph_config=graph_config
             )
             verification(

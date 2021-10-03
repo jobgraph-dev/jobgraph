@@ -7,7 +7,7 @@ import attr
 
 
 @attr.s
-class Task:
+class Job:
     """
     Representation of a task in a TaskGraph.  Each Task has, at creation:
 

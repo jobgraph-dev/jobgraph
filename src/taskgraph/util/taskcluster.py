@@ -10,7 +10,7 @@ import requests
 import logging
 import taskcluster_urls as liburls
 from requests.packages.urllib3.util.retry import Retry
-from taskgraph.task import Task
+from taskgraph.job import Job
 from taskgraph.util.memoize import memoize
 from taskgraph.util import yaml
 
@@ -148,7 +148,7 @@ def get_artifact_prefix(task):
     prefix = None
     if isinstance(task, dict):
         prefix = task.get("attributes", {}).get("artifact_prefix")
-    elif isinstance(task, Task):
+    elif isinstance(task, Job):
         prefix = task.attributes.get("artifact_prefix")
     else:
         raise Exception(f"Can't find artifact-prefix of non-task: {task}")

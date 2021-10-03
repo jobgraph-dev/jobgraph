@@ -6,7 +6,7 @@
 import unittest
 
 from taskgraph.graph import Graph
-from taskgraph.task import Task
+from taskgraph.job import Job
 from taskgraph.jobgraph import JobGraph
 
 
@@ -16,13 +16,13 @@ class TestTaskGraph(unittest.TestCase):
 
     def test_taskgraph_to_json(self):
         tasks = {
-            "a": Task(
+            "a": Job(
                 kind="test",
                 label="a",
                 attributes={"attr": "a-task"},
                 task={"taskdef": True},
             ),
-            "b": Task(
+            "b": Job(
                 kind="test",
                 label="b",
                 attributes={},
@@ -64,8 +64,8 @@ class TestTaskGraph(unittest.TestCase):
 
     def test_round_trip(self):
         graph = JobGraph(
-            tasks={
-                "a": Task(
+            jobs={
+                "a": Job(
                     kind="fancy",
                     label="a",
                     attributes={},
@@ -73,7 +73,7 @@ class TestTaskGraph(unittest.TestCase):
                     optimization={"seta": None},
                     task={"task": "def"},
                 ),
-                "b": Task(
+                "b": Job(
                     kind="pre",
                     label="b",
                     attributes={},
@@ -89,8 +89,8 @@ class TestTaskGraph(unittest.TestCase):
         self.assertEqual(graph, new_graph)
 
     simple_graph = JobGraph(
-        tasks={
-            "a": Task(
+        jobs={
+            "a": Job(
                 kind="fancy",
                 label="a",
                 attributes={},
@@ -98,7 +98,7 @@ class TestTaskGraph(unittest.TestCase):
                 optimization={"seta": None},
                 task={"task": "def"},
             ),
-            "b": Task(
+            "b": Job(
                 kind="pre",
                 label="b",
                 attributes={},
