@@ -63,6 +63,8 @@ base_schema = Schema(
     }
 )
 
+GIT_REPO_PROVIDERS = ("github", "gitlab")
+
 
 def extend_parameters_schema(schema):
     """
@@ -203,29 +205,34 @@ class Parameters(ReadOnlyDict):
         elif self["repository_type"] == "git":
             # For getting the file URL for git repositories, we only support a Github HTTPS remote
             repo = self["head_repository"]
-            if repo.startswith("https://github.com/"):
-                if repo.endswith("/"):
-                    repo = repo[:-1]
-
-                rev = self["head_rev"]
-                endpoint = "blob" if pretty else "raw"
-                return f"{repo}/{endpoint}/{rev}/{path}"
-            elif repo.startswith("git@github.com:"):
-                if repo.endswith(".git"):
-                    repo = repo[:-4]
-                rev = self["head_rev"]
-                endpoint = "blob" if pretty else "raw"
-                return "{}/{}/{}/{}".format(
-                    repo.replace("git@github.com:", "https://github.com/"),
-                    endpoint,
-                    rev,
-                    path,
-                )
-            else:
+            repo_providers = [repo_provider for repo_provider in GIT_REPO_PROVIDERS if repo_provider in repo]
+            if len(repo_providers) > 1:
+                raise ParameterMismatch(f"Too many repo providers matched this repo: {repo}. Matched providers: {repo_providers}")
+            elif len(repo_providers) == 0:
                 raise ParameterMismatch(
-                    "Don't know how to determine file URL for non-github"
+                    "Don't know how to determine file URL for non-github or non-gitlab"
                     "repo: {}".format(repo)
                 )
+
+            repo_provider = repo_providers[0]
+            if repo.startswith(f"https://{repo_provider}.com/"):
+                if repo.endswith("/"):
+                    repo = repo[:-1]
+                https_repo = repo
+            elif repo.startswith(f"git@{repo_provider}.com:"):
+                if repo.endswith(".git"):
+                    repo = repo[:-4]
+                https_repo = repo.replace(f"git@{repo_provider}.com:", f"https://{repo_provider}.com/")
+            else:
+                raise ParameterMismatch(
+                    "Identified github or gitlab URL but cannot determine file URL. Repo: {repo}"
+                )
+
+            rev = self["head_rev"]
+            endpoint = "blob" if pretty else "raw"
+            separator = "/-" if repo_provider == "gitlab" else ""
+            return f"{https_repo}{separator}/{endpoint}/{rev}/{path}"
+
         else:
             raise RuntimeError(
                 'Only the "git" and "hg" repository types are supported for using file_url()'

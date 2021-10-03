@@ -251,7 +251,7 @@ def verify_index(config, index):
         Required("docker-image"): Any(
             # a raw Docker image path (repo/image:tag)
             str,
-            # an in-tree generated docker image (from `taskcluster/docker/<name>`)
+            # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
             {"in-tree": str},
             # an indexed docker image
             {"indexed": str},

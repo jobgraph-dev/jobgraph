@@ -50,7 +50,7 @@ docker_image_schema = Schema(
         Optional("job-from"): str,
         # Arguments to use for the Dockerfile.
         Optional("args"): {str: str},
-        # Name of the docker image definition under taskcluster/docker, when
+        # Name of the docker image definition under gitlab-ci/docker, when
         # different from the docker image name.
         Optional("definition"): str,
         # List of package tasks this docker image depends on.
@@ -104,7 +104,7 @@ def fill_template(config, tasks):
                 )
 
         if not taskgraph.fast:
-            context_path = os.path.join("taskcluster", "docker", definition)
+            context_path = os.path.join("gitlab-ci", "docker", definition)
             topsrcdir = os.path.dirname(config.graph_config.taskcluster_yml)
             if config.write_artifacts:
                 context_file = os.path.join(CONTEXTS_DIR, f"{image_name}.tar.gz")

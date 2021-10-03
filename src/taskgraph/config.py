@@ -106,7 +106,7 @@ class GraphConfig:
 
     @property
     def vcs_root(self):
-        if path.split(self.root_dir)[-2:] != ["taskcluster", "ci"]:
+        if path.split(self.root_dir)[-2:] != ["gitlab-ci", "ci"]:
             raise Exception(
                 "Not guessing path to vcs root. "
                 "Graph config in non-standard location."
@@ -115,7 +115,7 @@ class GraphConfig:
 
     @property
     def taskcluster_yml(self):
-        if path.split(self.root_dir)[-2:] != ["taskcluster", "ci"]:
+        if path.split(self.root_dir)[-2:] != ["gitlab-ci", "ci"]:
             raise Exception(
                 "Not guessing path to `.taskcluster.yml`. "
                 "Graph config in non-standard location."
