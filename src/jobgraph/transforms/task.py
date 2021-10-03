@@ -100,10 +100,6 @@ task_description_schema = Schema(
                 "build_date",
             ),
         },
-        # The `run_on_projects` attribute, defaulting to "all".  This dictates the
-        # projects on which this task should be included in the target task set.
-        # See the attributes documentation for details.
-        Optional("run-on-projects"): optionally_keyed_by("build-platform", [str]),
         Optional("run-on-tasks-for"): [str],
         Optional("run-on-git-branches"): [str],
         # The `always-target` attribute will cause the task to be included in the
@@ -528,7 +524,6 @@ def build_task(config, tasks):
         )
 
         attributes = task.get("attributes", {})
-        attributes["run_on_projects"] = task.get("run-on-projects", ["all"])
         attributes["run_on_tasks_for"] = task.get("run-on-tasks-for", ["all"])
         attributes["run_on_git_branches"] = task.get("run-on-git-branches", ["all"])
         attributes["always_target"] = task["always-target"]

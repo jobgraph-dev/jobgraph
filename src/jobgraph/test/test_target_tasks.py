@@ -12,21 +12,17 @@ from jobgraph.job import Job
 
 
 class TestTargetTasks(unittest.TestCase):
-    def default_matches_project(self, run_on_projects, project):
+    def default_matches_project(self, project):
         return self.default_matches(
-            attributes={
-                "run_on_projects": run_on_projects,
-            },
+            attributes={},
             parameters={
                 "project": project,
                 "tasks_for": "hg-push",
             },
         )
 
-    def default_matches_tasks_for(self, run_on_tasks_for, tasks_for):
-        attributes = {"run_on_projects": ["all"]}
-        if run_on_tasks_for is not None:
-            attributes["run_on_tasks_for"] = run_on_tasks_for
+    def default_matches_tasks_for(self, tasks_for):
+        attributes = {}
 
         return self.default_matches(
             attributes=attributes,
@@ -41,7 +37,6 @@ class TestTargetTasks(unittest.TestCase):
         self, run_on_tasks_for, tasks_for, run_on_git_branches, git_branch
     ):
         attributes = {
-            "run_on_projects": ["all"],
             "run_git_branches": ["all"],
         }
         if run_on_tasks_for is not None:
@@ -68,18 +63,6 @@ class TestTargetTasks(unittest.TestCase):
             graph=Graph(nodes={"a"}, edges=set()),
         )
         return "a" in method(graph, parameters, {})
-
-    def test_default_all(self):
-        """run_on_projects=[all] includes release, integration, and other projects"""
-        self.assertTrue(self.default_matches_project(["all"], "mozilla-central"))
-        self.assertTrue(self.default_matches_project(["all"], "mozilla-inbound"))
-        self.assertTrue(self.default_matches_project(["all"], "baobab"))
-
-    def test_default_nothing(self):
-        """run_on_projects=[] includes nothing"""
-        self.assertFalse(self.default_matches_project([], "mozilla-central"))
-        self.assertFalse(self.default_matches_project([], "mozilla-inbound"))
-        self.assertFalse(self.default_matches_project([], "baobab"))
 
     def test_default_tasks_for(self):
         self.assertTrue(self.default_matches_tasks_for(None, "hg-push"))
@@ -338,9 +321,6 @@ class TestTargetTasks(unittest.TestCase):
         tasks = {
             "a": Job(kind=None, label="a", attributes={}, task={}),
             "b": Job(kind=None, label="b", attributes={"at-at": "yep"}, task={}),
-            "c": Job(
-                kind=None, label="c", attributes={"run_on_projects": ["try"]}, task={}
-            ),
         }
         graph = Graph(nodes=set("abc"), edges=set())
         return JobGraph(tasks, graph)

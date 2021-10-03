@@ -54,7 +54,6 @@ job_description_schema = Schema(
         Optional("soft-dependencies"): task_description_schema["soft-dependencies"],
         Optional("extra"): task_description_schema["extra"],
         Optional("index"): task_description_schema["index"],
-        Optional("run-on-projects"): task_description_schema["run-on-projects"],
         Optional("run-on-tasks-for"): task_description_schema["run-on-tasks-for"],
         Optional("run-on-git-branches"): task_description_schema["run-on-git-branches"],
         Optional("always-target"): task_description_schema["always-target"],

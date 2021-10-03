@@ -59,7 +59,6 @@ def _match_run_on(key, run_on):
     return key in run_on
 
 
-match_run_on_projects = _match_run_on
 match_run_on_tasks_for = _match_run_on
 
 

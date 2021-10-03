@@ -4,7 +4,6 @@
 
 
 from jobgraph.util.attributes import (
-    match_run_on_projects,
     match_run_on_tasks_for,
     match_run_on_git_branches,
 )
@@ -32,12 +31,6 @@ def filter_out_cron(task, parameters):
     Filter out tasks that run via cron.
     """
     return not task.attributes.get("cron")
-
-
-def filter_for_project(task, parameters):
-    """Filter tasks by project.  Optionally enable nightlies."""
-    run_on_projects = set(task.attributes.get("run_on_projects", []))
-    return match_run_on_projects(parameters["project"], run_on_projects)
 
 
 def filter_for_tasks_for(task, parameters):
@@ -69,7 +62,6 @@ def standard_filter(task, parameters):
         filter_func(task, parameters)
         for filter_func in (
             filter_out_cron,
-            filter_for_project,
             filter_for_tasks_for,
             filter_for_git_branch,
         )
@@ -78,8 +70,7 @@ def standard_filter(task, parameters):
 
 @_target_task("default")
 def target_tasks_default(full_task_graph, parameters, graph_config):
-    """Target the tasks which have indicated they should be run on this project
-    via the `run_on_projects` attributes."""
+    """Target the tasks which have indicated they should be run based on attributes."""
     return [
         l for l, t in full_task_graph.jobs.items() if standard_filter(t, parameters)
     ]
@@ -87,8 +78,7 @@ def target_tasks_default(full_task_graph, parameters, graph_config):
 
 @_target_task("codereview")
 def target_tasks_codereview(full_task_graph, parameters, graph_config):
-    """Target the tasks which have indicated they should be run on this project
-    via the `run_on_projects` attributes."""
+    """Target the tasks which have indicated they should be run based on attributes."""
     return [
         l
         for l, t in full_task_graph.jobs.items()

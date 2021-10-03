@@ -7,7 +7,6 @@ import unittest
 
 from jobgraph.util.attributes import (
     attrmatch,
-    match_run_on_projects,
     match_run_on_git_branches,
 )
 
@@ -47,20 +46,6 @@ class Attrmatch(unittest.TestCase):
         self.assertFalse(attrmatch({"a": 1}, a=1, b=2, c=3))
         self.assertFalse(attrmatch({"a": 1, "b": 2}, a=1, b=2, c=3))
         self.assertTrue(attrmatch({"a": 1, "b": 2, "c": 3}, a=1, b=2, c=3))
-
-
-class MatchRunOnProjects(unittest.TestCase):
-    def test_empty(self):
-        self.assertFalse(match_run_on_projects("try", []))
-
-    def test_all(self):
-        self.assertTrue(match_run_on_projects("try", ["all"]))
-        self.assertTrue(match_run_on_projects("larch", ["all"]))
-        self.assertTrue(match_run_on_projects("autoland", ["all"]))
-        self.assertTrue(match_run_on_projects("mozilla-inbound", ["all"]))
-        self.assertTrue(match_run_on_projects("mozilla-central", ["all"]))
-        self.assertTrue(match_run_on_projects("mozilla-beta", ["all"]))
-        self.assertTrue(match_run_on_projects("mozilla-release", ["all"]))
 
 
 class MatchRunOnGitBranches(unittest.TestCase):

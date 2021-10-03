@@ -134,7 +134,6 @@ def make_task(config, jobs):
             "name": name,
             "description": job["description"],
             "label": "fetch-%s" % name,
-            "run-on-projects": [],
             "run": {
                 "using": "run-task",
                 "checkout": False,
