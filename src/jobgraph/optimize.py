@@ -88,7 +88,7 @@ def _make_default_strategies():
 
 def _get_optimizations(target_task_graph, strategies):
     def optimizations(label):
-        task = target_task_graph.tasks[label]
+        task = target_task_graph.jobs[label]
         if task.optimization:
             opt_by, arg = list(task.optimization.items())[0]
             return (opt_by, strategies[opt_by], arg)
@@ -128,7 +128,7 @@ def remove_tasks(target_task_graph, params, optimizations, do_not_optimize):
             continue
 
         # call the optimization strategy
-        task = target_task_graph.tasks[label]
+        task = target_task_graph.jobs[label]
         opt_by, opt, arg = optimizations(label)
         if opt.should_remove_task(task, params, arg):
             removed.add(label)
@@ -175,7 +175,7 @@ def replace_tasks(
             continue
 
         # call the optimization strategy
-        task = target_task_graph.tasks[label]
+        task = target_task_graph.jobs[label]
         opt_by, opt, arg = optimizations(label)
         repl = opt.should_replace_task(task, params, arg)
         if repl:
@@ -234,7 +234,7 @@ def get_subgraph(
     tasks_by_taskid = {}
     named_links_dict = target_task_graph.graph.named_links_dict()
     omit = removed_tasks | replaced_tasks
-    for label, task in target_task_graph.tasks.items():
+    for label, task in target_task_graph.jobs.items():
         if label in omit:
             continue
         task.task_id = label_to_taskid[label]
