@@ -112,7 +112,7 @@ def fill_template(config, tasks):
                 context_hash = generate_context_hash(topsrcdir, context_path, args)
         else:
             if config.write_artifacts:
-                raise Exception("Can't write artifacts if `taskgraph.fast` is set.")
+                raise Exception("Can't write artifacts if `jobgraph.fast` is set.")
             context_hash = "0" * 40
         digest_data = [context_hash]
         digest_data += [json.dumps(args, sort_keys=True)]

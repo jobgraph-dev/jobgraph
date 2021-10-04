@@ -119,7 +119,7 @@ def docker_worker_toolchain(config, job, taskdesc):
     if "toolchain-alias" in run:
         attributes["toolchain-alias"] = run.pop("toolchain-alias")
 
-    if not taskgraph.fast:
+    if not jobgraph.fast:
         name = taskdesc["label"].replace(f"{config.kind}-", "", 1)
         taskdesc["cache"] = {
             "type": CACHE_TYPE,

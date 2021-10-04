@@ -117,7 +117,7 @@ def format_taskgraph(options, parameters, logfile=None):
         logging.root.addHandler(handler)
 
     if options["fast"]:
-        taskgraph.fast = True
+        jobgraph.fast = True
 
     if isinstance(parameters, str):
         parameters = parameters_loader(

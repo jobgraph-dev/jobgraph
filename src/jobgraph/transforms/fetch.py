@@ -155,7 +155,7 @@ def make_task(config, jobs):
             },
         }
 
-        if not taskgraph.fast:
+        if not jobgraph.fast:
             cache_name = task["label"].replace(f"{config.kind}-", "", 1)
 
             # This adds the level to the index path automatically.
