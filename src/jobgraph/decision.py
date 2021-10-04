@@ -11,7 +11,6 @@ import logging
 import time
 import yaml
 
-from .create import create_tasks
 from .generator import JobGraphGenerator
 from .parameters import Parameters
 from .jobgraph import JobGraph
@@ -86,15 +85,6 @@ def taskgraph_decision(options, parameters=None):
     # and the map of labels to taskids
     write_artifact("task-graph.json", jgg.morphed_task_graph.to_json())
     write_artifact("label-to-taskid.json", jgg.label_to_taskid)
-
-    # actually create the graph
-    create_tasks(
-        jgg.graph_config,
-        jgg.morphed_task_graph,
-        jgg.label_to_taskid,
-        jgg.parameters,
-        decision_task_id=decision_task_id,
-    )
 
 
 def get_decision_parameters(graph_config, options):
