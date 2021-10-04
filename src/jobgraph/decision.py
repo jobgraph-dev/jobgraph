@@ -73,19 +73,19 @@ def taskgraph_decision(options, parameters=None):
 
     # write out the full graph for reference
     full_task_json = jgg.full_task_graph.to_json()
-    write_artifact("full-task-graph.json", full_task_json)
+    write_artifact("full-task-graph.yml", full_task_json)
 
     # this is just a test to check whether the from_json() function is working
     _, _ = JobGraph.from_json(full_task_json)
 
     # write out the target task set to allow reproducing this as input
-    write_artifact("target-tasks.json", list(jgg.target_task_set.tasks.keys()))
+    write_artifact("target-tasks.yml", list(jgg.target_task_set.jobs.keys()))
 
     # write out the optimized task graph to describe what will actually happen,
     # and the map of labels to taskids
-    write_artifact("task-graph.json", jgg.morphed_task_graph.to_json())
+    write_artifact("task-graph.yml", jgg.morphed_task_graph.to_json())
     write_artifact("generated-gitlab-ci.yml", jgg.morphed_task_graph.to_gitlab_ci_jobs())
-    write_artifact("label-to-taskid.json", jgg.label_to_taskid)
+    write_artifact("label-to-taskid.yml", jgg.label_to_taskid)
 
 
 def get_decision_parameters(graph_config, options):
