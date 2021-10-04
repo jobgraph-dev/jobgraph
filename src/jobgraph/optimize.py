@@ -225,10 +225,11 @@ def get_subgraph(
 
     # fill in label_to_taskid for anything not removed or replaced
     assert replaced_tasks <= set(label_to_taskid)
+    # TODO: Remove this logic which only made sense in the Taskcluster world
     for label in sorted(
         target_task_graph.graph.nodes - removed_tasks - set(label_to_taskid)
     ):
-        label_to_taskid[label] = slugid()
+        label_to_taskid[label] = label
 
     # resolve labels to taskIds and populate task['dependencies']
     tasks_by_taskid = {}
@@ -260,7 +261,7 @@ def get_subgraph(
             decision_task_id=decision_task_id,
             dependencies=named_task_dependencies,
         )
-        deps = task.task.setdefault("dependencies", [])
+        deps = task.task.setdefault("needs", [])
         deps.extend(sorted(named_task_dependencies.values()))
         tasks_by_taskid[task.task_id] = task
 

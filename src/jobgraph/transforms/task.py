@@ -423,7 +423,6 @@ def build_task(config, tasks):
             "tags": [worker_type],
             "cache": {},
             "timeout": task["worker"]["max-run-time"],
-            "needs": [],
         }
 
         # add the payload and adjust anything else as required.
@@ -448,7 +447,7 @@ def build_task(config, tasks):
 
 @transforms.add
 def check_task_dependencies(config, tasks):
-    """Ensures that tasks don't have more than 100 dependencies."""
+    """Ensures that tasks don't have more than 50 dependencies."""
     for task in tasks:
         if len(task["dependencies"]) > MAX_DEPENDENCIES:
             raise Exception(
