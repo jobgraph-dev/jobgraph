@@ -84,6 +84,7 @@ def taskgraph_decision(options, parameters=None):
     # write out the optimized task graph to describe what will actually happen,
     # and the map of labels to taskids
     write_artifact("task-graph.json", jgg.morphed_task_graph.to_json())
+    write_artifact("generated-gitlab-ci.yml", jgg.morphed_task_graph.to_gitlab_ci_jobs())
     write_artifact("label-to-taskid.json", jgg.label_to_taskid)
 
 

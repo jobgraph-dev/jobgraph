@@ -3,6 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+import yaml
 from .graph import Graph
 from .job import Job
 
@@ -50,6 +51,13 @@ class JobGraph:
             # overwrite dependencies with the information in the jobgraph's edges.
             jobs[key]["dependencies"] = named_links_dict.get(key, {})
         return jobs
+
+    def to_gitlab_ci_jobs(self):
+        json_graph = self.to_json()
+        return {
+            job["label"]: job["task"]
+            for job in json_graph.values()
+        }
 
     @classmethod
     def from_json(cls, jobs_dict):
