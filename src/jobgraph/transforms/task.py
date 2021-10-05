@@ -180,7 +180,7 @@ def payload_builder(name, schema):
         Required("env"): {str: taskref_or_string},
         # the command to run; if not given, kubernetes will default to the
         # command in the docker image
-        Optional("command"): [taskref_or_string],
+        Optional("command"): taskref_or_string,
         # the maximum time to run, in seconds
         Required("max-run-time"): int,
         # the exit status code(s) that indicates the task should be retried
@@ -236,7 +236,7 @@ def build_docker_worker_payload(config, task, task_def):
     task_def["variables"] = worker["env"]
 
     if "command" in worker:
-        task_def["script"] = worker["command"]
+        task_def["script"] = [worker["command"]]
 
     if "max-run-time" in worker:
         task_def["timeout"] = f'{worker["max-run-time"]} seconds'

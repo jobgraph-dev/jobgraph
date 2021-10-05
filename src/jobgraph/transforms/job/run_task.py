@@ -7,6 +7,7 @@ Support for running jobs that are invoked via the `run-task` script.
 
 
 import os
+import shlex
 
 import attr
 
@@ -142,4 +143,4 @@ def docker_worker_run_task(config, job, taskdesc):
         command.extend(("--user", "root", "--group", "root"))
     command.append("--")
     command.extend(run_command)
-    worker["command"] = command
+    worker["command"] = shlex.join(command)
