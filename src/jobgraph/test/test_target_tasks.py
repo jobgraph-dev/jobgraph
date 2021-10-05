@@ -58,7 +58,7 @@ class TestTargetTasks(unittest.TestCase):
         method = target_tasks.get_method("default")
         graph = JobGraph(
             jobs={
-                "a": Job(kind="build", label="a", attributes=attributes, task={}),
+                "a": Job(kind="build", label="a", attributes=attributes, actual_gitlab_ci_job={}),
             },
             graph=Graph(nodes={"a"}, edges=set()),
         )
@@ -319,8 +319,8 @@ class TestTargetTasks(unittest.TestCase):
 
     def make_task_graph(self):
         tasks = {
-            "a": Job(kind=None, label="a", attributes={}, task={}),
-            "b": Job(kind=None, label="b", attributes={"at-at": "yep"}, task={}),
+            "a": Job(kind=None, label="a", attributes={}, actual_gitlab_ci_job={}),
+            "b": Job(kind=None, label="b", attributes={"at-at": "yep"}, actual_gitlab_ci_job={}),
         }
         graph = Graph(nodes=set("abc"), edges=set())
         return JobGraph(tasks, graph)

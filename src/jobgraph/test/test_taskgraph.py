@@ -20,13 +20,13 @@ class TestTaskGraph(unittest.TestCase):
                 kind="test",
                 label="a",
                 attributes={"attr": "a-task"},
-                task={"taskdef": True},
+                actual_gitlab_ci_job={"taskdef": True},
             ),
             "b": Job(
                 kind="test",
                 label="b",
                 attributes={},
-                task={"task": "def"},
+                actual_gitlab_ci_job={"task": "def"},
                 optimization={"seta": None},
                 # note that this dep is ignored, superseded by that
                 # from the taskgraph's edges
@@ -71,7 +71,7 @@ class TestTaskGraph(unittest.TestCase):
                     attributes={},
                     dependencies={"prereq": "b"},  # must match edges, below
                     optimization={"seta": None},
-                    task={"task": "def"},
+                    actual_gitlab_ci_job={"task": "def"},
                 ),
                 "b": Job(
                     kind="pre",
@@ -79,7 +79,7 @@ class TestTaskGraph(unittest.TestCase):
                     attributes={},
                     dependencies={},
                     optimization={"seta": None},
-                    task={"task": "def2"},
+                    actual_gitlab_ci_job={"task": "def2"},
                 ),
             },
             graph=Graph(nodes={"a", "b"}, edges={("a", "b", "prereq")}),
@@ -96,7 +96,7 @@ class TestTaskGraph(unittest.TestCase):
                 attributes={},
                 dependencies={"prereq": "b"},  # must match edges, below
                 optimization={"seta": None},
-                task={"task": "def"},
+                actual_gitlab_ci_job={"task": "def"},
             ),
             "b": Job(
                 kind="pre",
@@ -104,7 +104,7 @@ class TestTaskGraph(unittest.TestCase):
                 attributes={},
                 dependencies={},
                 optimization={"seta": None},
-                task={"task": "def2"},
+                actual_gitlab_ci_job={"task": "def2"},
             ),
         },
         graph=Graph(nodes={"a", "b"}, edges={("a", "b", "prereq")}),

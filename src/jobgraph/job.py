@@ -14,7 +14,7 @@ class Job:
     - kind: the name of the task kind
     - label; the label for this task
     - attributes: a dictionary of attributes for this task (used for filtering)
-    - task: the task definition (JSON-able dictionary)
+    - actual_gitlab_ci_job: the job definition (JSON-able dictionary) which will be output to `.gitlab-ci.yml`
     - optimization: optimization to apply to the task (see taskgraph.optimize)
     - dependencies: tasks this one depends on, in the form {name: label}, for example
       {'build': 'build-linux64/opt', 'docker-image': 'build-docker-image-desktop-test'}
@@ -33,7 +33,7 @@ class Job:
     label = attr.ib()
     description = attr.ib()
     attributes = attr.ib()
-    task = attr.ib()
+    actual_gitlab_ci_job = attr.ib()
     task_id = attr.ib(default=None, init=False)
     optimization = attr.ib(default=None)
     dependencies = attr.ib(factory=dict)
@@ -51,7 +51,7 @@ class Job:
             "dependencies": self.dependencies,
             "soft_dependencies": self.soft_dependencies,
             "optimization": self.optimization,
-            "task": self.task,
+            "actual_gitlab_ci_job": self.actual_gitlab_ci_job,
         }
         if self.task_id:
             rv["task_id"] = self.task_id
@@ -69,7 +69,7 @@ class Job:
             label=job_dict["label"],
             description=job_dict["description"],
             attributes=job_dict["attributes"],
-            task=job_dict["task"],
+            actual_gitlab_ci_job=job_dict["actual_gitlab_ci_job"],
             optimization=job_dict["optimization"],
             dependencies=job_dict.get("dependencies"),
             soft_dependencies=job_dict.get("soft_dependencies"),

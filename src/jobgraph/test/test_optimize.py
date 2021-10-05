@@ -42,11 +42,11 @@ class TestOptimize(unittest.TestCase):
         dependencies=None,
     ):
         task_def = task_def or {"sample": "task-def"}
-        task = Job(kind="test", label=label, attributes={}, task=task_def)
+        task = Job(kind="test", label=label, attributes={}, actual_gitlab_ci_job=task_def)
         task.optimization = optimization
         task.task_id = task_id
         if dependencies is not None:
-            task.task["dependencies"] = sorted(dependencies)
+            task.actual_gitlab_ci_job["dependencies"] = sorted(dependencies)
         return task
 
     def make_graph(self, *tasks_and_edges):

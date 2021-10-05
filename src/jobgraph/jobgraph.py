@@ -55,7 +55,7 @@ class JobGraph:
     def to_gitlab_ci_jobs(self):
         json_graph = self.to_json()
         return {
-            job["label"]: job["task"]
+            job["label"]: job["actual_gitlab_ci_job"]
             for job in json_graph.values()
         }
 

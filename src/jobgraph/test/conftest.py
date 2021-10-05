@@ -75,9 +75,9 @@ class FakeOptimization(OptimizationStrategy):
         if self.mode == "always":
             return True
         if self.mode == "even":
-            return task.task["i"] % 2 == 0
+            return task.actual_gitlab_ci_job["i"] % 2 == 0
         if self.mode == "odd":
-            return task.task["i"] % 2 != 0
+            return task.actual_gitlab_ci_job["i"] % 2 != 0
         return False
 
 

@@ -229,14 +229,14 @@ def get_subgraph(
                 }
             )
 
-        task.task = resolve_task_references(
+        task.actual_gitlab_ci_job = resolve_task_references(
             task.label,
-            task.task,
+            task.actual_gitlab_ci_job,
             task_id=task.task_id,
             decision_task_id=decision_task_id,
             dependencies=named_task_dependencies,
         )
-        deps = task.task.setdefault("needs", [])
+        deps = task.actual_gitlab_ci_job.setdefault("needs", [])
         deps.extend(sorted(named_task_dependencies.values()))
 
     #  drop edges that are no longer entirely in the task graph

@@ -79,7 +79,7 @@ class Kind:
                 label=job_dict["label"],
                 description=job_dict["description"],
                 attributes=job_dict["attributes"],
-                task=job_dict["task"],
+                actual_gitlab_ci_job=job_dict["task"],
                 optimization=job_dict.get("optimization"),
                 dependencies=job_dict.get("dependencies"),
             )
@@ -405,7 +405,7 @@ def load_tasks_for_kind(parameters, kind, root_dir=None):
     parameters = Parameters(strict=False, **parameters)
     jgg = JobGraphGenerator(root_dir=root_dir, parameters=parameters)
     return {
-        task.task["metadata"]["name"]: task
+        task.actual_gitlab_ci_job["metadata"]["name"]: task
         for task in jgg.full_task_set
         if task.kind == kind
     }

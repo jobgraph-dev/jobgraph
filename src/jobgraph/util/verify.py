@@ -56,7 +56,7 @@ def verify_notification_filters(task, taskgraph, scratch_pad, graph_config):
     if task is None:
         return
     valid_filters = ("on-any", "on-completed", "on-failed", "on-exception")
-    task_dict = task.task
+    task_dict = task.actual_gitlab_ci_job
 
     # TODO support notification without Taskcluster's routes
 
@@ -68,5 +68,5 @@ def verify_always_optimized(task, taskgraph, scratch_pad, graph_config):
     """
     if task is None:
         return
-    if task.task.get("workerType") == "always-optimized":
+    if task.actual_gitlab_ci_job.get("workerType") == "always-optimized":
         raise Exception(f"Could not optimize the task {task.label!r}")
