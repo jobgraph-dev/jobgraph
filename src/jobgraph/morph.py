@@ -33,27 +33,25 @@ here = os.path.abspath(os.path.dirname(__file__))
 logger = logging.getLogger(__name__)
 
 
-def amend_taskgraph(taskgraph, label_to_taskid, to_add):
+def amend_taskgraph(taskgraph, to_add):
     """Add the given tasks to the taskgraph, returning a new taskgraph"""
     new_tasks = taskgraph.tasks.copy()
     new_edges = set(taskgraph.graph.edges)
     for task in to_add:
         new_tasks[task.task_id] = task
-        assert task.label not in label_to_taskid
-        label_to_taskid[task.label] = task.task_id
         for depname, dep in task.dependencies.items():
             new_edges.add((task.task_id, dep, depname))
 
     taskgraph = JobGraph(new_tasks, Graph(set(new_tasks), new_edges))
-    return taskgraph, label_to_taskid
+    return taskgraph
 
 
-def morph(taskgraph, label_to_taskid, parameters, graph_config):
+def morph(taskgraph, parameters, graph_config):
     """Apply all morphs"""
     morphs = []
 
     for m in morphs:
-        taskgraph, label_to_taskid = m(
-            taskgraph, label_to_taskid, parameters, graph_config
+        taskgraph = m(
+            taskgraph, parameters, graph_config
         )
-    return taskgraph, label_to_taskid
+    return taskgraph

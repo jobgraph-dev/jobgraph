@@ -197,16 +197,6 @@ class JobGraphGenerator:
         return self._run_until("optimized_task_graph")
 
     @property
-    def label_to_taskid(self):
-        """
-        A dictionary mapping task label to assigned taskId.  This property helps
-        in interpreting `optimized_task_graph`.
-
-        @type: dictionary
-        """
-        return self._run_until("label_to_taskid")
-
-    @property
     def morphed_task_graph(self):
         """
         The optimized task graph, with any subsequent morphs applied. This graph
@@ -377,7 +367,7 @@ class JobGraphGenerator:
         do_not_optimize = set(parameters.get("do_not_optimize", []))
         if not parameters.get("optimize_target_tasks", True):
             do_not_optimize = set(target_task_set.graph.nodes).union(do_not_optimize)
-        optimized_task_graph, label_to_taskid = optimize_task_graph(
+        optimized_task_graph = optimize_task_graph(
             target_task_graph,
             parameters,
             do_not_optimize,
@@ -387,11 +377,10 @@ class JobGraphGenerator:
 
         yield verifications("optimized_task_graph", optimized_task_graph, graph_config)
 
-        morphed_task_graph, label_to_taskid = morph(
-            optimized_task_graph, label_to_taskid, parameters, graph_config
+        morphed_task_graph = morph(
+            optimized_task_graph, parameters, graph_config
         )
 
-        yield "label_to_taskid", label_to_taskid
         yield verifications("morphed_task_graph", morphed_task_graph, graph_config)
 
     def _run_until(self, name):

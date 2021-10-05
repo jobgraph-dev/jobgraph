@@ -115,14 +115,11 @@ class TestOptimize(unittest.TestCase):
         graph,
         exp_replaced,
         exp_removed=set(),
-        exp_label_to_taskid={},
         do_not_optimize=None,
-        label_to_taskid=None,
         removed_tasks=None,
         existing_tasks=None,
     ):
         do_not_optimize = do_not_optimize or set()
-        label_to_taskid = label_to_taskid or {}
         removed_tasks = removed_tasks or set()
         existing_tasks = existing_tasks or {}
 
@@ -131,13 +128,11 @@ class TestOptimize(unittest.TestCase):
             optimizations=optimize._get_optimizations(graph, self.strategies),
             params={},
             do_not_optimize=do_not_optimize,
-            label_to_taskid=label_to_taskid,
             removed_tasks=removed_tasks,
             existing_tasks=existing_tasks,
         )
         self.assertEqual(got_replaced, exp_replaced)
         self.assertEqual(removed_tasks, exp_removed)
-        self.assertEqual(label_to_taskid, exp_label_to_taskid)
 
     def test_replace_tasks_never(self):
         "No tasks are replaced when strategy is 'never'"
@@ -152,14 +147,13 @@ class TestOptimize(unittest.TestCase):
         self.assert_replace_tasks(
             graph,
             exp_replaced={"t1", "t2", "t3"},
-            exp_label_to_taskid={"t1": "e1", "t2": "e2", "t3": "e3"},
         )
 
     def test_replace_tasks_blocked(self):
         "A task cannot be replaced if it depends on one that was not replaced"
         graph = self.make_triangle(t1={"replace": "e1"}, t3={"replace": "e3"})
         self.assert_replace_tasks(
-            graph, exp_replaced={"t1"}, exp_label_to_taskid={"t1": "e1"}
+            graph, exp_replaced={"t1"}
         )
 
     def test_replace_tasks_do_not_optimize(self):
@@ -172,7 +166,6 @@ class TestOptimize(unittest.TestCase):
         self.assert_replace_tasks(
             graph,
             exp_replaced={"t1"},
-            exp_label_to_taskid={"t1": "e1"},
             do_not_optimize={"t2"},
         )
 
@@ -185,7 +178,6 @@ class TestOptimize(unittest.TestCase):
             graph,
             exp_replaced={"t1"},
             exp_removed={"t2", "t3"},
-            exp_label_to_taskid={"t1": "e1"},
         )
 
     def assert_subgraph(
@@ -193,21 +185,18 @@ class TestOptimize(unittest.TestCase):
         graph,
         removed_tasks,
         replaced_tasks,
-        label_to_taskid,
         exp_subgraph,
-        exp_label_to_taskid,
     ):
         self.maxDiff = None
         optimize.slugid = partial(next, ("tid%d" % i for i in range(1, 10)))
         try:
             got_subgraph = optimize.get_subgraph(
-                graph, removed_tasks, replaced_tasks, label_to_taskid, "DECISION-TASK"
+                graph, removed_tasks, replaced_tasks, "DECISION-TASK"
             )
         finally:
             optimize.slugid = slugid
         self.assertEqual(got_subgraph.graph, exp_subgraph.graph)
         self.assertEqual(got_subgraph.jobs, exp_subgraph.tasks)
-        self.assertEqual(label_to_taskid, exp_label_to_taskid)
 
     def test_get_subgraph_no_change(self):
         "get_subgraph returns a similarly-shaped subgraph when nothing is removed"

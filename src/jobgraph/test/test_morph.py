@@ -23,11 +23,10 @@ def graph_config():
 @pytest.fixture
 def make_taskgraph():
     def inner(tasks):
-        label_to_taskid = {k: k + "-tid" for k in tasks}
-        for label, task_id in label_to_taskid.items():
-            tasks[label].task_id = task_id
+        for label in tasks:
+            tasks[label].task_id = "TO-BE-REMOVED"
         graph = Graph(nodes=set(tasks), edges=set())
         taskgraph = JobGraph(tasks, graph)
-        return taskgraph, label_to_taskid
+        return taskgraph
 
     return inner

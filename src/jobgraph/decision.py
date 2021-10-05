@@ -85,7 +85,6 @@ def taskgraph_decision(options, parameters=None):
     # and the map of labels to taskids
     write_artifact("task-graph.yml", jgg.morphed_task_graph.to_json())
     write_artifact("generated-gitlab-ci.yml", jgg.morphed_task_graph.to_gitlab_ci_jobs())
-    write_artifact("label-to-taskid.yml", jgg.label_to_taskid)
 
 
 def get_decision_parameters(graph_config, options):

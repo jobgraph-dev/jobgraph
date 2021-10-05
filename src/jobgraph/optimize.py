@@ -40,7 +40,6 @@ def optimize_task_graph(
     Perform task optimization, returning a taskgraph and a map from label to
     assigned taskId, including replacement tasks.
     """
-    label_to_taskid = {}
     if not existing_tasks:
         existing_tasks = {}
 
@@ -62,20 +61,15 @@ def optimize_task_graph(
         optimizations=optimizations,
         params=params,
         do_not_optimize=do_not_optimize,
-        label_to_taskid=label_to_taskid,
         existing_tasks=existing_tasks,
         removed_tasks=removed_tasks,
     )
 
-    return (
-        get_subgraph(
-            target_task_graph,
-            removed_tasks,
-            replaced_tasks,
-            label_to_taskid,
-            decision_task_id,
-        ),
-        label_to_taskid,
+    return get_subgraph(
+        target_task_graph,
+        removed_tasks,
+        replaced_tasks,
+        decision_task_id,
     )
 
 
@@ -144,14 +138,12 @@ def replace_tasks(
     params,
     optimizations,
     do_not_optimize,
-    label_to_taskid,
     removed_tasks,
     existing_tasks,
 ):
     """
     Implement the "Replacing Tasks" phase, returning a set of task labels of
-    all replaced tasks. The replacement taskIds are added to label_to_taskid as
-    a side-effect.
+    all replaced tasks.
     """
     opt_counts = defaultdict(int)
     replaced = set()
@@ -169,7 +161,6 @@ def replace_tasks(
         # if the task already exists, that's an easy replacement
         repl = existing_tasks.get(label)
         if repl:
-            label_to_taskid[label] = repl
             replaced.add(label)
             opt_counts["existing_tasks"] += 1
             continue
@@ -184,7 +175,6 @@ def replace_tasks(
                 # problems with removed tasks being depended on
                 removed_tasks.add(label)
             else:
-                label_to_taskid[label] = repl
                 replaced.add(label)
             opt_counts[opt_by] += 1
             continue
@@ -197,17 +187,11 @@ def get_subgraph(
     target_task_graph,
     removed_tasks,
     replaced_tasks,
-    label_to_taskid,
     decision_task_id,
 ):
     """
     Return the subgraph of target_task_graph consisting only of
     non-optimized tasks and edges between them.
-
-    To avoid losing track of taskIds for tasks optimized away, this method
-    simultaneously substitutes real taskIds for task labels in the graph, and
-    populates each task definition's `dependencies` key with the appropriate
-    taskIds.  Task references are resolved in the process.
     """
 
     # check for any dependency edges from included to removed tasks
@@ -223,24 +207,15 @@ def get_subgraph(
         )
         raise Exception("Optimization error: " + probs)
 
-    # fill in label_to_taskid for anything not removed or replaced
-    assert replaced_tasks <= set(label_to_taskid)
-    # TODO: Remove this logic which only made sense in the Taskcluster world
-    for label in sorted(
-        target_task_graph.graph.nodes - removed_tasks - set(label_to_taskid)
-    ):
-        label_to_taskid[label] = label
-
-    # resolve labels to taskIds and populate task['dependencies']
-    tasks_by_taskid = {}
+    # populate task['dependencies']
     named_links_dict = target_task_graph.graph.named_links_dict()
     omit = removed_tasks | replaced_tasks
     for label, task in target_task_graph.jobs.items():
         if label in omit:
             continue
-        task.task_id = label_to_taskid[label]
+        task.task_id = "TO-BE-REMOVED"
         named_task_dependencies = {
-            name: label_to_taskid[label]
+            name: label
             for name, label in named_links_dict.get(label, {}).items()
         }
 
@@ -248,9 +223,9 @@ def get_subgraph(
         if task.soft_dependencies:
             named_task_dependencies.update(
                 {
-                    label: label_to_taskid[label]
+                    label: label
                     for label in task.soft_dependencies
-                    if label in label_to_taskid and label not in omit
+                    if label not in omit
                 }
             )
 
@@ -263,22 +238,22 @@ def get_subgraph(
         )
         deps = task.task.setdefault("needs", [])
         deps.extend(sorted(named_task_dependencies.values()))
-        tasks_by_taskid[task.task_id] = task
 
-    # resolve edges to taskIds
-    edges_by_taskid = (
-        (label_to_taskid.get(left), label_to_taskid.get(right), name)
-        for (left, right, name) in target_task_graph.graph.edges
-    )
-    # ..and drop edges that are no longer entirely in the task graph
+    #  drop edges that are no longer entirely in the task graph
     #   (note that this omits edges to replaced tasks, but they are still in task.dependnecies)
-    edges_by_taskid = {
+    remaining_edges = {
         (left, right, name)
-        for (left, right, name) in edges_by_taskid
-        if left in tasks_by_taskid and right in tasks_by_taskid
+        for (left, right, name) in target_task_graph.graph.edges
+        if left not in omit and right not in omit
+    }
+    remaining_nodes = target_task_graph.graph.nodes - omit
+    remaining_tasks_by_label = {
+        label: task
+        for label, task in target_task_graph.jobs.items()
+        if label not in omit
     }
 
-    return JobGraph(tasks_by_taskid, Graph(set(tasks_by_taskid), edges_by_taskid))
+    return JobGraph(remaining_tasks_by_label, Graph(remaining_nodes, remaining_edges))
 
 
 class OptimizationStrategy:

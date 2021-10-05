@@ -101,12 +101,11 @@ def test_always_target_tasks(maketgg):
 def test_optimized_task_graph(maketgg):
     "The optimized task graph contains task ids"
     tgg = maketgg(["_fake-t-2"])
-    tid = tgg.label_to_taskid
     assert tgg.optimized_task_graph.graph == graph.Graph(
-        {tid["_fake-t-0"], tid["_fake-t-1"], tid["_fake-t-2"]},
+        {"_fake-t-0", "_fake-t-1", "_fake-t-2"},
         {
-            (tid["_fake-t-1"], tid["_fake-t-0"], "prev"),
-            (tid["_fake-t-2"], tid["_fake-t-1"], "prev"),
+            ("_fake-t-1", "_fake-t-0", "prev"),
+            ("_fake-t-2", "_fake-t-1", "prev"),
         },
     )
 
