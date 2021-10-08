@@ -16,9 +16,6 @@ from jobgraph.util import yaml
 
 logger = logging.getLogger(__name__)
 
-# this is set to true for `mach taskgraph action-callback --test`
-testing = False
-
 # Default rootUrl to use if none is given in the environment; this should point
 # to the production Taskcluster deployment used for CI.
 PRODUCTION_TASKCLUSTER_ROOT_URL = "https://taskcluster.net"
@@ -151,30 +148,21 @@ def get_task_definition(task_id):
 def cancel_task(task_id):
     """Cancels a task given a task_id. In testing mode, just logs that it would
     have cancelled."""
-    if testing:
-        logger.info(f"Would have cancelled {task_id}.")
-    else:
-        _do_request(get_task_url(task_id) + "/cancel", json={})
+    _do_request(get_task_url(task_id) + "/cancel", json={})
 
 
 def status_task(task_id):
     """Gets the status of a task given a task_id. In testing mode, just logs that it would
     have retrieved status."""
-    if testing:
-        logger.info(f"Would have gotten status for {task_id}.")
-    else:
-        resp = _do_request(get_task_url(task_id) + "/status")
-        status = resp.json().get("status", {}).get("state") or "unknown"
-        return status
+    resp = _do_request(get_task_url(task_id) + "/status")
+    status = resp.json().get("status", {}).get("state") or "unknown"
+    return status
 
 
 def rerun_task(task_id):
     """Reruns a task given a task_id. In testing mode, just logs that it would
     have reran."""
-    if testing:
-        logger.info(f"Would have rerun {task_id}.")
-    else:
-        _do_request(get_task_url(task_id) + "/rerun", json={})
+    _do_request(get_task_url(task_id) + "/rerun", json={})
 
 
 def get_purge_cache_url(worker_type):
@@ -186,16 +174,9 @@ def get_purge_cache_url(worker_type):
 
 def purge_cache(worker_type, cache_name):
     """Requests a cache purge from the purge-caches service."""
-    if testing:
-        logger.info(
-            "Would have purged {}/{}.".format(
-                worker_type, cache_name
-            )
-        )
-    else:
-        logger.info(f"Purging {worker_type}/{cache_name}.")
-        purge_cache_url = get_purge_cache_url(worker_type)
-        _do_request(purge_cache_url, json={"cacheName": cache_name})
+    logger.info(f"Purging {worker_type}/{cache_name}.")
+    purge_cache_url = get_purge_cache_url(worker_type)
+    _do_request(purge_cache_url, json={"cacheName": cache_name})
 
 
 def send_email(address, subject, content, link):
