@@ -46,7 +46,6 @@ base_schema = Schema(
         Required("head_rev"): str,
         Required("head_tag"): str,
         Required("level"): str,
-        Required("moz_build_date"): str,
         Required("optimize_target_tasks"): bool,
         Required("owner"): str,
         Required("project"): str,
@@ -133,7 +132,6 @@ class Parameters(ReadOnlyDict):
             "head_rev": _repo().head_ref,
             "head_tag": "",
             "level": "3",
-            "moz_build_date": datetime.now().strftime("%Y%m%d%H%M%S"),
             "optimize_target_tasks": True,
             "owner": "nobody@mozilla.com",
             "project": _repo().get_url().rsplit("/", 1)[1],
@@ -170,13 +168,6 @@ class Parameters(ReadOnlyDict):
         `mach try fuzzy`.
         """
         return "try" in self["project"] or self["pipeline_source"] == "merge_request_event"
-
-    @property
-    def moz_build_date(self):
-        # XXX self["moz_build_date"] is left as a string because:
-        #  * of backward compatibility
-        #  * parameters are output in a YAML file
-        return datetime.strptime(self["moz_build_date"], "%Y%m%d%H%M%S")
 
     def file_url(self, path, pretty=False):
         """

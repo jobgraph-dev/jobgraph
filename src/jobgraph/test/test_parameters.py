@@ -30,7 +30,6 @@ class TestParameters(unittest.TestCase):
         "head_rev": "rev",
         "head_tag": "",
         "level": "3",
-        "moz_build_date": "20191008095500",
         "optimize_target_tasks": True,
         "owner": "nobody@mozilla.com",
         "project": "project",
@@ -140,18 +139,12 @@ class TestParameters(unittest.TestCase):
                 {"some": "other"},
             )
 
-    def test_moz_build_date_time(self):
-        p = Parameters(**self.vals)
-        self.assertEqual(p["moz_build_date"], "20191008095500")
-        self.assertEqual(p.moz_build_date, datetime.datetime(2019, 10, 8, 9, 55, 0))
-
 
 def test_parameters_id():
     # Some parameters rely on current time, ensure these are the same for the
     # purposes of this test.
     defaults = {
         "build_date": 0,
-        "moz_build_date": "2021-08-23",
         "pushdate": 0,
     }
 

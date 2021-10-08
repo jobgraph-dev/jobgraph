@@ -65,7 +65,6 @@ class TestGetDecisionParameters(unittest.TestCase):
         self.assertEqual(params["build_date"], 1503691511)
         self.assertEqual(params["head_tag"], "v0.0.1")
         self.assertEqual(params["pushlog_id"], "143")
-        self.assertEqual(params["moz_build_date"], "20170825200511")
 
     def test_no_email_owner(self):
         self.options["owner"] = "ffxbld"

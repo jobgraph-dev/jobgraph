@@ -109,7 +109,6 @@ def docker_worker_toolchain(config, job, taskdesc):
     env = worker["env"]
     env.update(
         {
-            "MOZ_BUILD_DATE": config.params["moz_build_date"],
             "MOZ_SCM_LEVEL": config.params["level"],
         }
     )

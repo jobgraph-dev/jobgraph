@@ -132,10 +132,6 @@ def get_decision_parameters(graph_config, options):
 
     # use the pushdate as build_date if given, else use current time
     parameters["build_date"] = parameters["pushdate"] or int(time.time())
-    # moz_build_date is the build identifier based on build_date
-    parameters["moz_build_date"] = time.strftime(
-        "%Y%m%d%H%M%S", time.gmtime(parameters["build_date"])
-    )
 
     project = parameters["project"]
     try:
