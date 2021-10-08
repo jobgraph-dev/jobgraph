@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 @attr.s(frozen=True)
 class VerificationSequence:
     """
-    Container for a sequence of verifications over a TaskGraph. Each
-    verification is represented as a callable taking (task, taskgraph,
-    scratch_pad), called for each task in the taskgraph, and one more
-    time with no task but with the taskgraph and the same scratch_pad
+    Container for a sequence of verifications over a JobGraph. Each
+    verification is represented as a callable taking (task, jobgraph,
+    scratch_pad), called for each task in the jobgraph, and one more
+    time with no task but with the jobgraph and the same scratch_pad
     that was passed for each task.
     """
 
@@ -46,7 +46,7 @@ verifications = VerificationSequence()
 
 
 @verifications.add("full_task_graph")
-def verify_notification_filters(task, taskgraph, scratch_pad, graph_config):
+def verify_notification_filters(task, jobgraph, scratch_pad, graph_config):
     """
     This function ensures that only understood filters for notifications are
     specified.
@@ -62,7 +62,7 @@ def verify_notification_filters(task, taskgraph, scratch_pad, graph_config):
 
 
 @verifications.add("optimized_task_graph")
-def verify_always_optimized(task, taskgraph, scratch_pad, graph_config):
+def verify_always_optimized(task, jobgraph, scratch_pad, graph_config):
     """
     This function ensures that always-optimized tasks have been optimized.
     """

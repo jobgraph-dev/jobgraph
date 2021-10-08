@@ -30,7 +30,7 @@ graph_config_schema = Schema(
                 }
             },
         },
-        Required("taskgraph"): {
+        Required("jobgraph"): {
             Optional(
                 "register",
                 description="Python function to call to register extensions.",
@@ -69,7 +69,7 @@ class GraphConfig:
 
     def register(self):
         """
-        Add the project's taskgraph directory to the python path, and register
+        Add the project's jobgraph directory to the python path, and register
         any extensions present.
         """
         modify_path = os.path.dirname(self.root_dir)
@@ -77,12 +77,12 @@ class GraphConfig:
             if GraphConfig._PATH_MODIFIED == modify_path:
                 # Already modified path with the same root_dir.
                 # We currently need to do this to enable actions to call
-                # taskgraph_decision, e.g. relpro.
+                # jobgraph_decision, e.g. relpro.
                 return
             raise Exception("Can't register multiple directories on python path.")
         GraphConfig._PATH_MODIFIED = modify_path
         sys.path.insert(0, modify_path)
-        register_path = self["taskgraph"].get("register")
+        register_path = self["jobgraph"].get("register")
         if register_path:
             find_object(register_path)(self)
 
@@ -115,7 +115,7 @@ def validate_graph_config(config):
 def load_graph_config(root_dir):
     config_yml = os.path.join(root_dir, "config.yml")
     if not os.path.exists(config_yml):
-        raise Exception(f"Couldn't find taskgraph configuration: {config_yml}")
+        raise Exception(f"Couldn't find jobgraph configuration: {config_yml}")
 
     logger.debug(f"loading config from `{config_yml}`")
     config = load_yaml(config_yml)

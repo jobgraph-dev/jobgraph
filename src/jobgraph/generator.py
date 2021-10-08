@@ -102,7 +102,7 @@ class Kind:
 
 class JobGraphGenerator:
     """
-    The central controller for taskgraph.  This handles all phases of graph
+    The central controller for jobgraph.  This handles all phases of graph
     generation.  The task is generated from all of the kinds defined in
     subdirectories of the generator's root directory.
 
@@ -153,7 +153,7 @@ class JobGraphGenerator:
         """
         The full task set: all tasks defined by any kind (a graph without edges)
 
-        @type: TaskGraph
+        @type: JobGraph
         """
         return self._run_until("full_task_set")
 
@@ -163,7 +163,7 @@ class JobGraphGenerator:
         The full task graph: the full task set, with edges representing
         dependencies.
 
-        @type: TaskGraph
+        @type: JobGraph
         """
         return self._run_until("full_task_graph")
 
@@ -172,7 +172,7 @@ class JobGraphGenerator:
         """
         The set of targetted tasks (a graph without edges)
 
-        @type: TaskGraph
+        @type: JobGraph
         """
         return self._run_until("target_task_set")
 
@@ -181,7 +181,7 @@ class JobGraphGenerator:
         """
         The set of targetted tasks and all of their dependencies
 
-        @type: TaskGraph
+        @type: JobGraph
         """
         return self._run_until("target_task_graph")
 
@@ -192,7 +192,7 @@ class JobGraphGenerator:
         have been optimized out are either omitted or replaced with a Task
         instance containing only a task_id.
 
-        @type: TaskGraph
+        @type: JobGraph
         """
         return self._run_until("optimized_task_graph")
 
@@ -203,7 +203,7 @@ class JobGraphGenerator:
         will have the same meaning as the optimized task graph, but be in a form
         more palatable to TaskCluster.
 
-        @type: TaskGraph
+        @type: JobGraph
         """
         return self._run_until("morphed_task_graph")
 
@@ -212,7 +212,7 @@ class JobGraphGenerator:
         """
         The configuration for this graph.
 
-        @type: TaskGraph
+        @type: JobGraph
         """
         return self._run_until("graph_config")
 
@@ -397,7 +397,7 @@ def load_tasks_for_kind(parameters, kind, root_dir=None):
     """
     Get all the tasks of a given kind.
 
-    This function is designed to be called from outside of taskgraph.
+    This function is designed to be called from outside of jobgraph.
     """
     # make parameters read-write
     parameters = dict(parameters)

@@ -37,8 +37,7 @@ def optimize_task_graph(
     strategies=None,
 ):
     """
-    Perform task optimization, returning a taskgraph and a map from label to
-    assigned taskId, including replacement tasks.
+    Perform task optimization, returning a JobGraph.
     """
     if not existing_tasks:
         existing_tasks = {}

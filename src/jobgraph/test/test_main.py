@@ -4,7 +4,7 @@
 import pytest
 
 import jobgraph
-from jobgraph.main import main as taskgraph_main
+from jobgraph.main import main as jobgraph_main
 
 
 @pytest.fixture
@@ -13,13 +13,13 @@ def run_main(maketgg, monkeypatch):
         kwargs.setdefault("target_tasks", ["_fake-t-0", "_fake-t-1"])
         tgg = maketgg(**kwargs)
 
-        def fake_get_taskgraph_generator(*args):
+        def fake_get_jobgraph_generator(*args):
             return tgg
 
         monkeypatch.setattr(
-            taskgraph.main, "get_taskgraph_generator", fake_get_taskgraph_generator
+            jobgraph.main, "get_jobgraph_generator", fake_get_jobgraph_generator
         )
-        taskgraph_main(args)
+        jobgraph_main(args)
         return tgg
 
     return inner
@@ -36,7 +36,7 @@ def run_main(maketgg, monkeypatch):
         ("morphed", ["_fake-t-0", "_fake-t-1"]),
     ),
 )
-def test_show_taskgraph(run_main, capsys, attr, expected):
+def test_show_jobgraph(run_main, capsys, attr, expected):
     run_main([attr])
     out, err = capsys.readouterr()
     assert out.strip() == "\n".join(expected)

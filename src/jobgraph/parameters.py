@@ -66,7 +66,7 @@ def extend_parameters_schema(schema):
     """
     Extend the schema for parameters to include per-project configuration.
 
-    This should be called by the `taskgraph.register` function in the
+    This should be called by the `jobgraph.register` function in the
     graph-configuration.
     """
     global base_schema
@@ -160,7 +160,7 @@ class Parameters(ReadOnlyDict):
         try:
             return super().__getitem__(k)
         except KeyError:
-            raise KeyError(f"taskgraph parameter {k!r} not found")
+            raise KeyError(f"jobgraph parameter {k!r} not found")
 
     def is_try(self):
         """

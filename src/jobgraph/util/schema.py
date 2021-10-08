@@ -178,7 +178,7 @@ def check_schema(schema):
 
 class Schema(voluptuous.Schema):
     """
-    Operates identically to voluptuous.Schema, but applying some taskgraph-specific checks
+    Operates identically to voluptuous.Schema, but applying some jobgraph-specific checks
     in the process.
     """
 

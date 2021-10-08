@@ -1,10 +1,10 @@
 ---
-trust-domain: taskgraph
+trust-domain: jobgraph
 
-taskgraph:
+jobgraph:
     repositories:
         ci:
-            name: Taskgraph
+            name: Jobgraph
 
 workers:
     aliases:

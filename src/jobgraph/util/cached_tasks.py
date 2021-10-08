@@ -33,8 +33,8 @@ def add_optimization(
     if digest is None:
         digest = hashlib.sha256("\n".join(digest_data).encode("utf-8")).hexdigest()
 
-    if "cached-task-prefix" in config.graph_config["taskgraph"]:
-        cache_prefix = config.graph_config["taskgraph"]["cached-task-prefix"]
+    if "cached-task-prefix" in config.graph_config["jobgraph"]:
+        cache_prefix = config.graph_config["jobgraph"]["cached-task-prefix"]
     else:
         cache_prefix = config.graph_config["trust-domain"]
 

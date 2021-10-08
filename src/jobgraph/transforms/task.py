@@ -78,7 +78,7 @@ task_description_schema = Schema(
         # method.
         Required("always-target"): bool,
         # Optimization to perform on this task during the optimization phase.
-        # Optimizations are defined in taskcluster/taskgraph/optimize.py.
+        # Optimizations are defined in gitlab-ci/jobgraph/optimize.py.
         Required("optimization"): OptimizationSchema,
         # the worker-type for the task.  The following parameters will
         # be substituted in this string:

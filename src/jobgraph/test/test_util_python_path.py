@@ -24,7 +24,7 @@ class TestPythonPath(unittest.TestCase):
         self.assertRaises(
             AttributeError,
             python_path.find_object,
-            "taskgraph.test.test_util_python_path:NoSuchObject",
+            "jobgraph.test.test_util_python_path:NoSuchObject",
         )
 
     def test_find_object_exists(self):
@@ -32,6 +32,6 @@ class TestPythonPath(unittest.TestCase):
         from jobgraph.test.test_util_python_path import TestObject
 
         obj = python_path.find_object(
-            "taskgraph.test.test_util_python_path:TestObject.testClassProperty"
+            "jobgraph.test.test_util_python_path:TestObject.testClassProperty"
         )
         self.assertIs(obj, TestObject.testClassProperty)

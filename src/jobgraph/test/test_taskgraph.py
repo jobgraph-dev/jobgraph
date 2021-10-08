@@ -10,11 +10,11 @@ from jobgraph.job import Job
 from jobgraph.jobgraph import JobGraph
 
 
-class TestTaskGraph(unittest.TestCase):
+class TestJobGraph(unittest.TestCase):
 
     maxDiff = None
 
-    def test_taskgraph_to_json(self):
+    def test_jobgraph_to_json(self):
         tasks = {
             "a": Job(
                 kind="test",
@@ -29,14 +29,14 @@ class TestTaskGraph(unittest.TestCase):
                 actual_gitlab_ci_job={"task": "def"},
                 optimization={"seta": None},
                 # note that this dep is ignored, superseded by that
-                # from the taskgraph's edges
+                # from the jobgraph's edges
                 dependencies={"first": "a"},
             ),
         }
         graph = Graph(nodes=set("ab"), edges={("a", "b", "edgelabel")})
-        taskgraph = JobGraph(tasks, graph)
+        jobgraph = JobGraph(tasks, graph)
 
-        res = taskgraph.to_json()
+        res = jobgraph.to_json()
 
         self.assertEqual(
             res,

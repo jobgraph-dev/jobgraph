@@ -56,7 +56,7 @@ class WithFakeKind(JobGraphGenerator):
 
 def fake_load_graph_config(root_dir):
     graph_config = GraphConfig(
-        {"trust-domain": "test-domain", "taskgraph": {}}, root_dir
+        {"trust-domain": "test-domain", "jobgraph": {}}, root_dir
     )
     graph_config.__dict__["register"] = lambda: None
     return graph_config

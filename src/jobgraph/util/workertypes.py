@@ -18,7 +18,7 @@ class _BuiltinWorkerType:
         """
         Since the list of built-in worker-types is small and fixed, we can get
         away with punning the implementation name (in
-        `taskgraph.transforms.task`) and the worker_type.
+        `jobgraph.transforms.task`) and the worker_type.
         """
         return self.worker_type
 

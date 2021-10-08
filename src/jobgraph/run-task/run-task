@@ -265,7 +265,7 @@ def configure_cache_posix(cache, user, group,
     our_requirements = {
         # Include a version string that we can bump whenever to trigger
         # fresh caches. The actual value is not relevant and doesn't need
-        # to follow any explicit order. Since taskgraph bakes this file's
+        # to follow any explicit order. Since jobgraph bakes this file's
         # hash into cache names, any change to this file/version is sufficient
         # to force the use of a new cache.
         b'version=1',
@@ -882,7 +882,7 @@ def main(args):
 
     # Validate caches.
     #
-    # Taskgraph should pass in a list of paths that are caches via an
+    # Jobgraph should pass in a list of paths that are caches via an
     # environment variable (which we don't want to pass down to child
     # processes).
 

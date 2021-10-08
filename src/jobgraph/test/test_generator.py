@@ -114,10 +114,10 @@ def test_load_tasks_for_kind(monkeypatch):
     """
     `load_tasks_for_kinds` will load the tasks for the provided kind
     """
-    monkeypatch.setattr(generator, "TaskGraphGenerator", WithFakeKind)
+    monkeypatch.setattr(generator, "JobGraphGenerator", WithFakeKind)
     monkeypatch.setattr(generator, "load_graph_config", fake_load_graph_config)
 
-    tasks = load_tasks_for_kind(
+    tasks = load_pipeline_source_kind(
         {"_kinds": [("_example-kind", []), ("docker-image", [])]},
         "_example-kind",
         "/root",

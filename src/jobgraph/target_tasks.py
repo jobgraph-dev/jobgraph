@@ -22,7 +22,7 @@ def _target_task(name):
 
 
 def get_method(method):
-    """Get a target_task_method to pass to a TaskGraphGenerator."""
+    """Get a target_task_method to pass to a JobGraphGenerator."""
     return _target_task_methods[method]
 
 

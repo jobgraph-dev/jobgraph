@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 """
-Tools for interacting with existing taskgraphs.
+Tools for interacting with existing jobgraphs.
 """
 
 

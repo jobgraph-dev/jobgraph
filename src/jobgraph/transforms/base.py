@@ -51,7 +51,7 @@ class TransformConfig:
     # current kind
     kind_dependencies_tasks = attr.ib()
 
-    # Global configuration of the taskgraph
+    # Global configuration of the jobgraph
     graph_config = attr.ib(type=GraphConfig)
 
     # whether to write out artifacts for the decision task
@@ -60,7 +60,7 @@ class TransformConfig:
     @property
     @memoize
     def repo_configs(self):
-        repositories = self.graph_config["taskgraph"]["repositories"]
+        repositories = self.graph_config["jobgraph"]["repositories"]
         if len(repositories) == 1:
             current_prefix = list(repositories.keys())[0]
         else:

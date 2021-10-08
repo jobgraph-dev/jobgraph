@@ -9,13 +9,13 @@ import attr
 @attr.s
 class Job:
     """
-    Representation of a task in a TaskGraph.  Each Task has, at creation:
+    Representation of a job in a JobGraph.  Each Job has, at creation:
 
     - kind: the name of the task kind
     - label; the label for this task
     - attributes: a dictionary of attributes for this task (used for filtering)
     - actual_gitlab_ci_job: the job definition (JSON-able dictionary) which will be output to `.gitlab-ci.yml`
-    - optimization: optimization to apply to the task (see taskgraph.optimize)
+    - optimization: optimization to apply to the task (see jobgraph.optimize)
     - dependencies: tasks this one depends on, in the form {name: label}, for example
       {'build': 'build-linux64/opt', 'docker-image': 'build-docker-image-desktop-test'}
     - soft_dependencies: tasks this one may depend on if they are available post
@@ -60,7 +60,7 @@ class Job:
     @classmethod
     def from_json(cls, job_dict):
         """
-        Given a data structure as produced by taskgraph.to_json, re-construct
+        Given a data structure as produced by jobgraph.to_json, re-construct
         the original Task object.  This is used to "resume" the task-graph
         generation process, for example in Action tasks.
         """

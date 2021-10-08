@@ -13,7 +13,7 @@ from jobgraph import decision
 from jobgraph.util.yaml import load_yaml
 
 
-FAKE_GRAPH_CONFIG = {"product-dir": "browser", "taskgraph": {}}
+FAKE_GRAPH_CONFIG = {"product-dir": "browser", "jobgraph": {}}
 
 
 class TestDecision(unittest.TestCase):

@@ -6,7 +6,7 @@ Convert a job description into a task description.
 
 Jobs descriptions are similar to task descriptions, but they specify how to run
 the job at a higher level, using a "run" field that can be interpreted by
-run-using handlers in `taskcluster/taskgraph/transforms/job`.
+run-using handlers in `gitlab-ci/jobgraph/transforms/job`.
 """
 
 
@@ -46,7 +46,7 @@ job_description_schema = Schema(
         Optional("label"): str,
         # the following fields are passed directly through to the task description,
         # possibly modified by the run implementation.  See
-        # taskcluster/taskgraph/transforms/task.py for the schema details.
+        # gitlab-ci/jobgraph/transforms/task.py for the schema details.
         Required("description"): task_description_schema["description"],
         Optional("attributes"): task_description_schema["attributes"],
         Optional("job-from"): task_description_schema["job-from"],

@@ -42,14 +42,13 @@ try_task_config_schema_v2 = Schema(
 )
 
 
-def taskgraph_decision(options, parameters=None):
+def jobgraph_decision(options, parameters=None):
     """
-    Run the decision task.  This function implements `mach taskgraph decision`,
+    Run the decision task.  This function implements `jobgraph decision`,
     and is responsible for
 
      * processing decision task command-line options into parameters
-     * running task-graph generation exactly the same way the other `mach
-       taskgraph` commands do
+     * running task-graph generation exactly the same way the other `jobgraph` commands do
      * generating a set of artifacts to memorialize the graph
      * calling TaskCluster APIs to create the graph
     """
@@ -60,7 +59,7 @@ def taskgraph_decision(options, parameters=None):
 
     decision_task_id = os.environ["TASK_ID"]
 
-    # create a TaskGraphGenerator instance
+    # create a JobGraphGenerator instance
     jgg = JobGraphGenerator(
         root_dir=options.get("root"),
         parameters=parameters,
@@ -89,7 +88,7 @@ def taskgraph_decision(options, parameters=None):
 
 def get_decision_parameters(graph_config, options):
     """
-    Load parameters from the command-line options for 'taskgraph decision'.
+    Load parameters from the command-line options for 'jobgraph decision'.
     This also applies per-project parameters, based on the given project.
 
     """
@@ -157,8 +156,8 @@ def get_decision_parameters(graph_config, options):
     if options.get("optimize_target_tasks") is not None:
         parameters["optimize_target_tasks"] = options["optimize_target_tasks"]
 
-    if "decision-parameters" in graph_config["taskgraph"]:
-        find_object(graph_config["taskgraph"]["decision-parameters"])(
+    if "decision-parameters" in graph_config["jobgraph"]:
+        find_object(graph_config["jobgraph"]["decision-parameters"])(
             graph_config, parameters
         )
 

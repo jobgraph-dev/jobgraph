@@ -45,67 +45,67 @@ def argument(*args, **kwargs):
     return decorator
 
 
-def format_taskgraph_labels(taskgraph):
+def format_jobgraph_labels(jobgraph):
     return "\n".join(
-        taskgraph.tasks[index].label for index in taskgraph.graph.visit_postorder()
+        jobgraph.jobs[index].label for index in jobgraph.graph.visit_postorder()
     )
 
 
-def format_taskgraph_json(taskgraph):
+def format_jobgraph_json(jobgraph):
     return json.dumps(
-        taskgraph.to_json(), sort_keys=True, indent=2, separators=(",", ": ")
+        jobgraph.to_json(), sort_keys=True, indent=2, separators=(",", ": ")
     )
 
 
-def format_taskgraph_yaml(taskgraph):
-    return yaml.safe_dump(taskgraph.to_json(), default_flow_style=False)
+def format_jobgraph_yaml(jobgraph):
+    return yaml.safe_dump(jobgraph.to_json(), default_flow_style=False)
 
 
-def get_filtered_taskgraph(taskgraph, tasksregex):
+def get_filtered_jobgraph(jobgraph, tasksregex):
     """
     Filter all the tasks on basis of a regular expression
-    and returns a new TaskGraph object
+    and returns a new JobGraph object
     """
     from jobgraph.graph import Graph
     from jobgraph.jobgraph import JobGraph
 
-    # return original taskgraph if no regular expression is passed
+    # return original jobgraph if no regular expression is passed
     if not tasksregex:
-        return taskgraph
-    named_links_dict = taskgraph.graph.named_links_dict()
+        return jobgraph
+    named_links_dict = jobgraph.graph.named_links_dict()
     filteredtasks = {}
     filterededges = set()
     regexprogram = re.compile(tasksregex)
 
-    for key in taskgraph.graph.visit_postorder():
-        task = taskgraph.tasks[key]
+    for key in jobgraph.graph.visit_postorder():
+        task = jobgraph.tasks[key]
         if regexprogram.match(task.label):
             filteredtasks[key] = task
             for depname, dep in named_links_dict[key].items():
                 if regexprogram.match(dep):
                     filterededges.add((key, dep, depname))
-    filtered_taskgraph = JobGraph(
+    filtered_jobgraph = JobGraph(
         filteredtasks, Graph(set(filteredtasks), filterededges)
     )
-    return filtered_taskgraph
+    return filtered_jobgraph
 
 
 FORMAT_METHODS = {
-    "labels": format_taskgraph_labels,
-    "json": format_taskgraph_json,
-    "yaml": format_taskgraph_yaml,
-    "yml": format_taskgraph_yaml,
+    "labels": format_jobgraph_labels,
+    "json": format_jobgraph_json,
+    "yaml": format_jobgraph_yaml,
+    "yml": format_jobgraph_yaml,
 }
 
 
-def get_taskgraph_generator(root, parameters):
+def get_jobgraph_generator(root, parameters):
     """Helper function to make testing a little easier."""
     from jobgraph.generator import JobGraphGenerator
 
     return JobGraphGenerator(root_dir=root, parameters=parameters)
 
 
-def format_taskgraph(options, parameters, logfile=None):
+def format_jobgraph(options, parameters, logfile=None):
     import jobgraph
     from jobgraph.parameters import parameters_loader
 
@@ -127,10 +127,10 @@ def format_taskgraph(options, parameters, logfile=None):
             strict=False,
         )
 
-    tgg = get_taskgraph_generator(options.get("root"), parameters)
+    tgg = get_jobgraph_generator(options.get("root"), parameters)
 
     tg = getattr(tgg, options["graph_attr"])
-    tg = get_filtered_taskgraph(tg, options["tasks_regex"])
+    tg = get_filtered_jobgraph(tg, options["tasks_regex"])
     format_method = FORMAT_METHODS[options["format"] or "labels"]
     return format_method(tg)
 
@@ -157,7 +157,7 @@ def dump_output(out, path=None, params_spec=None):
     print(out + "\n", file=fh)
 
 
-def generate_taskgraph(options, parameters, logdir):
+def generate_jobgraph(options, parameters, logdir):
     from jobgraph.parameters import Parameters
 
     def logfile(spec):
@@ -173,14 +173,14 @@ def generate_taskgraph(options, parameters, logdir):
     # tracebacks a little more readable and avoids additional process overhead.
     if len(parameters) == 1:
         spec = parameters[0]
-        out = format_taskgraph(options, spec, logfile(spec))
+        out = format_jobgraph(options, spec, logfile(spec))
         dump_output(out, options["output_file"])
         return
 
     futures = {}
     with ProcessPoolExecutor() as executor:
         for spec in parameters:
-            f = executor.submit(format_taskgraph, options, spec, logfile(spec))
+            f = executor.submit(format_jobgraph, options, spec, logfile(spec))
             futures[f] = spec
 
     for future in as_completed(futures):
@@ -204,15 +204,15 @@ def generate_taskgraph(options, parameters, logdir):
 
 @command(
     "tasks",
-    help="Show all tasks in the taskgraph.",
+    help="Show all jobs in the jobgraph.",
     defaults={"graph_attr": "full_task_set"},
 )
 @command(
-    "full", help="Show the full taskgraph.", defaults={"graph_attr": "full_task_graph"}
+    "full", help="Show the full jobgraph.", defaults={"graph_attr": "full_task_graph"}
 )
 @command(
     "target",
-    help="Show the set of target tasks.",
+    help="Show the set of target jobs.",
     defaults={"graph_attr": "target_task_set"},
 )
 @command(
@@ -230,7 +230,7 @@ def generate_taskgraph(options, parameters, logdir):
     help="Show the morphed graph.",
     defaults={"graph_attr": "morphed_task_graph"},
 )
-@argument("--root", "-r", help="root of the taskgraph definition relative to topsrcdir")
+@argument("--root", "-r", help="root of the jobgraph definition relative to topsrcdir")
 @argument("--quiet", "-q", action="store_true", help="suppress all logging output")
 @argument(
     "--verbose", "-v", action="store_true", help="include debug-level logging output"
@@ -310,11 +310,11 @@ def generate_taskgraph(options, parameters, logdir):
     const="default",
     nargs="?",
     default=None,
-    help="Generate and diff the current taskgraph against another revision. "
+    help="Generate and diff the current jobgraph against another revision. "
     "Without args the base revision will be used. A revision specifier such as "
     "the hash or `.~1` (hg) or `HEAD~1` (git) can be used as well.",
 )
-def show_taskgraph(options):
+def show_jobgraph(options):
     from jobgraph.parameters import Parameters
     from jobgraph.util.vcs import get_repository
 
@@ -334,7 +334,7 @@ def show_taskgraph(options):
 
         if not repo.working_directory_clean():
             print(
-                "abort: can't diff taskgraph with dirty working directory",
+                "abort: can't diff jobgraph with dirty working directory",
                 file=sys.stderr,
             )
             return 1
@@ -377,7 +377,7 @@ def show_taskgraph(options):
         # Log to separate files for each process instead of stderr to
         # avoid interleaving.
         basename = os.path.basename(os.getcwd())
-        logdir = os.path.join(appdirs.user_log_dir("taskgraph"), basename)
+        logdir = os.path.join(appdirs.user_log_dir("jobgraph"), basename)
         if not os.path.isdir(logdir):
             os.makedirs(logdir)
     else:
@@ -386,17 +386,17 @@ def show_taskgraph(options):
         # to setup its `mach` based logging.
         setup_logging()
 
-    generate_taskgraph(options, parameters, logdir)
+    generate_jobgraph(options, parameters, logdir)
 
     if options["diff"]:
         assert diffdir is not None
         assert repo is not None
 
         # Some transforms use global state for checks, so will fail
-        # when running taskgraph a second time in the same session.
-        # Reload all taskgraph modules to avoid this.
+        # when running jobgraph a second time in the same session.
+        # Reload all jobgraph modules to avoid this.
         for mod in sys.modules.copy():
-            if mod != __name__ and mod.startswith("taskgraph"):
+            if mod != __name__ and mod.startswith("jobgraph"):
                 del sys.modules[mod]
 
         if options["diff"] == "default":
@@ -411,7 +411,7 @@ def show_taskgraph(options):
                 diffdir, f"{options['graph_attr']}_{base_ref}"
             )
             print(f"Generating {options['graph_attr']} @ {base_ref}", file=sys.stderr)
-            generate_taskgraph(options, parameters, logdir)
+            generate_jobgraph(options, parameters, logdir)
         finally:
             repo.update(cur_ref)
 
@@ -549,7 +549,7 @@ def image_digest(args):
 
 
 @command("decision", help="Run the decision task")
-@argument("--root", "-r", help="root of the taskgraph definition relative to topsrcdir")
+@argument("--root", "-r", help="root of the jobgraph definition relative to topsrcdir")
 @argument(
     "--message",
     required=False,
@@ -605,13 +605,13 @@ def image_digest(args):
 )
 @argument("--try-task-config-file", help="path to try task configuration file")
 def decision(options):
-    from jobgraph.decision import taskgraph_decision
+    from jobgraph.decision import jobgraph_decision
 
-    taskgraph_decision(options)
+    jobgraph_decision(options)
 
 
 def create_parser():
-    parser = argparse.ArgumentParser(description="Interact with taskgraph")
+    parser = argparse.ArgumentParser(description="Interact with jobgraph")
     subparsers = parser.add_subparsers()
     for _, (func, args, kwargs, defaults) in commands.items():
         subparser = subparsers.add_parser(*args, **kwargs)
