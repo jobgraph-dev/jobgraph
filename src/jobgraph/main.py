@@ -582,7 +582,22 @@ def image_digest(args):
 )
 @argument("--head-tag", help="Tag attached to the revision", default="")
 @argument(
-    "--pipeline-source", required=True, help="the pipeline_source value used to generate this task"
+    "--pipeline-source", required=True, help="the pipeline_source value used to generate this task",
+    # List defined in CI_PIPELINE_SOURCE at https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+    choices=(
+        "api",
+        "chat",
+        "external_pull_request_event",
+        "external",
+        "merge_request_event",
+        "parent_pipeline",
+        "pipeline",
+        "push",
+        "schedule",
+        "trigger",
+        "web",
+        "webide",
+    )
 )
 @argument("--try-task-config-file", help="path to try task configuration file")
 def decision(options):
