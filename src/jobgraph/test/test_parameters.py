@@ -34,7 +34,6 @@ class TestParameters(unittest.TestCase):
         "owner": "nobody@mozilla.com",
         "project": "project",
         "pushdate": 0,
-        "pushlog_id": "0",
         "repository_type": "hg",
         "target_tasks_method": "default",
         "pipeline_source": "push",

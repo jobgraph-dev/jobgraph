@@ -12,7 +12,6 @@ import yaml
 import os
 import slugid
 
-from .vcs import find_hg_revision_push_info
 from .templates import merge
 from .time import current_json_time
 
@@ -25,16 +24,7 @@ def make_decision_task(params, root, context, head_rev=None):
     if not head_rev:
         head_rev = params["head_rev"]
 
-    if params["repository_type"] == "hg":
-        pushlog = find_hg_revision_push_info(params["repository_url"], head_rev)
-
-        hg_push_context = {
-            "pushlog_id": pushlog["pushid"],
-            "pushdate": pushlog["pushdate"],
-            "owner": pushlog["user"],
-        }
-    else:
-        hg_push_context = {}
+    hg_push_context = {}
 
     slugids = {}
 

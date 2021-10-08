@@ -307,10 +307,6 @@ class SkipUnlessChanged(OptimizationStrategy):
                 "SkipUnlessChanged optimization only works with mercurial repositories"
             )
 
-        # pushlog_id == -1 - this is the case when run from a cron.yml job
-        if params.get("pushlog_id") == -1:
-            return False
-
         changed = files_changed.check(params, file_patterns)
         if not changed:
             logger.debug(

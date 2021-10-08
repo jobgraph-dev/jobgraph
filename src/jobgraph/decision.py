@@ -101,7 +101,6 @@ def get_decision_parameters(graph_config, options):
             "head_ref",
             "head_tag",
             "project",
-            "pushlog_id",
             "pushdate",
             "repository_type",
             "owner",

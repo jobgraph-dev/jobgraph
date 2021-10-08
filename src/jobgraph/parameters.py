@@ -50,7 +50,6 @@ base_schema = Schema(
         Required("owner"): str,
         Required("project"): str,
         Required("pushdate"): int,
-        Required("pushlog_id"): str,
         Required("repository_type"): str,
         # target-kind is not included, since it should never be
         # used at run-time
@@ -136,7 +135,6 @@ class Parameters(ReadOnlyDict):
             "owner": "nobody@mozilla.com",
             "project": _repo().get_url().rsplit("/", 1)[1],
             "pushdate": int(time.time()),
-            "pushlog_id": "0",
             "repository_type": _repo().tool,
             "target_tasks_method": "default",
             "pipeline_source": "",
