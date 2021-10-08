@@ -44,7 +44,6 @@ def config():
             "head_rev": "abcdef",
             "head_ref": "abcdef",
             "level": 1,
-            "repository_type": "hg",
         }
     )
     return TransformConfig(

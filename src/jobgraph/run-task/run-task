@@ -673,7 +673,6 @@ def collect_vcs_options(args, project, name):
 
     env_prefix = project.upper()
 
-    repo_type = os.environ.get('%s_REPOSITORY_TYPE' % env_prefix)
     base_repo = os.environ.get('%s_BASE_REPOSITORY' % env_prefix)
     head_repo = os.environ.get('%s_HEAD_REPOSITORY' % env_prefix)
     revision = os.environ.get('%s_HEAD_REV' % env_prefix)

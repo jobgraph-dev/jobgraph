@@ -34,7 +34,6 @@ class TestParameters(unittest.TestCase):
         "owner": "nobody@mozilla.com",
         "project": "project",
         "pushdate": 0,
-        "repository_type": "hg",
         "target_tasks_method": "default",
         "pipeline_source": "push",
     }
@@ -80,8 +79,6 @@ class TestParameters(unittest.TestCase):
 
     def test_Parameters_file_url_git_remote(self):
         vals = self.vals.copy()
-        vals["repository_type"] = "git"
-
         vals["head_repository"] = "git@bitbucket.com:owner/repo.git"
         p = Parameters(**vals)
         self.assertRaises(ParameterMismatch, lambda: p.file_url(""))

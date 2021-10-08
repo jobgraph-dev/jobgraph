@@ -41,10 +41,6 @@ def filter_for_pipeline_source(task, parameters):
 def filter_for_git_branch(task, parameters):
     """Filter tasks by git branch.
     If `run_on_git_branch` is not defined, then task runs on all branches"""
-    # We cannot filter out on git branches if we not on a git repository
-    if parameters.get("repository_type") != "git":
-        return True
-
     # Pull requests usually have arbitrary names, let's not filter git branches on them.
     if parameters["pipeline_source"] == "merge_request_event":
         return True

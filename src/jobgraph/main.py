@@ -566,11 +566,6 @@ def image_digest(args):
 @argument(
     "--target-tasks-method", help="method for selecting the target tasks to generate"
 )
-@argument(
-    "--repository-type",
-    required=True,
-    help='Type of repository, either "hg" or "git"',
-)
 @argument("--base-repository", required=True, help='URL for "base" repository to clone')
 @argument(
     "--head-repository",

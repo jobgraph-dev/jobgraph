@@ -17,7 +17,7 @@ def find_decision_task(parameters, graph_config):
     task"""
     # TODO: Use Gitlab API to find decision job ID
     raise NotImplementedError(
-        "Unknown repository_type {}!".format(parameters["repository_type"])
+        "Please implement a way to find the decision job on Gitlab CI!")
     )
 
 

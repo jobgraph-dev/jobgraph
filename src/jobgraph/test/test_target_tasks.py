@@ -28,7 +28,6 @@ class TestTargetTasks(unittest.TestCase):
             attributes=attributes,
             parameters={
                 "project": "mozilla-central",
-                "repository_type": "hg",
                 "pipeline_source": pipeline_source,
             },
         )
@@ -48,7 +47,6 @@ class TestTargetTasks(unittest.TestCase):
             attributes=attributes,
             parameters={
                 "project": "fenix",
-                "repository_type": "git",
                 "pipeline_source": pipeline_source,
                 "head_ref": git_branch,
             },

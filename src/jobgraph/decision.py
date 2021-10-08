@@ -102,7 +102,6 @@ def get_decision_parameters(graph_config, options):
             "head_tag",
             "project",
             "pushdate",
-            "repository_type",
             "owner",
             "level",
             "target_tasks_method",

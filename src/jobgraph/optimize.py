@@ -302,17 +302,4 @@ class Either(OptimizationStrategy):
 
 class SkipUnlessChanged(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
-        if params.get("repository_type") != "hg":
-            raise RuntimeError(
-                "SkipUnlessChanged optimization only works with mercurial repositories"
-            )
-
-        changed = files_changed.check(params, file_patterns)
-        if not changed:
-            logger.debug(
-                'no files found matching a pattern in `skip-unless-changed` for "{}"'.format(
-                    task.label
-                )
-            )
-            return True
-        return False
+        raise NotImplementedError("Please implement this optimization strategy on Gitlab CI.")

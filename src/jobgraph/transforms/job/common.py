@@ -165,7 +165,6 @@ def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):
                     "HEAD_REPOSITORY": repo_config.head_repository,
                     "HEAD_REV": repo_config.head_rev,
                     "HEAD_REF": repo_config.head_ref,
-                    "REPOSITORY_TYPE": repo_config.type,
                     "SSH_SECRET_NAME": repo_config.ssh_secret_name,
                 }.items()
                 if value is not None

@@ -80,18 +80,6 @@ def repo(request, hg_repo, git_repo):
     return get_repository(git_repo)
 
 
-def test_get_repository_type(repo):
-    if isinstance(repo, HgRepository):
-        assert repo.tool == "hg"
-    else:
-        assert repo.tool == "git"
-
-
-def test_get_repository_type_failure(tmpdir):
-    with pytest.raises(RuntimeError):
-        get_repository(tmpdir.strpath)
-
-
 @pytest.mark.parametrize(
     "commit_message",
     (

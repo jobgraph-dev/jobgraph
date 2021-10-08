@@ -166,7 +166,6 @@ def fill_template(config, tasks):
                     "VCS_BASE_REPOSITORY": config.params["base_repository"],
                     "VCS_HEAD_REPOSITORY": config.params["head_repository"],
                     "VCS_HEAD_REV": config.params["head_rev"],
-                    "VCS_REPOSITORY_TYPE": config.params["repository_type"],
                 },
                 "chain-of-trust": True,
                 "max-run-time": 7200,

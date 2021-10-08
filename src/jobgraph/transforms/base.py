@@ -22,7 +22,6 @@ class RepoConfig:
     base_repository = attr.ib(type=str)
     head_repository = attr.ib(type=str)
     head_ref = attr.ib(type=str)
-    type = attr.ib(type=str)
     path = attr.ib(type=str, default="")
     head_rev = attr.ib(type=str, default=None)
     ssh_secret_name = attr.ib(type=str, default=None)
@@ -84,7 +83,6 @@ class TransformConfig:
                 head_repository=self.params["head_repository"],
                 head_ref=self.params["head_ref"],
                 head_rev=self.params["head_rev"],
-                type=self.params["repository_type"],
                 ssh_secret_name=repositories[current_prefix].get("ssh-secret-name"),
             ),
         }
@@ -97,7 +95,6 @@ class TransformConfig:
                         base_repository=repo["default-repository"],
                         head_repository=repo["default-repository"],
                         head_ref=repo["default-ref"],
-                        type=repo["type"],
                         ssh_secret_name=repo.get("ssh-secret-name"),
                     )
                     for (repo_prefix, repo) in repositories.items()

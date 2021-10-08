@@ -53,7 +53,6 @@ class TestGetDecisionParameters(unittest.TestCase):
             "head_tag": "v0.0.1",
             "project": "mozilla-central",
             "pushdate": 1503691511,
-            "repository_type": "hg",
             "owner": "nobody@mozilla.com",
             "pipeline_source": "push",
             "level": "3",
