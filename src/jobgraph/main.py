@@ -94,6 +94,7 @@ FORMAT_METHODS = {
     "labels": format_taskgraph_labels,
     "json": format_taskgraph_json,
     "yaml": format_taskgraph_yaml,
+    "yml": format_taskgraph_yaml,
 }
 
 
@@ -324,6 +325,9 @@ def show_taskgraph(options):
     cur_ref = None
     diffdir = None
     output_file = options["output_file"]
+
+    if output_file and not options.get("format"):
+        options["format"] = Path(output_file).suffix[1:]
 
     if options["diff"]:
         repo = get_repository(os.getcwd())
