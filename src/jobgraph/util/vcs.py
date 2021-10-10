@@ -25,7 +25,7 @@ class Repository(ABC):
 
     @abstractproperty
     def tool(self) -> str:
-        """Version control system being used, either 'hg' or 'git'."""
+        """Version control system being used which is usually 'git'."""
 
     @abstractproperty
     def head_ref(self) -> str:
@@ -62,49 +62,6 @@ class Repository(ABC):
     @abstractmethod
     def update(self, ref):
         """Update the working directory to the specified reference."""
-
-
-class HgRepository(Repository):
-    tool = "hg"
-
-    @property
-    def head_ref(self):
-        return self.run("log", "-r", ".", "-T", "{node}").strip()
-
-    @property
-    def base_ref(self):
-        return self.run("log", "-r", "last(ancestors(.) and public())", "-T", "{node}")
-
-    @property
-    def branch(self):
-        bookmarks_fn = os.path.join(self.path, ".hg", "bookmarks.current")
-        if os.path.exists(bookmarks_fn):
-            with open(bookmarks_fn) as f:
-                bookmark = f.read()
-                return bookmark or None
-
-        return None
-
-    def get_url(self, remote="default"):
-        return self.run("path", "-T", "{url}", remote).strip()
-
-    def get_commit_message(self, revision=None):
-        revision = revision or self.head_ref
-        return self.run("log", "-r", ".", "-T", "{desc}")
-
-    def working_directory_clean(self, untracked=False, ignored=False):
-        args = ["status", "--modified", "--added", "--removed", "--deleted"]
-        if untracked:
-            args.append("--unknown")
-        if ignored:
-            args.append("--ignored")
-
-        # If output is empty, there are no entries of requested status, which
-        # means we are clean.
-        return not len(self.run(*args).strip())
-
-    def update(self, ref):
-        return self.run("update", "--check", ref)
 
 
 class GitRepository(Repository):
@@ -156,9 +113,7 @@ def get_repository(path):
     """Get a repository object for the repository at `path`.
     If `path` is not a known VCS repository, raise an exception.
     """
-    if os.path.isdir(os.path.join(path, ".hg")):
-        return HgRepository(path)
-    elif os.path.exists(os.path.join(path, ".git")):
+    if os.path.exists(os.path.join(path, ".git")):
         return GitRepository(path)
 
-    raise RuntimeError("Current directory is neither a git or hg repository")
+    raise RuntimeError("Current directory is not a git repository")

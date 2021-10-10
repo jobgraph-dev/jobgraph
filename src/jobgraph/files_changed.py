@@ -22,6 +22,7 @@ def get_changed_files(repository, revision):
     Get the set of files changed in the push headed by the given revision.
     Responses are cached, so multiple calls with the same arguments are OK.
     """
+    # TODO Port this function to call Gitlab instead.
     url = "{}/json-automationrelevance/{}".format(repository.rstrip("/"), revision)
     logger.debug("Querying version control for metadata: %s", url)
 
@@ -47,7 +48,7 @@ def get_changed_files(repository, revision):
 
 def check(params, file_patterns):
     """Determine whether any of the files changed in the indicated push to
-    https://hg.mozilla.org match any of the given file patterns."""
+    gitlab match any of the given file patterns."""
     repository = params.get("head_repository")
     revision = params.get("head_rev")
     if not repository or not revision:
@@ -57,6 +58,7 @@ def check(params, file_patterns):
         )
         return True
 
+    # TODO Change get_changed_files to
     changed_files = get_changed_files(repository, revision)
 
     for pattern in file_patterns:

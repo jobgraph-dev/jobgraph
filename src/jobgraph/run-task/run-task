@@ -41,11 +41,6 @@ import urllib.request
 from threading import Thread
 
 SECRET_BASEURL_TPL = 'http://taskcluster/secrets/v1/secret/{}'
-FINGERPRINT_URL = SECRET_BASEURL_TPL.format('project/taskcluster/gecko/hgfingerprint')
-FALLBACK_FINGERPRINT = {
-    'fingerprints':
-        "sha256:17:38:aa:92:0b:84:3e:aa:8e:52:52:e9:4c:2f:98:a9:0e:bf:6c:3e:e9"
-        ":15:ff:0a:29:80:f7:06:02:5b:e8:48"}
 
 GITHUB_SSH_FINGERPRINT = (
     b"github.com ssh-rsa "
@@ -461,27 +456,6 @@ def git_checkout(
     return commit_hash
 
 
-def fetch_hgfingerprint():
-    try:
-        print_line(b'vcs', b'fetching hg.mozilla.org fingerprint from %s\n' %
-                   FINGERPRINT_URL.encode('utf-8'))
-        res = urllib.request.urlopen(FINGERPRINT_URL, timeout=10)
-        secret = res.read()
-        try:
-            secret = json.loads(secret.decode('utf-8'))
-        except ValueError:
-            print_line(b'vcs', b'invalid JSON in hg fingerprint secret')
-            sys.exit(1)
-    except (urllib.error.URLError, socket.timeout):
-        print_line(b'vcs', b'Unable to retrieve current hg.mozilla.org fingerprint'
-                           b'using the secret service, using fallback instead.')
-        # XXX This fingerprint will not be accurate if running on an old
-        #     revision after the server fingerprint has changed.
-        secret = {'secret': FALLBACK_FINGERPRINT}
-
-    return secret['secret']['fingerprints']
-
-
 def fetch_ssh_secret(secret_name):
     """ Retrieves the private ssh key, and returns it as a StringIO object
     """
@@ -544,8 +518,6 @@ def collect_vcs_options(args, project, name):
     ref = os.environ.get('%s_HEAD_REF' % env_prefix)
     private_key_secret = os.environ.get('%s_SSH_SECRET_NAME' % env_prefix)
 
-    store_path = os.environ.get('HG_STORE_PATH')
-
     # Expand ~ in some paths.
     if checkout:
         checkout = os.path.abspath(os.path.expanduser(checkout))
@@ -568,7 +540,7 @@ def collect_vcs_options(args, project, name):
     }
 
 
-def vcs_checkout_from_args(options, *, hgmo_fingerprint):
+def vcs_checkout_from_args(options):
 
     if not options['checkout']:
         if options['ref'] and not options['revision']:
@@ -795,25 +767,6 @@ def main(args):
         if running_as_root:
             os.chown(os.path.dirname(checkout), uid, gid)
 
-    def prepare_hg_store_path():
-        # And ensure the shared store path exists and has proper permissions.
-        if 'HG_STORE_PATH' not in os.environ:
-            print('error: HG_STORE_PATH environment variable not set')
-            sys.exit(1)
-
-        store_path = os.environ['HG_STORE_PATH']
-
-        if not path_in_cache(store_path):
-            print_line(b'vcs', b'WARNING: HG_STORE_PATH (%s) not in cache:'
-                               b'performance will likely suffer\n' %
-                               store_path.encode('utf-8'))
-
-        try:
-            os.makedirs(store_path)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
         if running_as_root:
             os.chown(store_path, uid, gid)
 
@@ -829,14 +782,6 @@ def main(args):
             continue
         prepare_checkout_dir(repo['checkout'])
 
-    hgmo_fingerprint = None
-    if any(
-        repo['checkout'] and repo['repo-type'] == 'hg' for repo in repositories
-    ):
-        prepare_hg_store_path()
-        if args.fetch_hgfingerprint:
-            hgmo_fingerprint = fetch_hgfingerprint()
-
     if IS_POSIX and running_as_root:
         # Drop permissions to requested user.
         # This code is modeled after what `sudo` was observed to do in a Docker
@@ -851,7 +796,7 @@ def main(args):
         os.setresuid(uid, uid, uid)
 
     for repo in repositories:
-        vcs_checkout_from_args(repo, hgmo_fingerprint=hgmo_fingerprint)
+        vcs_checkout_from_args(repo)
 
     resource_process = None
 

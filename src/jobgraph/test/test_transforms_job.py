@@ -39,8 +39,8 @@ def config():
     graph_config = load_graph_config(os.path.join("taskcluster", "ci"))
     params = FakeParameters(
         {
-            "base_repository": "http://hg.example.com",
-            "head_repository": "http://hg.example.com",
+            "base_repository": "http://gitlab.example.com",
+            "head_repository": "http://gitlab.example.com",
             "head_rev": "abcdef",
             "head_ref": "abcdef",
             "level": 1,

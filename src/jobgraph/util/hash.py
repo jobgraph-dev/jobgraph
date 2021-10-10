@@ -28,8 +28,7 @@ def _find_files(base_path):
 def hash_paths(base_path, patterns):
     """
     Give a list of path patterns, return a digest of the contents of all
-    the corresponding files, similarly to git tree objects or mercurial
-    manifests.
+    the corresponding files, similarly to git tree objects.
 
     Each file is hashed. The list of all hashes and file paths is then
     itself hashed to produce the result.

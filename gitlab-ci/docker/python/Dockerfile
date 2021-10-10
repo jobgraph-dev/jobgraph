@@ -15,7 +15,7 @@ RUN mkdir /builds && \
 # %include-run-task
 
 RUN apt-get update && apt-get install -y --force-yes --no-install-recommends \
-    mercurial
+    git
 
 ENV SHELL=/bin/bash \
     HOME=/builds/worker \

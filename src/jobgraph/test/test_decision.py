@@ -46,12 +46,12 @@ class TestDecision(unittest.TestCase):
 class TestGetDecisionParameters(unittest.TestCase):
     def setUp(self):
         self.options = {
-            "base_repository": "https://hg.mozilla.org/mozilla-unified",
-            "head_repository": "https://hg.mozilla.org/mozilla-central",
+            "base_repository": "https://gitlab.com/some-user/some-project",
+            "head_repository": "https://gitlab.com/some-other-user/some-project",
             "head_rev": "abcd",
             "head_ref": "ef01",
             "head_tag": "v0.0.1",
-            "project": "mozilla-central",
+            "project": "some-project",
             "pushdate": 1503691511,
             "owner": "nobody@mozilla.com",
             "pipeline_source": "push",

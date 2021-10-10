@@ -4,12 +4,10 @@ set -v -e
 
 test "$(whoami)" == 'root'
 
-# Python 2 is still needed for mercurial 4.7.2 (see install-mercurial.sh)
 apt-get update
 apt-get install -y --force-yes --no-install-recommends \
     ca-certificates \
     openssh-client \
-    python \
     python3 \
     python3-pip \
     python3-setuptools \
@@ -29,8 +27,6 @@ tooltool_fetch() {
 }
 
 cd $BUILD
-# shellcheck disable=SC1091
-. /setup/install-mercurial.sh
 
 # Using pip3 directly results in a warning that a "very old" wrapper is being
 # used, and that support for this will be deprecated.

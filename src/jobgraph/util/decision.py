@@ -24,8 +24,6 @@ def make_decision_task(params, root, context, head_rev=None):
     if not head_rev:
         head_rev = params["head_rev"]
 
-    hg_push_context = {}
-
     slugids = {}
 
     def as_slugid(name):
@@ -51,7 +49,6 @@ def make_decision_task(params, root, context, head_rev=None):
                     # remainder are fake values, but the decision task expects them anyway
                     "comment": " ",
                 },
-                hg_push_context,
             ),
             "now": current_json_time(),
             "as_slugid": as_slugid,

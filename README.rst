@@ -25,7 +25,7 @@ within the virtual environment.
 
 ::
 
-   $ hg clone https://hg.mozilla.org/ci/jobgraph/
+   $ git clone https://gitlab.com/JohanLorenzo/jobgraph/
    $ cd <location-where-jobgraph-has-been-cloned>
    $ mkvirtualenv jobgraph
    # ensure we get the development version of it locally to be able to work with it

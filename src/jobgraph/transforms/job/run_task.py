@@ -123,7 +123,6 @@ def docker_worker_run_task(config, job, taskdesc):
     # dict is for the case of `{'task-reference': str}`.
     if isinstance(run_command, str) or isinstance(run_command, dict):
         run_command = ["bash", "-cx", run_command]
-    command.append("--fetch-hgfingerprint")
     if run["run-as-root"]:
         command.extend(("--user", "root", "--group", "root"))
     command.append("--")

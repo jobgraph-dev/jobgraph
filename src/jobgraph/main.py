@@ -312,7 +312,7 @@ def generate_jobgraph(options, parameters, logdir):
     default=None,
     help="Generate and diff the current jobgraph against another revision. "
     "Without args the base revision will be used. A revision specifier such as "
-    "the hash or `.~1` (hg) or `HEAD~1` (git) can be used as well.",
+    "the hash or `HEAD~1` can be used as well.",
 )
 def show_jobgraph(options):
     from jobgraph.parameters import Parameters
@@ -573,7 +573,7 @@ def image_digest(args):
     help='URL for "head" repository to fetch revision from',
 )
 @argument(
-    "--head-ref", required=True, help="Reference (this is same as rev usually for hg)"
+    "--head-ref", required=True, help="Commit reference (branch name or tag, for instance)"
 )
 @argument(
     "--head-rev", required=True, help="Commit revision to use from head repository"

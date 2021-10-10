@@ -83,7 +83,7 @@ class TestTargetTasks(unittest.TestCase):
             )
         )
         self.assertFalse(
-            self.default_matches_pipeline_source([r"merge_request_event"], "hg-pull")
+            self.default_matches_pipeline_source(["merge_request_event"], "push")
         )
 
     def test_default_git_branches(self):

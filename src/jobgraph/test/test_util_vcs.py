@@ -9,29 +9,9 @@ from textwrap import dedent
 
 import pytest
 
-from jobgraph.util.vcs import get_repository, HgRepository
+from jobgraph.util.vcs import get_repository
 
 _FORCE_COMMIT_DATE_TIME = "2019-11-04T10:03:58+00:00"
-
-
-@pytest.fixture(scope="function")
-def hg_repo(tmpdir, monkeypatch):
-    # Set HGPLAIN to ensure local .hgrc configs don't cause test failures.
-    monkeypatch.setenv("HGPLAIN", "1")
-    repo_dir = _init_repo(tmpdir, "hg")
-    with open(os.path.join(repo_dir, ".hg", "hgrc"), "a") as f:
-        f.write(
-            """[ui]
-username = Integration Tests <integration@tests.test>
-"""
-        )
-
-    # hg sometimes errors out with "nothing changed" even though the commit succeeded
-    subprocess.call(
-        ["hg", "commit", "-m", "First commit", "--date", _FORCE_COMMIT_DATE_TIME],
-        cwd=repo_dir,
-    )
-    yield repo_dir
 
 
 _GIT_DATE_ENV_VARS = ("GIT_AUTHOR_DATE", "GIT_COMMITTER_DATE")
@@ -73,10 +53,8 @@ def _init_repo(tmpdir, repo_type):
     return repo_dir
 
 
-@pytest.fixture(params=("git", "hg"))
-def repo(request, hg_repo, git_repo):
-    if request.param == "hg":
-        return get_repository(hg_repo)
+@pytest.fixture
+def repo(git_repo):
     return get_repository(git_repo)
 
 
@@ -99,27 +77,12 @@ def test_get_commit_message(repo, commit_message):
 
 
 def test_calculate_head_ref(repo):
-    if repo.tool == "hg":
-        assert repo.head_ref == "c6ef323128f7ba6fd47147743e882d9fc6d72a4e"
-    else:
-        assert repo.head_ref == "c34844580592fcf4575b8f1174285b853b566d85"
+    assert repo.head_ref == "c34844580592fcf4575b8f1174285b853b566d85"
 
 
 def test_get_repo_path(repo):
-    if repo.tool == "hg":
-        with open(os.path.join(repo.path, ".hg/hgrc"), "w") as f:
-            f.write(
-                dedent(
-                    """
-                [paths]
-                default = https://some/repo
-                other = https://some.other/repo
-                """
-                )
-            )
-    else:
-        repo.run("remote", "add", "origin", "https://some/repo")
-        repo.run("remote", "add", "other", "https://some.other/repo")
+    repo.run("remote", "add", "origin", "https://some/repo")
+    repo.run("remote", "add", "other", "https://some.other/repo")
 
     assert repo.get_url() == "https://some/repo"
     assert repo.get_url("other") == "https://some.other/repo"
