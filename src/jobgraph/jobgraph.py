@@ -54,9 +54,14 @@ class JobGraph:
 
     def to_gitlab_ci_jobs(self):
         json_graph = self.to_json()
-        return {
+        all_stages = {job["actual_gitlab_ci_job"]["stage"] for job in json_graph.values()}
+        all_jobs = {
             job["label"]: job["actual_gitlab_ci_job"]
             for job in json_graph.values()
+        }
+        return {
+            "stages": sorted(list(all_stages)),
+            **all_jobs,
         }
 
     @classmethod
