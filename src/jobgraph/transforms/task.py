@@ -138,17 +138,6 @@ def payload_builder(name, schema):
         # worker features that should be enabled
         Required("chain-of-trust"): bool,
         Required("docker-in-docker"): bool,  # (aka 'dind')
-        # Paths to Docker volumes.
-        #
-        # For in-tree Docker images, volumes can be parsed from Dockerfile.
-        # This only works for the Dockerfile itself: if a volume is defined in
-        # a base image, it will need to be declared here. Out-of-tree Docker
-        # images will also require explicit volume annotation.
-        #
-        # Caches are often mounted to the same path as Docker volumes. In this
-        # case, they take precedence over a Docker volume. But a volume still
-        # needs to be declared for the path.
-        Optional("volumes"): [str],
         # caches to set up for the task
         Optional("caches"): [
             {
@@ -211,16 +200,10 @@ def build_docker_worker_payload(config, task, task_def):
 
             # Find VOLUME in Dockerfile.
             volumes = dockerutil.parse_volumes(name)
-            for v in sorted(volumes):
-                if v in worker["volumes"]:
-                    raise Exception(
-                        "volume %s already defined; "
-                        "if it is defined in a Dockerfile, "
-                        "it does not need to be specified in the "
-                        "worker definition" % v
-                    )
-
-                worker["volumes"].append(v)
+            if volumes:
+                raise Exception(
+                    "volumes defined in Dockerfiles are not supported."
+                )
 
         else:
             raise Exception("unknown docker image type")
@@ -323,16 +306,10 @@ def build_docker_worker_payload(config, task, task_def):
 
         payload["cache"] = caches
 
-    # And send down volumes information to run-task as well.
-    if run_task and worker.get("volumes"):
-        payload["env"]["TASKCLUSTER_VOLUMES"] = ";".join(sorted(worker["volumes"]))
-
     if features:
         payload["features"] = features
     if capabilities:
         payload["capabilities"] = capabilities
-
-    check_caches_are_volumes(task)
 
 
 @payload_builder(
@@ -360,7 +337,6 @@ def set_defaults(config, tasks):
         if worker["implementation"] in ("kubernetes",):
             worker.setdefault("chain-of-trust", False)
             worker.setdefault("docker-in-docker", False)
-            worker.setdefault("volumes", [])
             worker.setdefault("env", {})
             if "caches" in worker:
                 for c in worker["caches"]:
@@ -459,29 +435,3 @@ def check_task_dependencies(config, tasks):
                 )
             )
         yield task
-
-
-def check_caches_are_volumes(task):
-    """Ensures that all cache paths are defined as volumes.
-
-    Caches and volumes are the only filesystem locations whose content
-    isn't defined by the Docker image itself. Some caches are optional
-    depending on the job environment. We want paths that are potentially
-    caches to have as similar behavior regardless of whether a cache is
-    used. To help enforce this, we require that all paths used as caches
-    to be declared as Docker volumes. This check won't catch all offenders.
-    But it is better than nothing.
-    """
-    volumes = set(task["worker"]["volumes"])
-    paths = {c["mount-point"] for c in task["worker"].get("caches", [])}
-    missing = paths - volumes
-
-    if not missing:
-        return
-
-    raise Exception(
-        "task %s (image %s) has caches that are not declared as "
-        "Docker volumes: %s "
-        "(have you added them as VOLUMEs in the Dockerfile?)"
-        % (task["label"], task["worker"]["docker-image"], ", ".join(sorted(missing)))
-    )

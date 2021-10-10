@@ -73,20 +73,6 @@ the same user/group.
 '''
 
 
-NON_EMPTY_VOLUME = '''
-error: volume %s is not empty
-
-Our Docker image policy requires volumes to be empty.
-
-The volume was likely populated as part of building the Docker image.
-Change the Dockerfile and anything run from it to not create files in
-any VOLUME.
-
-A lesser possibility is that you stumbled upon a TaskCluster platform bug
-where it fails to use new volumes for tasks.
-'''
-
-
 FETCH_CONTENT_NOT_FOUND = '''
 error: fetch-content script not found
 
@@ -372,33 +358,6 @@ def configure_cache_posix(cache, user, group,
 
     write_audit_entry(audit_path, b'missing .cacherequires')
     return True
-
-
-def configure_volume_posix(volume, user, group, running_as_root):
-    # The only time we should see files in the volume is if the Docker
-    # image build put files there.
-    #
-    # For the sake of simplicity, our policy is that volumes should be
-    # empty. This also has the advantage that an empty volume looks
-    # a lot like an empty cache. Tasks can rely on caches being
-    # swapped in and out on any volume without any noticeable change
-    # of behavior.
-    volume_files = os.listdir(volume)
-    if volume_files:
-        print(NON_EMPTY_VOLUME % volume)
-        print('entries in root directory: %s' %
-              ' '.join(sorted(volume_files)))
-        sys.exit(1)
-
-    # The volume is almost certainly owned by root:root. Chown it so it
-    # is writable.
-
-    if running_as_root:
-        print_line(b'volume', b'changing ownership of volume %s '
-                              b'to %d:%d\n' % (volume.encode('utf-8'),
-                                               user.pw_uid,
-                                               group.gr_gid))
-        set_dir_permissions(volume, user.pw_uid, group.gr_gid)
 
 
 def git_checkout(
@@ -908,34 +867,13 @@ def main(args):
         if purge:
             return EXIT_PURGE_CACHE
 
-    if 'TASKCLUSTER_VOLUMES' in os.environ:
-        volumes = os.environ['TASKCLUSTER_VOLUMES'].split(';')
-        del os.environ['TASKCLUSTER_VOLUMES']
-    else:
-        volumes = []
+    all_caches = set(map(os.path.normpath, caches))
 
-    if volumes and not IS_POSIX:
-        print('assertion failed: volumes not expected on Windows')
-        return 1
-
-    # Sanitize volumes.
-    for volume in volumes:
-        # If a volume is a cache, it was dealt with above.
-        if volume in caches:
-            print_line(b'volume', b'volume %s is a cache\n' %
-                       volume.encode('utf-8'))
-            continue
-
-        configure_volume_posix(volume, user, group, running_as_root)
-
-    all_caches_and_volumes = set(map(os.path.normpath, caches))
-    all_caches_and_volumes |= set(map(os.path.normpath, volumes))
-
-    def path_in_cache_or_volume(path):
+    def path_in_cache(path):
         path = os.path.normpath(path)
 
         while path:
-            if path in all_caches_and_volumes:
+            if path in all_caches:
                 return True
 
             path, child = os.path.split(path)
@@ -958,9 +896,9 @@ def main(args):
 
         # TODO given the performance implications, consider making this a fatal
         # error.
-        if not path_in_cache_or_volume(checkout):
-            print_line(b'vcs', b'WARNING: vcs checkout path (%s) not in cache '
-                               b'or volume; performance will likely suffer\n' %
+        if not path_in_cache(checkout):
+            print_line(b'vcs', b'WARNING: vcs checkout path (%s) not in cache: '
+                               b'performance will likely suffer\n' %
                                checkout.encode('utf-8'))
 
         # Ensure the directory for the source checkout exists.
@@ -982,9 +920,9 @@ def main(args):
 
         store_path = os.environ['HG_STORE_PATH']
 
-        if not path_in_cache_or_volume(store_path):
-            print_line(b'vcs', b'WARNING: HG_STORE_PATH (%s) not in cache or '
-                               b'volume; performance will likely suffer\n' %
+        if not path_in_cache(store_path):
+            print_line(b'vcs', b'WARNING: HG_STORE_PATH (%s) not in cache:'
+                               b'performance will likely suffer\n' %
                                store_path.encode('utf-8'))
 
         try:

@@ -21,8 +21,5 @@ ENV SHELL=/bin/bash \
     HOME=/builds/worker \
     PATH=/builds/worker/.local/bin:$PATH
 
-VOLUME /builds/worker/checkouts
-VOLUME /builds/worker/.cache
-
 # Set a default command useful for debugging
 CMD ["/bin/bash", "--login"]

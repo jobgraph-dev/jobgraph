@@ -196,8 +196,7 @@ def create_context_tar(topsrcdir, context_dir, out_path, args=None):
 
     If a line in the Dockerfile has the form ``# %ARG <name>``, occurrences of
     the string ``$<name>`` in subsequent lines are replaced with the value
-    found in the ``args`` argument. Exception: this doesn't apply to VOLUME
-    definitions.
+    found in the ``args`` argument.
 
     Returns the SHA-256 hex digest of the created archive.
     """
