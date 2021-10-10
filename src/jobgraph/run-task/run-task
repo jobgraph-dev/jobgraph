@@ -502,13 +502,10 @@ def add_vcs_arguments(parser, project, name):
     parser.add_argument('--%s-checkout' % project,
                         help='Directory where %s checkout should be created' %
                              name)
-    parser.add_argument('--%s-sparse-profile' % project,
-                        help='Path to sparse profile for %s checkout' % name)
 
 
 def collect_vcs_options(args, project, name):
     checkout = getattr(args, '%s_checkout' % project)
-    sparse_profile = getattr(args, '%s_sparse_profile' % project)
 
     env_prefix = project.upper()
 
@@ -521,21 +518,16 @@ def collect_vcs_options(args, project, name):
     # Expand ~ in some paths.
     if checkout:
         checkout = os.path.abspath(os.path.expanduser(checkout))
-    if store_path:
-        store_path = os.path.abspath(os.path.expanduser(store_path))
 
     return {
-        'store-path': store_path,
         'project': project,
         'name': name,
         'env-prefix': env_prefix,
         'checkout': checkout,
-        'sparse-profile': sparse_profile,
         'base-repo': base_repo,
         'head-repo': head_repo,
         'revision': revision,
         'ref': ref,
-        'repo-type': repo_type,
         'ssh-secret-name': private_key_secret,
     }
 

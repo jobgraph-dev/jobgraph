@@ -122,7 +122,6 @@ def test_worker_caches(task, transform):
                 "command": "echo '{output}'",
                 "command-context": {"output": "hello", "extra": None},
                 "run-as-root": False,
-                "sparse-profile": False,
                 "tooltool-downloads": False,
             },
         },

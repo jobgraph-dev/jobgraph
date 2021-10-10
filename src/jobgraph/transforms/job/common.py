@@ -93,7 +93,7 @@ def docker_worker_add_artifacts(config, job, taskdesc):
     add_artifacts(config, job, taskdesc, path)
 
 
-def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):
+def support_vcs_checkout(config, job, taskdesc, repo_configs):
     """Update a job/task with parameters to enable a VCS checkout.
 
     This can only be used with ``run-task`` tasks, as the cache name is
@@ -115,11 +115,6 @@ def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):
 
     vcsdir = checkoutdir + "/" + get_vcsdir_name(worker["os"])
     cache_name = "checkouts"
-
-    # Sparse checkouts need their own cache because they can interfere
-    # with clients that aren't sparse aware.
-    if sparse:
-        cache_name += "-sparse"
 
     add_cache(job, taskdesc, cache_name, checkoutdir)
 

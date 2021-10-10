@@ -30,12 +30,6 @@ toolchain_run_schema = Schema(
         Required("script"): str,
         # Arguments to pass to the script.
         Optional("arguments"): [str],
-        # Sparse profile to give to checkout using `run-task`.  If given,
-        # a filename in `build/sparse-profiles`.  Defaults to
-        # "toolchain-build", i.e., to
-        # `build/sparse-profiles/toolchain-build`.  If `None`, instructs
-        # `run-task` to not use a sparse profile at all.
-        Required("sparse-profile"): Any(str, None),
         # Paths/patterns pointing to files that influence the outcome of a
         # toolchain build.
         Optional("resources"): [str],
@@ -78,16 +72,10 @@ def get_digest_data(config, run, taskdesc):
     return data
 
 
-toolchain_defaults = {
-    "sparse-profile": "toolchain-build",
-}
-
-
 @run_job_using(
     "kubernetes",
     "toolchain-script",
     schema=toolchain_run_schema,
-    defaults=toolchain_defaults,
 )
 def docker_worker_toolchain(config, job, taskdesc):
     run = job["run"]

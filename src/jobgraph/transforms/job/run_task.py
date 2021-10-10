@@ -30,9 +30,6 @@ run_task_schema = Schema(
             description="Path to run command in. If a checkout is present, the path "
             "to the checkout will be interpolated with the key `checkout`",
         ): str,
-        # The sparse checkout profile to use. Value is the filename relative to the
-        # directory where sparse profiles are defined (build/sparse-profiles/).
-        Required("sparse-profile"): Any(str, None),
         # The command arguments to pass to the `run-task` script, after the
         # checkout arguments.  If a list, it will be passed directly; otherwise
         # it will be included in a single argument to `bash -cx`.
@@ -66,21 +63,12 @@ def common_setup(config, job, taskdesc, command):
             job,
             taskdesc,
             repo_configs=repo_configs,
-            sparse=bool(run["sparse-profile"]),
         )
 
         vcs_path = taskdesc["worker"]["env"]["VCS_PATH"]
         for repo_config in repo_configs.values():
             checkout_path = path.join(vcs_path, repo_config.path)
             command.append(f"--{repo_config.prefix}-checkout={checkout_path}")
-
-        if run["sparse-profile"]:
-            command.append(
-                "--{}-sparse-profile=build/sparse-profiles/{}".format(
-                    repo_config.prefix,
-                    run["sparse-profile"],
-                )
-            )
 
         if "cwd" in run:
             run["cwd"] = path.normpath(run["cwd"].format(checkout=vcs_path))
@@ -100,7 +88,6 @@ def common_setup(config, job, taskdesc, command):
 
 worker_defaults = {
     "checkout": True,
-    "sparse-profile": None,
     "run-as-root": False,
 }
 
