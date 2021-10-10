@@ -84,8 +84,6 @@ task_description_schema = Schema(
         # be substituted in this string:
         #  {level} -- the scm level of this push
         "worker-type": str,
-        # Whether the job should use sccache compiler caching.
-        Required("needs-sccache"): bool,
         # information specific to the worker implementation that will run this task
         Optional("worker"): {
             Required("implementation"): str,
@@ -331,7 +329,6 @@ def set_defaults(config, tasks):
     for task in tasks:
         task.setdefault("always-target", False)
         task.setdefault("optimization", None)
-        task.setdefault("needs-sccache", False)
 
         worker = task["worker"]
         if worker["implementation"] in ("kubernetes",):

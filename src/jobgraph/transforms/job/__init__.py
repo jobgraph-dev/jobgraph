@@ -57,7 +57,6 @@ job_description_schema = Schema(
         Exclusive("optimization", "optimization"): task_description_schema[
             "optimization"
         ],
-        Optional("needs-sccache"): task_description_schema["needs-sccache"],
         # The "when" section contains descriptions of the circumstances under which
         # this task should be included in the task graph.  This will be converted
         # into an optimization, so it cannot be specified in a job description that
