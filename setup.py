@@ -22,8 +22,6 @@ setup(
         "jobgraph": [
             "run-task/run-task",
             "run-task/fetch-content",
-            "run-task/hgrc",
-            "run-task/robustcheckout.py",
         ],
         "jobgraph.test": ["automationrelevance.json"],
     },

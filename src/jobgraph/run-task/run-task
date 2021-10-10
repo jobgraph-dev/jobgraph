@@ -503,99 +503,6 @@ def fetch_ssh_secret(secret_name):
     return secret['secret']['ssh_privkey']
 
 
-def hg_checkout(
-    destination_path: str,
-    head_repo: str,
-    base_repo: Optional[str],
-    store_path: str,
-    hgmo_fingerprint: str,
-    sparse_profile: Optional[str],
-    branch: Optional[str],
-    revision: Optional[str]
-):
-    if IS_MACOSX:
-        hg_bin = '/tools/python27-mercurial/bin/hg'
-    elif IS_POSIX:
-        hg_bin = 'hg'
-    elif IS_WINDOWS:
-        # This is where OCC installs it in the AMIs.
-        hg_bin = r'C:\Program Files\Mercurial\hg.exe'
-        if not os.path.exists(hg_bin):
-            print('could not find Mercurial executable: %s' % hg_bin)
-            sys.exit(1)
-    else:
-        raise RuntimeError('Must be running on mac, posix or windows')
-
-    args = [
-        hg_bin,
-        'robustcheckout',
-        '--sharebase', store_path,
-        '--purge',
-    ]
-
-    # Obtain certificate fingerprints.  Without this, the checkout will use the fingerprint
-    # on the system, which is managed some other way (such as puppet)
-    if hgmo_fingerprint:
-        try:
-            print_line(b'vcs', b'fetching hg.mozilla.org fingerprint from %s\n' %
-                       FINGERPRINT_URL.encode('utf-8'))
-            res = urllib.request.urlopen(FINGERPRINT_URL, timeout=10)
-            secret = res.read()
-            try:
-                secret = json.loads(secret.decode('utf-8'))
-            except ValueError:
-                print_line(b'vcs', b'invalid JSON in hg fingerprint secret')
-                sys.exit(1)
-        except (urllib.error.URLError, socket.timeout):
-            print_line(b'vcs', b'Unable to retrieve current hg.mozilla.org fingerprint'
-                               b'using the secret service, using fallback instead.')
-            # XXX This fingerprint will not be accurate if running on an old
-            #     revision after the server fingerprint has changed.
-            secret = {'secret': FALLBACK_FINGERPRINT}
-
-        hgmo_fingerprint = secret['secret']['fingerprints']
-        args.extend([
-            '--config', 'hostsecurity.hg.mozilla.org:fingerprints=%s' % hgmo_fingerprint,
-        ])
-
-    if base_repo:
-        args.extend(['--upstream', base_repo])
-    if sparse_profile:
-        args.extend(['--sparseprofile', sparse_profile])
-
-    # Specify method to checkout a revision. This defaults to revisions as
-    # SHA-1 strings, but also supports symbolic revisions like `tip` via the
-    # branch flag.
-    args.extend([
-        '--branch' if branch else '--revision',
-        branch or revision,
-        head_repo, destination_path,
-    ])
-
-    run_required_command(b'vcs', args, extra_env={'PYTHONUNBUFFERED': '1'})
-
-    # Update the current revision hash and ensure that it is well formed.
-    revision = subprocess.check_output(
-        [hg_bin, 'log',
-         '--rev', '.',
-         '--template', '{node}'],
-        cwd=destination_path,
-        # Triggers text mode on Python 3.
-        universal_newlines=True)
-
-    assert re.match('^[a-f0-9]{40}$', revision)
-
-    msg = ("TinderboxPrint:<a href={head_repo}/rev/{revision} "
-           "title='Built from {repo_name} revision {revision}'>"
-           "{revision}</a>\n".format(revision=revision,
-                                     head_repo=head_repo,
-                                     repo_name=head_repo.split('/')[-1]))
-
-    print_line(b'vcs', msg.encode('utf-8'))
-
-    return revision
-
-
 def fetch_artifacts():
     print_line(b'fetches', b'fetching artifacts\n')
 
@@ -645,12 +552,6 @@ def collect_vcs_options(args, project, name):
     if store_path:
         store_path = os.path.abspath(os.path.expanduser(store_path))
 
-    # Some callers set the base repository to mozilla-central for historical
-    # reasons. Switch to mozilla-unified because robustcheckout works best
-    # with it.
-    if base_repo == 'https://hg.mozilla.org/mozilla-central':
-        base_repo = 'https://hg.mozilla.org/mozilla-unified'
-
     return {
         'store-path': store_path,
         'project': project,
@@ -694,39 +595,21 @@ def vcs_checkout_from_args(options, *, hgmo_fingerprint):
             ssh_known_hosts_file = ssh_dir.joinpath("known_hosts")
             ssh_known_hosts_file.write_bytes(GITHUB_SSH_FINGERPRINT)
 
-        if options['repo-type'] == 'git':
-            if not revision and not ref:
-                raise RuntimeError('Git requires that either a ref, a revision, or both are provided')
+        if not revision and not ref:
+            raise RuntimeError('Git requires that either a ref, a revision, or both are provided')
 
-            if not ref:
-                print('Providing a ref will improve the performance of this checkout')
+        if not ref:
+            print('Providing a ref will improve the performance of this checkout')
 
-            revision = git_checkout(
-                options['checkout'],
-                options['head-repo'],
-                options['base-repo'],
-                ref,
-                revision,
-                ssh_key_file,
-                ssh_known_hosts_file,
-            )
-        elif options['repo-type'] == 'hg':
-            if not revision and not ref:
-                raise RuntimeError('Hg requires that at least one of a ref or revision '
-                                   'is provided')
-
-            revision = hg_checkout(
-                options['checkout'],
-                options['head-repo'],
-                options['base-repo'],
-                options['store-path'],
-                hgmo_fingerprint,
-                options['sparse-profile'],
-                ref,
-                revision
-            )
-        else:
-            raise RuntimeError('Type of VCS must be either "git" or "hg"')
+        revision = git_checkout(
+            options['checkout'],
+            options['head-repo'],
+            options['base-repo'],
+            ref,
+            revision,
+            ssh_key_file,
+            ssh_known_hosts_file,
+        )
     finally:
         if ssh_dir:
             shutil.rmtree(ssh_dir, ignore_errors=True)

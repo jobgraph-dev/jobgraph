@@ -216,15 +216,11 @@ RUN_TASK_FILES = {
     for path in [
         "run-task",
         "fetch-content",
-        "hgrc",
-        "robustcheckout.py",
     ]
 }
 RUN_TASK_SNIPPET = [
     "COPY run-task/run-task /usr/local/bin/run-task\n",
     "COPY run-task/fetch-content /usr/local/bin/fetch-content\n",
-    "COPY run-task/robustcheckout.py /usr/local/mercurial/robustcheckout.py\n"
-    "COPY run-task/hgrc /etc/mercurial/hgrc.d/mozilla.rc\n",
 ]
 
 

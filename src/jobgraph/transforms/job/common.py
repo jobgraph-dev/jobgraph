@@ -119,20 +119,6 @@ def support_vcs_checkout(config, job, taskdesc, repo_configs, sparse=False):
     vcsdir = checkoutdir + "/" + get_vcsdir_name(worker["os"])
     cache_name = "checkouts"
 
-    # Robust checkout does not clean up subrepositories, so ensure  that tasks
-    # that checkout different sets of paths have separate caches.
-    # See https://bugzilla.mozilla.org/show_bug.cgi?id=1631610
-    if len(repo_configs) > 1:
-        checkout_paths = {
-            "\t".join([repo_config.path, repo_config.prefix])
-            for repo_config in sorted(
-                repo_configs.values(), key=lambda repo_config: repo_config.path
-            )
-        }
-        checkout_paths_str = "\n".join(checkout_paths).encode("utf-8")
-        digest = hashlib.sha256(checkout_paths_str).hexdigest()
-        cache_name += f"-repos-{digest}"
-
     # Sparse checkouts need their own cache because they can interfere
     # with clients that aren't sparse aware.
     if sparse:
