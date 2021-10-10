@@ -21,10 +21,6 @@ from voluptuous import Required, Any, Optional
 run_task_schema = Schema(
     {
         Required("using"): "run-task",
-        # if true, add a cache at ~worker/.cache, which is where things like pip
-        # tend to hide their caches.  This cache is never added for level-1 jobs.
-        # TODO Once bug 1526028 is fixed, this and 'use-caches' should be merged.
-        Required("cache-dotcache"): bool,
         # Whether or not to use caches.
         Optional("use-caches"): bool,
         # if true (the default), perform a checkout on the worker
@@ -103,7 +99,6 @@ def common_setup(config, job, taskdesc, command):
 
 
 worker_defaults = {
-    "cache-dotcache": False,
     "checkout": True,
     "sparse-profile": None,
     "run-as-root": False,
@@ -118,16 +113,6 @@ def docker_worker_run_task(config, job, taskdesc):
     worker = taskdesc["worker"] = job["worker"]
     command = ["/usr/local/bin/run-task"]
     common_setup(config, job, taskdesc, command)
-
-    if run.get("cache-dotcache"):
-        worker["caches"].append(
-            {
-                "type": "persistent",
-                "name": "{project}-dotcache".format(**config.params),
-                "mount-point": "{workdir}/.cache".format(**run),
-                "skip-untrusted": True,
-            }
-        )
 
     run_command = run["command"]
 
