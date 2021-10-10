@@ -32,7 +32,6 @@ def optimize_task_graph(
     target_task_graph,
     params,
     do_not_optimize,
-    decision_task_id,
     existing_tasks=None,
     strategies=None,
 ):
@@ -68,7 +67,6 @@ def optimize_task_graph(
         target_task_graph,
         removed_tasks,
         replaced_tasks,
-        decision_task_id,
     )
 
 
@@ -186,7 +184,6 @@ def get_subgraph(
     target_task_graph,
     removed_tasks,
     replaced_tasks,
-    decision_task_id,
 ):
     """
     Return the subgraph of target_task_graph consisting only of
@@ -232,7 +229,6 @@ def get_subgraph(
             task.label,
             task.actual_gitlab_ci_job,
             task_id=task.task_id,
-            decision_task_id=decision_task_id,
             dependencies=named_task_dependencies,
         )
         deps = task.actual_gitlab_ci_job.setdefault("needs", [])

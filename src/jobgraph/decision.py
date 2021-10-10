@@ -57,13 +57,10 @@ def jobgraph_decision(options, parameters=None):
         lambda graph_config: get_decision_parameters(graph_config, options)
     )
 
-    decision_task_id = os.environ["TASK_ID"]
-
     # create a JobGraphGenerator instance
     jgg = JobGraphGenerator(
         root_dir=options.get("root"),
         parameters=parameters,
-        decision_task_id=decision_task_id,
         write_artifacts=True,
     )
 

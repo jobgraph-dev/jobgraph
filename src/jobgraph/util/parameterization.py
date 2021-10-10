@@ -38,7 +38,7 @@ def resolve_timestamps(now, task_def):
     )
 
 
-def resolve_task_references(label, task_def, task_id, decision_task_id, dependencies):
+def resolve_task_references(label, task_def, task_id, dependencies):
     """Resolve all instances of
       {'task-reference': '..<..>..'}
     and
@@ -50,8 +50,6 @@ def resolve_task_references(label, task_def, task_id, decision_task_id, dependen
             key = match.group(1)
             if key == "self":
                 return task_id
-            elif key == "decision":
-                return decision_task_id
             try:
                 return dependencies[key]
             except KeyError:
@@ -68,8 +66,6 @@ def resolve_task_references(label, task_def, task_id, decision_task_id, dependen
 
             if dependency == "self":
                 raise KeyError(f"task '{label}' can't reference artifacts of self")
-            elif dependency == "decision":
-                task_id = decision_task_id
             else:
                 try:
                     task_id = dependencies[dependency]

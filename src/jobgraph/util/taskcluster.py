@@ -33,13 +33,8 @@ def get_root_url():
     come from $TASKCLUSTER_ROOT_URL; when run on the command line, we apply a
     defualt that points to the production deployment of Taskcluster. """
     if "TASKCLUSTER_ROOT_URL" not in os.environ:
-        if "TASK_ID" in os.environ:
-            raise RuntimeError(
-                "$TASKCLUSTER_ROOT_URL must be set when running in a task"
-            )
-        else:
-            logger.debug("Using default TASKCLUSTER_ROOT_URL (Firefox CI production)")
-            return PRODUCTION_TASKCLUSTER_ROOT_URL
+        logger.debug("Using default TASKCLUSTER_ROOT_URL (Firefox CI production)")
+        return PRODUCTION_TASKCLUSTER_ROOT_URL
     logger.debug(
         "Running in Taskcluster instance {}".format(
             os.environ["TASKCLUSTER_ROOT_URL"],

@@ -119,7 +119,6 @@ class JobGraphGenerator:
         self,
         root_dir,
         parameters,
-        decision_task_id="DECISION-TASK",
         write_artifacts=False,
     ):
         """
@@ -132,7 +131,6 @@ class JobGraphGenerator:
             root_dir = "gitlab-ci/ci"
         self.root_dir = root_dir
         self._parameters = parameters
-        self._decision_task_id = decision_task_id
         self._write_artifacts = write_artifacts
 
         # start the generator
@@ -371,7 +369,6 @@ class JobGraphGenerator:
             target_task_graph,
             parameters,
             do_not_optimize,
-            self._decision_task_id,
             existing_tasks=existing_tasks,
         )
 

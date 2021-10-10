@@ -152,7 +152,6 @@ def fill_template(config, tasks):
                     }
                 ],
                 "env": {
-                    "CONTEXT_TASK_ID": {"task-reference": "<decision>"},
                     "CONTEXT_PATH": "public/docker-contexts/{}.tar.gz".format(
                         image_name
                     ),
