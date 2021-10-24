@@ -1,7 +1,18 @@
+import os
+
 from setuptools import setup, find_packages
 
-with open("requirements/base.in", "r") as fp:
+
+root_dir = os.path.dirname(os.path.realpath(__file__))
+
+
+with open(os.path.join(root_dir, "requirements", "base.in")) as fp:
     requirements = fp.read().splitlines()
+
+
+with open(os.path.join(root_dir, "python-version.txt")) as fp:
+    python_version = fp.read().strip()
+
 
 setup(
     name="gitlabci-jobgraph",
@@ -12,7 +23,7 @@ setup(
     package_dir={"": "src"},
     install_requires=requirements,
     classifiers=(
-        "Programming Language :: Python :: 3.10",
+        f"Programming Language :: Python :: {python_version}",
     ),
     entry_points={"console_scripts": ["jobgraph = jobgraph.main:main"]},
     package_data={
