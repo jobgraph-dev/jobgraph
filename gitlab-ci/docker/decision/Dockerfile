@@ -14,8 +14,11 @@ WORKDIR "$RUNNER_HOME"
 ENV PATH="$RUNNER_HOME/.local/bin:$PATH" \
     USER="$RUNNER_USER"
 
-ADD requirements/base.txt /setup/requirements.txt
-RUN pip install --user --require-hashes --requirement "/setup/requirements.txt"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" src /jobgraph/src
+COPY --chown="$RUNNER_USER:$RUNNER_USER" setup.py python-version.txt /jobgraph/
+COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/base.in requirements/base.txt /jobgraph/requirements/
+RUN pip install --user --require-hashes --requirement '/jobgraph/requirements/base.txt' && \
+    pip install --user --no-deps --editable "/jobgraph"
 
-# Set a default command useful for debugging
-CMD ["/bin/ash", "--login"]
+ENTRYPOINT [ "jobgraph" ]
+CMD ["--help"]
