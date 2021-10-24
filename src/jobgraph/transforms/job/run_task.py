@@ -49,26 +49,18 @@ run_task_schema = Schema(
 def common_setup(config, job, taskdesc, command):
     run = job["run"]
     if run["checkout"]:
-        repo_configs = config.repo_configs
-        if len(repo_configs) > 1 and run["checkout"] is True:
-            raise Exception("Must explicitly sepcify checkouts with multiple repos.")
-        elif run["checkout"] is not True:
-            repo_configs = {
-                repo: attr.evolve(repo_configs[repo], **config)
-                for (repo, config) in run["checkout"].items()
-            }
+        repo_config = config.repo_config
 
         vcs_path = support_vcs_checkout(
             config,
             job,
             taskdesc,
-            repo_configs=repo_configs,
+            repo_config=repo_config,
         )
 
         vcs_path = taskdesc["worker"]["env"]["VCS_PATH"]
-        for repo_config in repo_configs.values():
-            checkout_path = path.join(vcs_path, repo_config.path)
-            command.append(f"--{repo_config.prefix}-checkout={checkout_path}")
+        checkout_path = path.join(vcs_path, repo_config.path)
+        command.append(f"--{repo_config.namespace}-checkout={checkout_path}")
 
         if "cwd" in run:
             run["cwd"] = path.normpath(run["cwd"].format(checkout=vcs_path))

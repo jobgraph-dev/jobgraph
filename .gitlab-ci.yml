@@ -1,6 +1,7 @@
 ---
 stages:
   - decision
+  - generated-pipeline
 
 
 decision:
@@ -19,7 +20,7 @@ decision:
   script:
     - apk update && apk add --no-cache --update git
     - pip install --require-hashes --requirement "$CI_PROJECT_DIR/requirements/base.txt"
-    - python "$CI_PROJECT_DIR/setup.py" install
+    - pip install --no-deps --editable "$CI_PROJECT_DIR"
     - set -x
     - >-
       if [[ -n $CI_MERGE_REQUEST_SOURCE_PROJECT_URL ]] && [[ $CI_MERGE_REQUEST_SOURCE_PROJECT_URL != '' ]]; then
@@ -41,3 +42,12 @@ decision:
       --project='jobgraph'
       --pushdate='0'
   stage: decision
+
+
+generated-pipeline:
+  stage: generated-pipeline
+  trigger:
+    include:
+      - artifact: artifacts/generated-gitlab-ci.yml
+        job: decision
+    strategy: depend

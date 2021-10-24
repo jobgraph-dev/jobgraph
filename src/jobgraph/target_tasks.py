@@ -53,6 +53,10 @@ def filter_for_git_branch(task, parameters):
     return match_run_on_git_branches(git_branch, run_on_git_branches)
 
 
+def temporary_filter_for_decision_image(task, parameters):
+    return task.label == "build-docker-image-decision"
+
+
 def standard_filter(task, parameters):
     return all(
         filter_func(task, parameters)
@@ -60,6 +64,7 @@ def standard_filter(task, parameters):
             filter_out_cron,
             filter_for_pipeline_source,
             filter_for_git_branch,
+            temporary_filter_for_decision_image,
         )
     )
 

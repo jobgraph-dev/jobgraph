@@ -1,24 +1,20 @@
-FROM          ubuntu:18.04
-MAINTAINER Tom Prince <mozilla@hocat.ca>
+FROM python:3.10-alpine@sha256:78604a29496b7a1bd5ea5c985d69a0928db7ea32fcfbf71bbde3e317fdd9ac5e
 
-# Add worker user
+ENV RUNNER_USER='runner' \
+    RUNNER_HOME='/builds/runner'
+
 RUN mkdir /builds && \
-    useradd -d /builds/worker -s /bin/bash -m worker && \
-    mkdir /builds/worker/artifacts && \
-    chown worker:worker /builds/worker/artifacts
+    adduser --disabled-password --home "$RUNNER_HOME" "$RUNNER_USER"
 
-# %include-run-task
+RUN apk update && \
+    apk add --no-cache --update git
 
-# Add jobgraph package.
-# %include requirements/base.txt
-ADD topsrcdir/requirements/base.txt /setup/requirements.txt
+USER "$RUNNER_USER"
+WORKDIR "$RUNNER_HOME"
+ENV PATH="$RUNNER_HOME/bin:$PATH"
 
-ADD system-setup.sh /setup/system-setup.sh
-RUN bash /setup/system-setup.sh
-
-ENV PATH=/builds/worker/bin:$PATH \
-    SHELL=/bin/bash \
-    HOME=/builds/worker
+ADD requirements/base.txt /setup/requirements.txt
+RUN pip install --user --require-hashes --requirement "/setup/requirements.txt"
 
 # Set a default command useful for debugging
-CMD ["/bin/bash", "--login"]
+CMD ["/bin/ash", "--login"]

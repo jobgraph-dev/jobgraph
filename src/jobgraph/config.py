@@ -36,18 +36,10 @@ graph_config_schema = Schema(
                 description="Python function to call to register extensions.",
             ): str,
             Optional("decision-parameters"): str,
-            Required("repositories"): All(
-                {
-                    str: {
-                        Required("name"): str,
-                        Optional("project-regex"): str,
-                        Optional("ssh-secret-name"): str,
-                        # FIXME
-                        Extra: str,
-                    }
-                },
-                Length(min=1),
-            ),
+            # TODO enforce hash
+            Required("docker-in-docker-image"): str,
+            # TODO enforce stricter dictionaries
+            Required("container-registry"): dict,
         },
         Extra: object,
     }

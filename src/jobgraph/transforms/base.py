@@ -11,14 +11,16 @@ import attr
 
 from ..config import GraphConfig
 from ..parameters import Parameters
+from ..util.gitlab import extract_gitlab_instance_and_namespace_and_name
 from ..util.schema import Schema, validate_schema
 from ..util.memoize import memoize
 
 
 @attr.s(frozen=True)
 class RepoConfig:
-    prefix = attr.ib(type=str)
+    gitlab_instance_domain = attr.ib(type=str)
     name = attr.ib(type=str)
+    namespace = attr.ib(type=str)
     base_repository = attr.ib(type=str)
     head_repository = attr.ib(type=str)
     head_ref = attr.ib(type=str)
@@ -58,50 +60,18 @@ class TransformConfig:
 
     @property
     @memoize
-    def repo_configs(self):
-        repositories = self.graph_config["jobgraph"]["repositories"]
-        if len(repositories) == 1:
-            current_prefix = list(repositories.keys())[0]
-        else:
-            project = self.params["project"]
-            matching_repos = {
-                repo_prefix: repo
-                for (repo_prefix, repo) in repositories.items()
-                if re.match(repo["project-regex"], project)
-            }
-            if len(matching_repos) != 1:
-                raise Exception(
-                    f"Couldn't find repository matching project `{project}`"
-                )
-            current_prefix = list(matching_repos.keys())[0]
+    def repo_config(self):
+        gitlab_instance_domain, namespace, name = extract_gitlab_instance_and_namespace_and_name(self.params["base_repository"])
 
-        repo_configs = {
-            current_prefix: RepoConfig(
-                prefix=current_prefix,
-                name=repositories[current_prefix]["name"],
-                base_repository=self.params["base_repository"],
-                head_repository=self.params["head_repository"],
-                head_ref=self.params["head_ref"],
-                head_rev=self.params["head_rev"],
-                ssh_secret_name=repositories[current_prefix].get("ssh-secret-name"),
-            ),
-        }
-        if len(repositories) != 1:
-            repo_configs.update(
-                {
-                    repo_prefix: RepoConfig(
-                        prefix=repo_prefix,
-                        name=repo["name"],
-                        base_repository=repo["default-repository"],
-                        head_repository=repo["default-repository"],
-                        head_ref=repo["default-ref"],
-                        ssh_secret_name=repo.get("ssh-secret-name"),
-                    )
-                    for (repo_prefix, repo) in repositories.items()
-                    if repo_prefix != current_prefix
-                }
-            )
-        return repo_configs
+        return RepoConfig(
+            gitlab_instance_domain=gitlab_instance_domain,
+            name=name,
+            namespace = namespace,
+            base_repository=self.params["base_repository"],
+            head_repository=self.params["head_repository"],
+            head_ref=self.params["head_ref"],
+            head_rev=self.params["head_rev"],
+        )
 
 
 @attr.s()

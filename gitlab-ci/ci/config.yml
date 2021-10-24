@@ -2,21 +2,21 @@
 trust-domain: jobgraph
 
 jobgraph:
-    repositories:
-        ci:
-            name: Jobgraph
+    docker-in-docker-image: docker:20.10.9-dind@sha256:24628ded7711e48db56af875236ac30a8950305ac461332955b3375ac5a87e1a
+    container-registry:
+        type: gitlab
 
 workers:
     aliases:
         images:
             implementation: kubernetes
             os: linux
-            worker-type: images
+            worker-type: gitlab-org-docker
         t-linux:
             implementation: kubernetes
             os: linux
-            worker-type: linux
+            worker-type: gitlab-org-docker
         misc:
             implementation: kubernetes
             os: linux
-            worker-type: linux
+            worker-type: gitlab-org-docker

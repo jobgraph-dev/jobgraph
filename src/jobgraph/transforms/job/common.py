@@ -93,7 +93,7 @@ def docker_worker_add_artifacts(config, job, taskdesc):
     add_artifacts(config, job, taskdesc, path)
 
 
-def support_vcs_checkout(config, job, taskdesc, repo_configs):
+def support_vcs_checkout(config, job, taskdesc, repo_config):
     """Update a job/task with parameters to enable a VCS checkout.
 
     This can only be used with ``run-task`` tasks, as the cache name is
@@ -122,22 +122,21 @@ def support_vcs_checkout(config, job, taskdesc, repo_configs):
     env.update(
         {
             "REPOSITORIES": json.dumps(
-                {repo.prefix: repo.name for repo in repo_configs.values()}
+                {repo_config.namespace: repo_config.name}
             ),
             "VCS_PATH": vcsdir,
         }
     )
-    for repo_config in repo_configs.values():
-        env.update(
-            {
-                f"{repo_config.prefix.upper()}_{key}": value
-                for key, value in {
-                    "BASE_REPOSITORY": repo_config.base_repository,
-                    "HEAD_REPOSITORY": repo_config.head_repository,
-                    "HEAD_REV": repo_config.head_rev,
-                    "HEAD_REF": repo_config.head_ref,
-                    "SSH_SECRET_NAME": repo_config.ssh_secret_name,
-                }.items()
-                if value is not None
-            }
-        )
+    env.update(
+        {
+            f"{repo_config.namespace.upper()}_{key}": value
+            for key, value in {
+                "BASE_REPOSITORY": repo_config.base_repository,
+                "HEAD_REPOSITORY": repo_config.head_repository,
+                "HEAD_REV": repo_config.head_rev,
+                "HEAD_REF": repo_config.head_ref,
+                "SSH_SECRET_NAME": repo_config.ssh_secret_name,
+            }.items()
+            if value is not None
+        }
+    )

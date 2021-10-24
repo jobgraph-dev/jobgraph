@@ -29,12 +29,6 @@ CONTEXTS_DIR = "docker-contexts"
 
 DIGEST_RE = re.compile("^[0-9a-f]{64}$")
 
-IMAGE_BUILDER_IMAGE = (
-    "taskcluster/image_builder:4.0.0"
-    "@sha256:"
-    "866c304445334703b68653e1390816012c9e6bdabfbd1906842b5b229e8ed044"
-)
-
 transforms = TransformSequence()
 
 docker_image_schema = Schema(
@@ -48,6 +42,7 @@ docker_image_schema = Schema(
         Optional("job-from"): str,
         # Arguments to use for the Dockerfile.
         Optional("args"): {str: str},
+        Required("container-registry-type"): str,
         # Name of the docker image definition under gitlab-ci/docker, when
         # different from the docker image name.
         Optional("definition"): str,
@@ -65,6 +60,39 @@ transforms.add_validate(docker_image_schema)
 
 
 @transforms.add
+def add_registry_specific_config(config, tasks):
+    for task in tasks:
+        registry_type = task.pop("container-registry-type")
+        # TODO Use decorators instead
+        if registry_type == "gitlab":
+            worker = task.setdefault("worker", {})
+            env = worker.setdefault("env", {})
+            # TODO Use variables already defined by jobgraph
+            env["DOCKER_IMAGE_FULL_TAG"] = "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
+
+            # See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
+            env["DOCKER_HOST"] = "tcp://docker:2376"
+            env["DOCKER_TLS_CERTDIR"] = "/certs"
+            env["DOCKER_TLS_VERIFY"] = "1"
+            env["DOCKER_CERT_PATH"] = "$DOCKER_TLS_CERTDIR/client"
+
+            image_name = task.get("name")
+            definition = task.get("definition", image_name)
+            docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
+            worker["command"] = " && ".join((
+                'docker login --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"',
+                # Registry must be lowercase
+                'export DOCKER_IMAGE_FULL_TAG="$(echo "$DOCKER_IMAGE_FULL_TAG" | tr \'[:upper:]\' \'[:lower:]\')"',
+                f'docker build --tag "$DOCKER_IMAGE_FULL_TAG" --file "$CI_PROJECT_DIR/{docker_file}" .',
+                'docker push "$DOCKER_IMAGE_FULL_TAG"',
+            ))
+        else:
+            raise ValueError(f"Unknown container-registry-type: {registry_type}")
+
+        yield task
+
+
+@transforms.add
 def fill_template(config, tasks):
     available_packages = set()
     for task in config.kind_dependencies_tasks:
@@ -76,10 +104,6 @@ def fill_template(config, tasks):
     context_hashes = {}
 
     tasks = list(tasks)
-
-    if not jobgraph.fast and config.write_artifacts:
-        if not os.path.isdir(CONTEXTS_DIR):
-            os.makedirs(CONTEXTS_DIR)
 
     for task in tasks:
         image_name = task.pop("name")
@@ -99,17 +123,7 @@ def fill_template(config, tasks):
         if not jobgraph.fast:
             context_path = os.path.join("gitlab-ci", "docker", definition)
             topsrcdir = os.path.dirname(config.graph_config.taskcluster_yml)
-            if config.write_artifacts:
-                context_file = os.path.join(CONTEXTS_DIR, f"{image_name}.tar.gz")
-                logger.info(f"Writing {context_file} for docker image {image_name}")
-                context_hash = create_context_tar(
-                    topsrcdir,
-                    context_path,
-                    context_file,
-                    args,
-                )
-            else:
-                context_hash = generate_context_hash(topsrcdir, context_path, args)
+            context_hash = generate_context_hash(topsrcdir, context_path, args)
         else:
             if config.write_artifacts:
                 raise Exception("Can't write artifacts if `jobgraph.fast` is set.")
@@ -122,58 +136,43 @@ def fill_template(config, tasks):
             image_name
         )
 
-        args["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
+        dind_image = config.graph_config["jobgraph"]["docker-in-docker-image"]
 
-        # Adjust the zstandard compression level based on the execution level.
-        # We use faster compression for level 1 because we care more about
-        # end-to-end times. We use slower/better compression for other levels
-        # because images are read more often and it is worth the trade-off to
-        # burn more CPU once to reduce image size.
-        zstd_level = "3" if int(config.params["level"]) == 1 else "10"
+        worker = task.setdefault("worker", {})
+        worker |= {
+            "implementation": "kubernetes",
+            "os": "linux",
+            "docker-image": dind_image,
+            "docker-in-docker": True,
+            "max-run-time": 7200,
+        }
+        worker["env"] |= {
+            # We use hashes as tags to reduce potential collisions of regular tags
+            "DOCKER_IMAGE_TAG": context_hash,
+            "DOCKER_IMAGE_NAME": image_name,
+        }
+
+        if packages:
+            args["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
+        if args:
+            worker["env"]["DOCKER_BUILD_ARGS"] = {
+                "task-reference": json.dumps(args),
+            }
 
         # include some information that is useful in reconstructing this task
         # from JSON
         taskdesc = {
-            "label": "build-docker-image-" + image_name,
+            "label": f"build-docker-image-{image_name}",
             "description": description,
             "attributes": {
                 "image_name": image_name,
                 "artifact_prefix": "public",
             },
             "worker-type": "images",
-            "worker": {
-                "implementation": "kubernetes",
-                "os": "linux",
-                "artifacts": [
-                    {
-                        "type": "file",
-                        "path": "/workspace/image.tar.zst",
-                        "name": "public/image.tar.zst",
-                    }
-                ],
-                "env": {
-                    "CONTEXT_PATH": "public/docker-contexts/{}.tar.gz".format(
-                        image_name
-                    ),
-                    "HASH": context_hash,
-                    "PROJECT": config.params["project"],
-                    "IMAGE_NAME": image_name,
-                    "DOCKER_IMAGE_ZSTD_LEVEL": zstd_level,
-                    "DOCKER_BUILD_ARGS": {
-                        "task-reference": json.dumps(args),
-                    },
-                    "VCS_BASE_REPOSITORY": config.params["base_repository"],
-                    "VCS_HEAD_REPOSITORY": config.params["head_repository"],
-                    "VCS_HEAD_REV": config.params["head_rev"],
-                },
-                "chain-of-trust": True,
-                "max-run-time": 7200,
-            },
+            "worker": worker,
         }
-        worker = taskdesc["worker"]
 
-        worker["docker-image"] = IMAGE_BUILDER_IMAGE
-        digest_data.append(f"image-builder-image:{IMAGE_BUILDER_IMAGE}")
+        digest_data.append(f"docker-in-docker-image:{dind_image}")
 
         if packages:
             deps = taskdesc.setdefault("dependencies", {})
@@ -185,13 +184,6 @@ def fill_template(config, tasks):
             deps["parent"] = f"build-docker-image-{parent}"
             worker["env"]["PARENT_TASK_ID"] = {
                 "task-reference": "<parent>",
-            }
-
-        if task.get("cache", True) and not jobgraph.fast:
-            taskdesc["cache"] = {
-                "type": "docker-images.v2",
-                "name": image_name,
-                "digest-data": digest_data,
             }
 
         yield taskdesc

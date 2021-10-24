@@ -209,7 +209,7 @@ def build_docker_worker_payload(config, task, task_def):
     features = {}
 
     if worker.get("docker-in-docker"):
-        features["dind"] = True
+        task_def["services"] = [config.graph_config["jobgraph"]["docker-in-docker-image"]]
 
     capabilities = {}
 
@@ -380,10 +380,8 @@ def build_task(config, tasks):
             task["worker-type"],
             level,
         )
-        project = config.params["project"]
 
         task_def = {
-            "image": "ubuntu:20.04",
             "retry": {
                 "max": 2,
                 "when": [
@@ -394,7 +392,6 @@ def build_task(config, tasks):
                 ],
             },
             "tags": [worker_type],
-            "cache": {},
             "timeout": task["worker"]["max-run-time"],
         }
 
