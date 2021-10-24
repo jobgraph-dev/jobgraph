@@ -11,7 +11,8 @@ RUN apk update && \
 
 USER "$RUNNER_USER"
 WORKDIR "$RUNNER_HOME"
-ENV PATH="$RUNNER_HOME/bin:$PATH"
+ENV PATH="$RUNNER_HOME/.local/bin:$PATH" \
+    USER="$RUNNER_USER"
 
 ADD requirements/base.txt /setup/requirements.txt
 RUN pip install --user --require-hashes --requirement "/setup/requirements.txt"
