@@ -8,8 +8,7 @@ decision:
     expire_in: 1 year
     paths:
       - artifacts/*
-  # TODO Port jobgraph to Python 3.10
-  image: python:3.9-alpine@sha256:eb1b2038f12c8916be54329319a625de2dfec4266b718efdb798cc149b342a2f
+  image: python:3.10-alpine@sha256:78604a29496b7a1bd5ea5c985d69a0928db7ea32fcfbf71bbde3e317fdd9ac5e
   retry:
     max: 2
     when:
