@@ -18,6 +18,10 @@ decision:
       - runner_system_failure
       - stuck_or_timeout_failure
   script:
+    - whoami
+    - pwd
+    - id
+    - ls -al /builds/runner
     - pip install --no-deps --editable "$CI_PROJECT_DIR"
     - set -x
     - >-
