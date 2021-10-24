@@ -22,9 +22,9 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     install_requires=requirements,
-    classifiers=(
+    classifiers=[
         f"Programming Language :: Python :: {python_version}",
-    ),
+    ],
     entry_points={"console_scripts": ["jobgraph = jobgraph.main:main"]},
     package_data={
         "jobgraph": [
