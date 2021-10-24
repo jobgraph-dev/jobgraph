@@ -5,6 +5,7 @@ stages:
 
 decision:
   artifacts:
+    expire_in: 1 year
     paths:
       - artifacts/*
   # TODO Port jobgraph to Python 3.10
