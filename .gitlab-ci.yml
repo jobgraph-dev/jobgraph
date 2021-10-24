@@ -9,7 +9,7 @@ decision:
     expire_in: 1 year
     paths:
       - artifacts/*
-  image: python:3.10-alpine@sha256:78604a29496b7a1bd5ea5c985d69a0928db7ea32fcfbf71bbde3e317fdd9ac5e
+  image: registry.gitlab.com/johanlorenzo/jobgraph/decision:75b32b132c758c8dc80c695b8cb0e39f68a8185f50f3759a920cf6b01eb9677f
   retry:
     max: 2
     when:
@@ -18,8 +18,6 @@ decision:
       - runner_system_failure
       - stuck_or_timeout_failure
   script:
-    - apk update && apk add --no-cache --update git
-    - pip install --require-hashes --requirement "$CI_PROJECT_DIR/requirements/base.txt"
     - pip install --no-deps --editable "$CI_PROJECT_DIR"
     - set -x
     - >-
