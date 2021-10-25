@@ -601,6 +601,8 @@ def image_digest(args):
 def decision(options):
     from jobgraph.decision import jobgraph_decision
 
+    print("You are using the checked out version!")
+
     jobgraph_decision(options)
 
 

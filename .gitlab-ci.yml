@@ -9,7 +9,7 @@ decision:
     expire_in: 1 year
     paths:
       - artifacts/*
-  image: registry.gitlab.com/johanlorenzo/jobgraph/decision@sha256:c81ed6d568400dea4fef59b3febc5f231709e6237e53598a8a96e05826574cb8
+  image: registry.gitlab.com/johanlorenzo/jobgraph/decision@sha256:7e6ffc4e9d6db376ed198b6d13c2fb002b482d07ddd64829549bfb92ee3bb58d
   retry:
     max: 2
     when:
@@ -18,6 +18,7 @@ decision:
       - runner_system_failure
       - stuck_or_timeout_failure
   script:
+    # We reinstall jobgraph to use the cloned version instead of the version in the docker image
     - pip install --prefix "/runner/.local" --no-deps --editable "$CI_PROJECT_DIR"
     - >-
       if [[ -n $CI_MERGE_REQUEST_SOURCE_PROJECT_URL ]] && [[ $CI_MERGE_REQUEST_SOURCE_PROJECT_URL != '' ]]; then
