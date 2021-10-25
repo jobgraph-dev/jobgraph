@@ -20,5 +20,5 @@ COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/base.in requirements/base.
 RUN pip install --user --require-hashes --requirement '/jobgraph/requirements/base.txt' && \
     pip install --user --no-deps --editable "/jobgraph"
 
-ENTRYPOINT [ "jobgraph" ]
-CMD ["--help"]
+# Set default command to shell so that decision jobs can run other shell commands like `pip`.
+CMD ["/bin/ash", "--login"]
