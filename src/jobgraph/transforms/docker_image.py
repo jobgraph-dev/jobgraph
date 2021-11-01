@@ -86,6 +86,8 @@ def add_registry_specific_config(config, tasks):
                 f'docker build --tag "$DOCKER_IMAGE_FULL_TAG" --file "$CI_PROJECT_DIR/{docker_file}" .',
                 'docker push "$DOCKER_IMAGE_FULL_TAG"',
             ))
+
+            task.setdefault("optimization", {}).setdefault("skip-if-on-gitlab-container-registry", True)
         else:
             raise ValueError(f"Unknown container-registry-type: {registry_type}")
 
@@ -165,9 +167,11 @@ def fill_template(config, tasks):
             "label": f"build-docker-image-{image_name}",
             "description": description,
             "attributes": {
-                "image_name": image_name,
                 "artifact_prefix": "public",
+                "context_hash": context_hash,
+                "image_name": image_name,
             },
+            "optimization": task.get("optimization", None),
             "worker-type": "images",
             "worker": worker,
         }

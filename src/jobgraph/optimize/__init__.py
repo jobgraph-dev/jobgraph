@@ -12,20 +12,31 @@ See ``taskcluster/docs/optimization.rst`` for more information.
 """
 
 
+import importlib
 import logging
 import os
 from collections import defaultdict
 
-from slugid import nice as slugid
+from ..graph import Graph
+from ..jobgraph import JobGraph
+from ..util.parameterization import resolve_task_references
 
-from .graph import Graph
-from . import files_changed
-from .jobgraph import JobGraph
-from .util.parameterization import resolve_task_references
 
 logger = logging.getLogger(__name__)
 
 TOPSRCDIR = os.path.abspath(os.path.join(__file__, "../../../"))
+
+strategies = {}
+
+def register_strategy(name, args=()):
+    def wrap(cls):
+        if name not in strategies:
+            strategies[name] = cls(*args)
+            if not hasattr(strategies[name], "description"):
+                strategies[name].description = name
+        return cls
+
+    return wrap
 
 
 def optimize_task_graph(
@@ -33,17 +44,12 @@ def optimize_task_graph(
     params,
     do_not_optimize,
     existing_tasks=None,
-    strategies=None,
 ):
     """
     Perform task optimization, returning a JobGraph.
     """
     if not existing_tasks:
         existing_tasks = {}
-
-    # instantiate the strategies for this optimization process
-    if not strategies:
-        strategies = _make_default_strategies()
 
     optimizations = _get_optimizations(target_task_graph, strategies)
 
@@ -68,13 +74,6 @@ def optimize_task_graph(
         removed_tasks,
         replaced_tasks,
     )
-
-
-def _make_default_strategies():
-    return {
-        "never": OptimizationStrategy(),  # "never" is the default behavior
-        "skip-unless-changed": SkipUnlessChanged(),
-    }
 
 
 def _get_optimizations(target_task_graph, strategies):
@@ -297,6 +296,10 @@ class Either(OptimizationStrategy):
         )
 
 
+@register_strategy("skip-unless-changed")
 class SkipUnlessChanged(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
         raise NotImplementedError("Please implement this optimization strategy on Gitlab CI.")
+
+
+importlib.import_module("jobgraph.optimize.docker_registry")
