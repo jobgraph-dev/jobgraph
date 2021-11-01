@@ -1,9 +1,8 @@
 import os
 import requests
 
-from urllib.parse import unquote, urlparse, quote
+from urllib.parse import unquote, urlparse
 
-from .memoize import memoize
 
 def extract_gitlab_instance_and_namespace_and_name(url):
     """Given an URL, return the instance domain name, repo name and the namespace it lives under.
@@ -24,26 +23,7 @@ def extract_gitlab_instance_and_namespace_and_name(url):
 
 
 # TODO Retry request
-@memoize
-def get_project_id(repository_url):
-    gitlab_domain_name, repo_namespace, repo_name = extract_gitlab_instance_and_namespace_and_name(repository_url)
-    escaped_project_path = quote(f"{repo_namespace}/{repo_name}", safe='')
-    # TODO Get variable from $CI_PROJECT_ID instead
-    response = requests.get(
-        f"https://{gitlab_domain_name}/api/v4/projects/{escaped_project_path}",
-        headers={
-            "JOB-TOKEN": os.environ.get("CI_JOB_TOKEN"),
-        },
-    )
-    response.raise_for_status()
-    return response.json()["id"]
-
-
-# TODO Retry request
-def get_container_registry_id(repository_url, image_name):
-    gitlab_domain_name, _, _ = extract_gitlab_instance_and_namespace_and_name(repository_url)
-    project_id = get_project_id(repository_url)
-
+def get_container_registry_id(gitlab_domain_name, project_id, image_name):
     response = requests.get(
         f"https://{gitlab_domain_name}/api/v4/projects/{project_id}/registry/repositories",
         headers={
@@ -63,10 +43,8 @@ def get_container_registry_id(repository_url, image_name):
 
 
 # TODO Retry request
-def get_container_registry_image_digest(repository_url, image_name, image_tag):
-    gitlab_domain_name, _, _ = extract_gitlab_instance_and_namespace_and_name(repository_url)
-    project_id = get_project_id(repository_url)
-    registry_id = get_container_registry_id(repository_url, image_name)
+def get_container_registry_image_digest(gitlab_domain_name, project_id, image_name, image_tag):
+    registry_id = get_container_registry_id(gitlab_domain_name, project_id, image_name)
     response = requests.get(
         f"https://{gitlab_domain_name}/api/v4/projects/{project_id}/registry/repositories/{registry_id}/tags/{image_tag}",
         headers={

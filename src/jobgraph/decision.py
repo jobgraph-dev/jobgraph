@@ -98,6 +98,7 @@ def get_decision_parameters(graph_config, options):
             "head_ref",
             "head_tag",
             "project",
+            "project_id",
             "pushdate",
             "owner",
             "level",
