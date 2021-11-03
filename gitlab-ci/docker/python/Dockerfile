@@ -1,25 +1,19 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# TODO: Factorize this docker image with the decision one
+FROM python:3.10-alpine@sha256:78604a29496b7a1bd5ea5c985d69a0928db7ea32fcfbf71bbde3e317fdd9ac5e
 
-# %ARG PYTHON_VERSION
-FROM python:$PYTHON_VERSION
-MAINTAINER Andrew Halberstadt <ahal@mozilla.com>
+ENV RUNNER_USER='runner' \
+    RUNNER_HOME='/runner'
 
-# Add worker user
-RUN mkdir /builds && \
-    useradd -d /builds/worker -s /bin/bash -m worker && \
-    mkdir /builds/worker/artifacts && \
-    chown worker:worker /builds/worker/artifacts
+RUN mkdir -p "$RUNNER_HOME" && \
+    adduser --disabled-password --home "$RUNNER_HOME" "$RUNNER_USER"
 
-# %include-run-task
+RUN apk update && \
+    apk add --no-cache --update git
 
-RUN apt-get update && apt-get install -y --force-yes --no-install-recommends \
-    git
+USER "$RUNNER_USER"
+WORKDIR "$RUNNER_HOME"
+ENV PATH="$RUNNER_HOME/.local/bin:$PATH" \
+    USER="$RUNNER_USER"
 
-ENV SHELL=/bin/bash \
-    HOME=/builds/worker \
-    PATH=/builds/worker/.local/bin:$PATH
-
-# Set a default command useful for debugging
-CMD ["/bin/bash", "--login"]
+# Set default command to shell so that decision jobs can run other shell commands like `pip`.
+CMD ["/bin/ash", "--login"]

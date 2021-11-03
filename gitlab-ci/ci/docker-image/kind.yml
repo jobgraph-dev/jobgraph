@@ -17,7 +17,4 @@ job-defaults:
 
 jobs:
     decision: {}
-    python3.7:
-        definition: python
-        args:
-            PYTHON_VERSION: "3.7"
+    python: {}

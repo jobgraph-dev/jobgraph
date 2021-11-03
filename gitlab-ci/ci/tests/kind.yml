@@ -14,7 +14,7 @@ job-defaults:
         retrigger: true
     worker-type: t-linux
     worker:
-        docker-image: {in-tree: python3.7}
+        docker-image: {in-tree: python}
         max-run-time: 3600
     run:
         using: run-task
