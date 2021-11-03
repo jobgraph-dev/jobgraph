@@ -29,8 +29,9 @@ def extract_gitlab_instance_and_namespace_and_name(url):
 def get_container_registry_image_digest(gitlab_domain_name, project_namespace, project_name, image_name, image_tag):
     token = _get_container_registry_token(gitlab_domain_name, project_namespace, project_name, image_name)
 
+    url = f"https://registry.{gitlab_domain_name}/v2/{project_namespace}/{project_name}/{image_name}/manifests/{image_tag}"
     response = requests.get(
-        f"https://registry.{gitlab_domain_name}/v2/{project_namespace}/{project_name}/{image_name}/manifests/{image_tag}",
+        url.lower(),
         headers={
             "Accept": "application/vnd.docker.distribution.manifest.v2+json",
             "Authorization": f"Bearer {token}",
@@ -47,6 +48,7 @@ def _get_container_registry_token(gitlab_domain_name, project_namespace, project
     session = requests.Session()
     session.auth = (os.environ["CI_REGISTRY_USER"], os.environ["CI_REGISTRY_PASSWORD"])
 
-    response = session.get(f"https://{gitlab_domain_name}/jwt/auth?client_id=docker&offline_token=true&service=container_registry")
+    url = f"https://{gitlab_domain_name}/jwt/auth?client_id=docker&offline_token=true&service=container_registry&scope=repository:{project_namespace}/{project_name}/{image_name}:pull"
+    response = session.get(url.lower())
     response.raise_for_status()
     return response.json()["token"]
