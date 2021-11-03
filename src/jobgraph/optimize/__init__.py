@@ -106,7 +106,6 @@ def remove_tasks(target_task_graph, params, optimizations, do_not_optimize):
     """
     opt_counts = defaultdict(int)
     removed = set()
-    reverse_links_dict = target_task_graph.graph.reverse_links_dict()
 
     for label in target_task_graph.graph.visit_preorder():
         # if we're not allowed to optimize, that's easy..
@@ -195,6 +194,7 @@ def get_subgraph(
         named_task_dependencies = {
             name: label
             for name, label in named_links_dict.get(label, {}).items()
+            if label not in omit
         }
 
         docker_images = {
