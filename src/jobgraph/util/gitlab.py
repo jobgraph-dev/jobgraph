@@ -27,6 +27,9 @@ def extract_gitlab_instance_and_namespace_and_name(url):
 # TODO Retry request
 @memoize
 def get_container_registry_image_digest(gitlab_domain_name, project_namespace, project_name, image_name, image_tag):
+    # Logic taken from:
+    #  * https://www.pimwiddershoven.nl/entry/request-an-api-bearer-token-from-gitlab-jwt-authentication-to-control-your-private-docker-registry
+    #  * https://github.com/lbolla/kubectl-plugin-outdated/pull/1
     token = _get_container_registry_token(gitlab_domain_name, project_namespace, project_name, image_name)
 
     url = f"https://registry.{gitlab_domain_name}/v2/{project_namespace}/{project_name}/{image_name}/manifests/{image_tag}"
