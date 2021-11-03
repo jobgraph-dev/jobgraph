@@ -56,7 +56,7 @@ def get_container_registry_image_digest(gitlab_domain_name, project_namespace, p
         raise ValueError(f"No digest found for tag: {image_tag}")
 
     response.raise_for_status()
-    return response.json()["config"]["digest"]
+    return response.headers["Docker-Content-Digest"]
 
 
 def _get_container_registry_token(gitlab_domain_name, project_namespace, project_name, image_name):
