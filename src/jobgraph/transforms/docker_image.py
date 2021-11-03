@@ -17,6 +17,10 @@ from jobgraph.util.docker import (
 from jobgraph.util.schema import (
     Schema,
 )
+from jobgraph.util.gitlab import (
+    extract_gitlab_instance_and_namespace_and_name,
+    get_image_full_location,
+)
 from voluptuous import (
     Optional,
     Required,
@@ -67,8 +71,6 @@ def add_registry_specific_config(config, tasks):
         if registry_type == "gitlab":
             worker = task.setdefault("worker", {})
             env = worker.setdefault("env", {})
-            # TODO Use variables already defined by jobgraph
-            env["DOCKER_IMAGE_FULL_TAG"] = "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
 
             # See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
             env["DOCKER_HOST"] = "tcp://docker:2376"
@@ -81,12 +83,9 @@ def add_registry_specific_config(config, tasks):
             docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
             worker["command"] = " && ".join((
                 'docker login --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"',
-                # Registry must be lowercase
-                'export DOCKER_IMAGE_FULL_TAG="$(echo "$DOCKER_IMAGE_FULL_TAG" | tr \'[:upper:]\' \'[:lower:]\')"',
-                f'docker build --tag "$DOCKER_IMAGE_FULL_TAG" --file "$CI_PROJECT_DIR/{docker_file}" .',
-                'docker push "$DOCKER_IMAGE_FULL_TAG"',
+                f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file "$CI_PROJECT_DIR/{docker_file}" .',
+                'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
             ))
-
             task.setdefault("optimization", {}).setdefault("skip-if-on-gitlab-container-registry", True)
         else:
             raise ValueError(f"Unknown container-registry-type: {registry_type}")
@@ -103,15 +102,11 @@ def fill_template(config, tasks):
         name = task.label.replace("packages-", "")
         available_packages.add(name)
 
-    context_hashes = {}
-
     tasks = list(tasks)
 
     for task in tasks:
         image_name = task.pop("name")
-        args = task.pop("args", {})
-        definition = task.pop("definition", image_name)
-        packages = task.pop("packages", [])
+        packages = task.get("packages", [])
         parent = task.pop("parent", None)
 
         for p in packages:
@@ -121,18 +116,6 @@ def fill_template(config, tasks):
                         config.kind, image_name, p
                     )
                 )
-
-        if not jobgraph.fast:
-            context_path = os.path.join("gitlab-ci", "docker", definition)
-            topsrcdir = os.path.dirname(config.graph_config.taskcluster_yml)
-            context_hash = generate_context_hash(topsrcdir, context_path, args)
-        else:
-            if config.write_artifacts:
-                raise Exception("Can't write artifacts if `jobgraph.fast` is set.")
-            context_hash = "0" * 40
-        digest_data = [context_hash]
-        digest_data += [json.dumps(args, sort_keys=True)]
-        context_hashes[image_name] = context_hash
 
         description = "Build the docker image {} for use by dependent tasks".format(
             image_name
@@ -150,16 +133,8 @@ def fill_template(config, tasks):
         }
         worker["env"] |= {
             # We use hashes as tags to reduce potential collisions of regular tags
-            "DOCKER_IMAGE_TAG": context_hash,
             "DOCKER_IMAGE_NAME": image_name,
         }
-
-        if packages:
-            args["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
-        if args:
-            worker["env"]["DOCKER_BUILD_ARGS"] = {
-                "task-reference": json.dumps(args),
-            }
 
         # include some information that is useful in reconstructing this task
         # from JSON
@@ -168,15 +143,12 @@ def fill_template(config, tasks):
             "description": description,
             "attributes": {
                 "artifact_prefix": "public",
-                "context_hash": context_hash,
                 "image_name": image_name,
             },
             "optimization": task.get("optimization", None),
             "worker-type": "images",
             "worker": worker,
         }
-
-        digest_data.append(f"docker-in-docker-image:{dind_image}")
 
         if packages:
             deps = taskdesc.setdefault("dependencies", {})
@@ -191,3 +163,43 @@ def fill_template(config, tasks):
             }
 
         yield taskdesc
+
+
+@transforms.add
+def fill_context_hash(config, tasks):
+    for task in tasks:
+        image_name = task["attributes"]["image_name"]
+        definition = task.pop("definition", image_name)
+        packages = task.pop("packages", [])
+
+        args = task.pop("args", {})
+        if packages:
+            args["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
+        if args:
+            worker["env"]["DOCKER_BUILD_ARGS"] = {
+                "task-reference": json.dumps(args),
+            }
+
+        if not jobgraph.fast:
+            context_path = os.path.join("gitlab-ci", "docker", definition)
+            topsrcdir = os.path.dirname(config.graph_config.taskcluster_yml)
+            context_hash = generate_context_hash(topsrcdir, context_path, args)
+        else:
+            if config.write_artifacts:
+                raise Exception("Can't write artifacts if `jobgraph.fast` is set.")
+            context_hash = "0" * 40
+
+        worker = task.setdefault("worker", {})
+        gitlab_domain_name, repo_namespace, repo_name = extract_gitlab_instance_and_namespace_and_name(config.params["head_repository"])
+        task["attributes"] |= {
+            "context_hash": context_hash,
+            "docker_image_full_location": get_image_full_location(gitlab_domain_name, repo_namespace, repo_name, image_name, image_tag=context_hash, resolve_digest=True),
+        }
+        worker["env"] |= {
+            # We use hashes as tags to reduce potential collisions of regular tags
+            "DOCKER_IMAGE_TAG": context_hash,
+            # We shouldn't resolve digest if we build and push image in this job
+            "DOCKER_IMAGE_FULL_LOCATION": get_image_full_location(gitlab_domain_name, repo_namespace, repo_name, image_name, image_tag=context_hash, resolve_digest=False),
+        }
+
+        yield task

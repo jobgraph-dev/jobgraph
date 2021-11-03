@@ -38,7 +38,7 @@ def resolve_timestamps(now, task_def):
     )
 
 
-def resolve_task_references(label, task_def, task_id, dependencies):
+def resolve_task_references(label, task_def, task_id, dependencies, docker_images):
     """Resolve all instances of
       {'task-reference': '..<..>..'}
     and
@@ -52,6 +52,20 @@ def resolve_task_references(label, task_def, task_id, dependencies):
                 return task_id
             try:
                 return dependencies[key]
+            except KeyError:
+                # handle escaping '<'
+                if key == "<":
+                    return key
+                raise KeyError(f"task '{label}' has no dependency named '{key}'")
+
+        return TASK_REFERENCE_PATTERN.sub(repl, val)
+
+    def docker_image_reference(val):
+        def repl(match):
+            key = match.group(1)
+            try:
+                docker_image = docker_images[key]
+                return docker_image
             except KeyError:
                 # handle escaping '<'
                 if key == "<":
@@ -88,7 +102,8 @@ def resolve_task_references(label, task_def, task_id, dependencies):
     return _recurse(
         task_def,
         {
-            "task-reference": task_reference,
             "artifact-reference": artifact_reference,
+            "docker-image-reference": docker_image_reference,
+            "task-reference": task_reference,
         },
     )

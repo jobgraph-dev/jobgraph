@@ -24,6 +24,18 @@ def extract_gitlab_instance_and_namespace_and_name(url):
     return domain_name, repo_namespace, repo_name
 
 
+def get_image_full_location(gitlab_domain_name, project_namespace, project_name, image_name, image_tag, resolve_digest=True):
+    if resolve_digest:
+        try:
+            image_digest = "@" + get_container_registry_image_digest(gitlab_domain_name, project_namespace, project_name, image_name, image_tag)
+        except ValueError:
+            image_digest = ""
+    else:
+        image_digest = ""
+
+    return f"registry.{gitlab_domain_name}/{project_namespace}/{project_name}/{image_name}:{image_tag}{image_digest}".lower()
+
+
 # TODO Retry request
 @memoize
 def get_container_registry_image_digest(gitlab_domain_name, project_namespace, project_name, image_name, image_tag):

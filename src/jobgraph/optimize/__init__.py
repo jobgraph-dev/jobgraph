@@ -113,10 +113,6 @@ def remove_tasks(target_task_graph, params, optimizations, do_not_optimize):
         if label in do_not_optimize:
             continue
 
-        # if there are remaining tasks depending on this one, do not remove..
-        if any(l not in removed for l in reverse_links_dict[label]):
-            continue
-
         # call the optimization strategy
         task = target_task_graph.jobs[label]
         opt_by, opt, arg = optimizations(label)
@@ -189,19 +185,6 @@ def get_subgraph(
     non-optimized tasks and edges between them.
     """
 
-    # check for any dependency edges from included to removed tasks
-    bad_edges = [
-        (l, r, n)
-        for l, r, n in target_task_graph.graph.edges
-        if l not in removed_tasks and r in removed_tasks
-    ]
-    if bad_edges:
-        probs = ", ".join(
-            f"{l} depends on {r} as {n} but it has been removed"
-            for l, r, n in bad_edges
-        )
-        raise Exception("Optimization error: " + probs)
-
     # populate task['dependencies']
     named_links_dict = target_task_graph.graph.named_links_dict()
     omit = removed_tasks | replaced_tasks
@@ -212,6 +195,12 @@ def get_subgraph(
         named_task_dependencies = {
             name: label
             for name, label in named_links_dict.get(label, {}).items()
+        }
+
+        docker_images = {
+            name: target_task_graph.jobs[dep_label].attributes["docker_image_full_location"]
+            for name, dep_label in named_links_dict.get(label, {}).items()
+            if target_task_graph.jobs[dep_label].attributes.get("docker_image_full_location")
         }
 
         # Add remaining soft dependencies
@@ -229,6 +218,7 @@ def get_subgraph(
             task.actual_gitlab_ci_job,
             task_id=task.task_id,
             dependencies=named_task_dependencies,
+            docker_images=docker_images,
         )
         deps = task.actual_gitlab_ci_job.setdefault("needs", [])
         deps.extend(sorted(named_task_dependencies.values()))
@@ -300,6 +290,11 @@ class Either(OptimizationStrategy):
 class SkipUnlessChanged(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
         raise NotImplementedError("Please implement this optimization strategy on Gitlab CI.")
+
+@register_strategy("never")
+class SkipUnlessChanged(OptimizationStrategy):
+    def should_remove_task(self, task, params, file_patterns):
+        return False
 
 
 importlib.import_module("jobgraph.optimize.docker_registry")
