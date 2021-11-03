@@ -3,6 +3,8 @@ import requests
 
 from urllib.parse import unquote, urlparse
 
+from jobgraph.util.memoize import memoize
+
 
 def extract_gitlab_instance_and_namespace_and_name(url):
     """Given an URL, return the instance domain name, repo name and the namespace it lives under.
@@ -23,38 +25,28 @@ def extract_gitlab_instance_and_namespace_and_name(url):
 
 
 # TODO Retry request
-def get_container_registry_id(gitlab_domain_name, project_id, image_name):
+@memoize
+def get_container_registry_image_digest(gitlab_domain_name, project_namespace, project_name, image_name, image_tag):
+    token = _get_container_registry_token(gitlab_domain_name, project_namespace, project_name, image_name)
+
     response = requests.get(
-        f"https://{gitlab_domain_name}/api/v4/projects/{project_id}/registry/repositories",
+        f"https://registry.{gitlab_domain_name}/v2/{project_namespace}/{project_name}/{image_name}/manifests/{image_tag}",
         headers={
-            "JOB-TOKEN": os.environ.get("CI_JOB_TOKEN"),
-        },
+            "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+            "Authorization": f"Bearer {token}"
+        }
     )
-    response.raise_for_status()
-    all_registries = response.json()
-
-    matching_registries = [registry for registry in all_registries if registry["name"] == image_name]
-    if len(matching_registries) == 0:
-        raise ValueError(f'No container registry found for image "{image_name}"')
-    elif len(matching_registries) > 1:
-        raise IndexError(f'More than a single registry matched image "{image_name}"')
-
-    return matching_registries[0]["id"]
-
-
-# TODO Retry request
-def get_container_registry_image_digest(gitlab_domain_name, project_id, image_name, image_tag):
-    registry_id = get_container_registry_id(gitlab_domain_name, project_id, image_name)
-    response = requests.get(
-        f"https://{gitlab_domain_name}/api/v4/projects/{project_id}/registry/repositories/{registry_id}/tags/{image_tag}",
-        headers={
-            "JOB-TOKEN": os.environ.get("CI_JOB_TOKEN"),
-        },
-    )
-
     if response.status_code == 404:
         raise ValueError(f"No digest found for tag: {image_tag}")
 
     response.raise_for_status()
+    return response.json()["config"]["digest"]
 
-    return response.json()["digest"]
+
+def _get_container_registry_token(gitlab_domain_name, project_namespace, project_name, image_name):
+    session = requests.Session()
+    session.auth = (os.environ["CI_REGISTRY_USER"], os.environ["CI_REGISTRY_PASSWORD"])
+
+    response = session.get(f"https://{gitlab_domain_name}/jwt/auth?client_id=docker&offline_token=true&service=container_registry&scope=repository:{project_namespace}/{project_name}/{image_name}:pull")
+    response.raise_for_status()
+    return response.json()["token"]
