@@ -46,38 +46,6 @@ run_task_schema = Schema(
 )
 
 
-def common_setup(config, job, taskdesc, command):
-    run = job["run"]
-    if run["checkout"]:
-        repo_config = config.repo_config
-
-        vcs_path = support_vcs_checkout(
-            config,
-            job,
-            taskdesc,
-            repo_config=repo_config,
-        )
-
-        vcs_path = taskdesc["worker"]["env"]["VCS_PATH"]
-        checkout_path = path.join(vcs_path, repo_config.path)
-        command.append(f"--{repo_config.namespace}-checkout={checkout_path}")
-
-        if "cwd" in run:
-            run["cwd"] = path.normpath(run["cwd"].format(checkout=vcs_path))
-    elif "cwd" in run and "{checkout}" in run["cwd"]:
-        raise Exception(
-            "Found `{{checkout}}` interpolation in `cwd` for task {name} "
-            "but the task doesn't have a checkout: {cwd}".format(
-                cwd=run["cwd"], name=job.get("name", job.get("label"))
-            )
-        )
-
-    if "cwd" in run:
-        command.extend(("--task-cwd", run["cwd"]))
-
-    taskdesc["worker"].setdefault("env", {})["MOZ_SCM_LEVEL"] = config.params["level"]
-
-
 worker_defaults = {
     "checkout": True,
     "run-as-root": False,
@@ -90,20 +58,11 @@ worker_defaults = {
 def docker_worker_run_task(config, job, taskdesc):
     run = job["run"]
     worker = taskdesc["worker"] = job["worker"]
-    command = ["/usr/local/bin/run-task"]
-    common_setup(config, job, taskdesc, command)
-
+    # TODO Reuse "/usr/local/bin/run-task" whenever possible
     run_command = run["command"]
 
     command_context = run.get("command-context")
     if command_context:
         run_command = run_command.format(**command_context)
 
-    # dict is for the case of `{'task-reference': str}`.
-    if isinstance(run_command, str) or isinstance(run_command, dict):
-        run_command = ["bash", "-cx", run_command]
-    if run["run-as-root"]:
-        command.extend(("--user", "root", "--group", "root"))
-    command.append("--")
-    command.extend(run_command)
-    worker["command"] = shlex.join(command)
+    worker["command"] = run_command
