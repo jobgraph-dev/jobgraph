@@ -38,7 +38,6 @@ decision:
       --owner="$CI_COMMIT_AUTHOR"
       --pipeline-source="$CI_PIPELINE_SOURCE"
       --project='jobgraph'
-      --project-id="$CI_PROJECT_ID"
       --pushdate='0'
   stage: decision
 

@@ -49,7 +49,6 @@ base_schema = Schema(
         Required("optimize_target_tasks"): bool,
         Required("owner"): str,
         Required("project"): str,
-        Required("project_id"): str,
         Required("pushdate"): int,
         # target-kind is not included, since it should never be
         # used at run-time

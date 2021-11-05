@@ -598,9 +598,6 @@ def image_digest(args):
     )
 )
 @argument("--try-task-config-file", help="path to try task configuration file")
-@argument(
-    "--project-id", required=True, help="Gitlab project ID"
-)
 def decision(options):
     from jobgraph.decision import jobgraph_decision
 
