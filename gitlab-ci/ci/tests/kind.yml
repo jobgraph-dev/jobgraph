@@ -14,7 +14,7 @@ job-defaults:
         retrigger: true
     worker-type: t-linux
     worker:
-        docker-image: {in-tree: python}
+        docker-image: {in-tree: python-test}
         max-run-time: 3600
     run:
         using: run-task
@@ -25,27 +25,20 @@ jobs:
         description: "Run `unit tests` to validate the latest changes"
         run:
             command: >-
-                pip install --user --require-hashes --requirement requirements/test.txt &&
                 pip install --user --no-deps . &&
                 pytest --pyargs jobgraph
 
     flake8:
         description: "Run `flake8` on Python 3 to validate the latest changes"
         run:
-            command: >-
-                pip install --user --require-hashes --requirement requirements/test.txt &&
-                flake8
+            command: flake8
 
     black:
         description: "Run `black` to validate the latest changes"
         run:
-            command: >-
-                pip install --user --require-hashes --requirement requirements/test.txt &&
-                black --check .
+            command: black --check .
 
     yamllint:
         description: "Run `yamllint` to validate the latest changes"
         run:
-            command: >-
-                pip install --user --require-hashes --requirement requirements/test.txt &&
-                yamllint .
+            command: yamllint .

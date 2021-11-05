@@ -78,14 +78,7 @@ def add_registry_specific_config(config, tasks):
             env["DOCKER_TLS_VERIFY"] = "1"
             env["DOCKER_CERT_PATH"] = "$DOCKER_TLS_CERTDIR/client"
 
-            image_name = task.get("name")
-            definition = task.get("definition", image_name)
-            docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
-            worker["command"] = " && ".join((
-                'docker login --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"',
-                f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file "$CI_PROJECT_DIR/{docker_file}" .',
-                'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
-            ))
+            worker["command"] = 'docker login --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
             task.setdefault("optimization", {}).setdefault("skip-if-on-gitlab-container-registry", True)
         else:
             raise ValueError(f"Unknown container-registry-type: {registry_type}")
@@ -105,7 +98,7 @@ def fill_template(config, tasks):
     tasks = list(tasks)
 
     for task in tasks:
-        image_name = task.pop("name")
+        image_name = task["name"]
         packages = task.get("packages", [])
         parent = task.pop("parent", None)
 
@@ -145,6 +138,7 @@ def fill_template(config, tasks):
                 "artifact_prefix": "public",
                 "image_name": image_name,
             },
+            "name": image_name,
             "optimization": task.get("optimization", None),
             "worker-type": "images",
             "worker": worker,
@@ -158,11 +152,34 @@ def fill_template(config, tasks):
         if parent:
             deps = taskdesc.setdefault("dependencies", {})
             deps["parent"] = f"build-docker-image-{parent}"
-            worker["env"]["PARENT_TASK_ID"] = {
-                "task-reference": "<parent>",
-            }
+            worker["env"]["DOCKER_IMAGE_PARENT"] = {"docker-image-reference": "<parent>"}
+            args = taskdesc.setdefault("args", {})
+            args |= {"DOCKER_IMAGE_PARENT": "$DOCKER_IMAGE_PARENT"}
 
         yield taskdesc
+
+
+@transforms.add
+def define_docker_commands(config, tasks):
+    for task in tasks:
+        packages = task.pop("packages", [])
+        arguments = task.get("args", {})
+        worker = task.setdefault("worker", {})
+
+        if packages:
+            arguments["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
+
+        image_name = task.pop("name")
+        definition = task.get("definition", image_name)
+        docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
+        build_args = " ".join(f'--build-arg "{argument_name}={argument_value}"' for argument_name, argument_value in arguments.items())
+        worker["command"] = " && ".join((
+            worker.get("command", ""),
+            f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file "$CI_PROJECT_DIR/{docker_file}" {build_args} .',
+            'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
+        ))
+
+        yield task
 
 
 @transforms.add
@@ -170,15 +187,7 @@ def fill_context_hash(config, tasks):
     for task in tasks:
         image_name = task["attributes"]["image_name"]
         definition = task.pop("definition", image_name)
-        packages = task.pop("packages", [])
-
         args = task.pop("args", {})
-        if packages:
-            args["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
-        if args:
-            worker["env"]["DOCKER_BUILD_ARGS"] = {
-                "task-reference": json.dumps(args),
-            }
 
         if not jobgraph.fast:
             context_path = os.path.join("gitlab-ci", "docker", definition)

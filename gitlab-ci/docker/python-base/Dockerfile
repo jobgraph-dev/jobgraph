@@ -1,4 +1,3 @@
-# TODO: Factorize this docker image with the decision one
 FROM python:3.10-alpine@sha256:78604a29496b7a1bd5ea5c985d69a0928db7ea32fcfbf71bbde3e317fdd9ac5e
 
 ENV RUNNER_USER='runner' \

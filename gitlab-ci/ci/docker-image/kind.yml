@@ -16,5 +16,8 @@ job-defaults:
 
 
 jobs:
-    decision: {}
-    python: {}
+    python-base: {}
+    decision:
+        parent: python-base
+    python-test:
+        parent: python-base
