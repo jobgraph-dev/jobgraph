@@ -295,6 +295,12 @@ class SkipUnlessChanged(OptimizationStrategy):
         )
 
 
+@register_strategy("always")
+class Always(OptimizationStrategy):
+    def should_remove_task(self, task, params, file_patterns):
+        return True
+
+
 @register_strategy("never")
 class Never(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):

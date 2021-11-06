@@ -2,7 +2,6 @@ import pytest
 
 from jobgraph import (
     generator,
-    optimize as optimize_mod,
     target_tasks as target_tasks_mod,
 )
 from jobgraph.config import GraphConfig
@@ -91,16 +90,7 @@ def maketgg(monkeypatch):
         def target_tasks_method(full_task_graph, parameters, graph_config):
             return target_tasks
 
-        def make_fake_strategies():
-            return {
-                mode: FakeOptimization(mode)
-                for mode in ("always", "never", "even", "odd")
-            }
-
         target_tasks_mod._target_task_methods["test_method"] = target_tasks_method
-        monkeypatch.setattr(
-            optimize_mod, "_make_default_strategies", make_fake_strategies
-        )
 
         parameters = FakeParameters(
             {

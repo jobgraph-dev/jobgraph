@@ -78,7 +78,7 @@ def get_filtered_jobgraph(jobgraph, tasksregex):
     regexprogram = re.compile(tasksregex)
 
     for key in jobgraph.graph.visit_postorder():
-        task = jobgraph.tasks[key]
+        task = jobgraph.jobs[key]
         if regexprogram.match(task.label):
             filteredtasks[key] = task
             for depname, dep in named_links_dict[key].items():
@@ -93,6 +93,7 @@ def get_filtered_jobgraph(jobgraph, tasksregex):
 FORMAT_METHODS = {
     "labels": format_jobgraph_labels,
     "json": format_jobgraph_json,
+    "txt": format_jobgraph_labels,
     "yaml": format_jobgraph_yaml,
     "yml": format_jobgraph_yaml,
 }

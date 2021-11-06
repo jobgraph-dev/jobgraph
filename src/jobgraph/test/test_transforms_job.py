@@ -16,9 +16,6 @@ from jobgraph.config import load_graph_config
 from jobgraph.transforms import job
 from jobgraph.transforms.job import run_task  # noqa: F401
 from jobgraph.transforms.base import TransformConfig
-from jobgraph.transforms.job.common import add_cache
-from jobgraph.transforms.task import payload_builders
-from jobgraph.util.schema import Schema, validate_schema
 
 from .conftest import FakeParameters
 
@@ -36,7 +33,7 @@ TASK_DEFAULTS = {
 
 @pytest.fixture(scope="module")
 def config():
-    graph_config = load_graph_config(os.path.join("taskcluster", "ci"))
+    graph_config = load_graph_config(os.path.join("gitlab-ci", "ci"))
     params = FakeParameters(
         {
             "base_repository": "http://gitlab.example.com",
@@ -79,34 +76,6 @@ def transform(monkeypatch, config):
         return frozen_args
 
     return inner
-
-
-@pytest.mark.parametrize(
-    "task",
-    [
-        {"worker-type": "t-linux"},
-        pytest.param(
-            {"worker-type": "releng-hardware/gecko-t-win10-64-hw"},
-            marks=pytest.mark.xfail,
-        ),
-    ],
-    ids=["kubernetes"],
-)
-def test_worker_caches(task, transform):
-    config, job, taskdesc, impl = transform(task)
-    add_cache(job, taskdesc, "cache1", "/cache1")
-    add_cache(job, taskdesc, "cache2", "/cache2", skip_untrusted=True)
-
-    if impl not in ("kubernetes"):
-        pytest.xfail(f"caches not implemented for '{impl}'")
-
-    key = "caches" if impl == "kubernetes" else "mounts"
-    assert key in taskdesc["worker"]
-    assert len(taskdesc["worker"][key]) == 2
-
-    # Create a new schema object with just the part relevant to caches.
-    partial_schema = Schema(payload_builders[impl].schema.schema[key])
-    validate_schema(partial_schema, taskdesc["worker"][key], "validation error")
 
 
 @pytest.mark.parametrize(

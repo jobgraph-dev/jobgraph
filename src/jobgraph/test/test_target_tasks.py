@@ -21,14 +21,17 @@ class TestTargetTasks(unittest.TestCase):
             },
         )
 
-    def default_matches_pipeline_source(self, pipeline_source):
+    def default_matches_pipeline_source(self, run_on_pipeline_source, pipeline_source):
         attributes = {}
+        if run_on_pipeline_source is not None:
+            attributes["run_on_pipeline_source"] = run_on_pipeline_source
 
         return self.default_matches(
             attributes=attributes,
             parameters={
                 "project": "mozilla-central",
                 "pipeline_source": pipeline_source,
+                "head_ref": "main",
             },
         )
 
@@ -39,7 +42,7 @@ class TestTargetTasks(unittest.TestCase):
             "run_git_branches": ["all"],
         }
         if run_on_pipeline_sources is not None:
-            attributes["run_on_pipeline_sources"] = run_on_pipeline_sources
+            attributes["run_on_pipeline_source"] = run_on_pipeline_sources
         if run_on_git_branches is not None:
             attributes["run_on_git_branches"] = run_on_git_branches
 
@@ -59,6 +62,7 @@ class TestTargetTasks(unittest.TestCase):
                 "a": Job(
                     kind="build",
                     label="a",
+                    description="some build",
                     attributes=attributes,
                     actual_gitlab_ci_job={},
                 ),
@@ -69,7 +73,7 @@ class TestTargetTasks(unittest.TestCase):
 
     def test_default_pipeline_source(self):
         self.assertTrue(self.default_matches_pipeline_source(None, "push"))
-        self.assertTrue(
+        self.assertFalse(
             self.default_matches_pipeline_source(None, "merge_request_event")
         )
 
@@ -98,12 +102,12 @@ class TestTargetTasks(unittest.TestCase):
         )
 
     def test_default_git_branches(self):
-        self.assertTrue(
+        self.assertFalse(
             self.default_matches_git_branches(
                 None, "merge_request_event", None, "master"
             )
         )
-        self.assertTrue(
+        self.assertFalse(
             self.default_matches_git_branches(
                 None, "merge_request_event", None, "some-branch"
             )

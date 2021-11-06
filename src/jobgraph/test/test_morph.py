@@ -14,7 +14,7 @@ from jobgraph.jobgraph import JobGraph
 
 @pytest.fixture(scope="module")
 def graph_config():
-    return load_graph_config(os.path.join("taskcluster", "ci"))
+    return load_graph_config(os.path.join("gitlab-ci", "ci"))
 
 
 @pytest.fixture

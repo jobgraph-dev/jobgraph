@@ -85,11 +85,7 @@ def _handle_artifact(path, response):
 
 
 def get_artifact_url(task_id, path):
-    artifact_tmpl = liburls.api(
-        get_root_url(False), "queue", "v1", "task/{}/artifacts/{}"
-    )
-    data = artifact_tmpl.format(task_id, path)
-    return data
+    raise NotImplementedError("Need to support Gitlab CI artifact definitions")
 
 
 def get_artifact(task_id, path):

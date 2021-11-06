@@ -25,7 +25,7 @@ jobs:
         description: "Run `unit tests` to validate the latest changes"
         run:
             command: >-
-                pip install --user --no-deps . &&
+                pip install --prefix "/runner/.local" --no-deps --editable . &&
                 pytest --pyargs jobgraph
 
     flake8:

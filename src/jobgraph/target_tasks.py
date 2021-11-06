@@ -35,7 +35,7 @@ def filter_out_cron(task, parameters):
 
 def filter_for_pipeline_source(task, parameters):
     run_on_pipeline_sources = set(
-        task.attributes.get("run_on_pipeline_sources", ["all"])
+        task.attributes.get("run_on_pipeline_source", ["push"])
     )
     return match_run_on_pipeline_sources(
         parameters["pipeline_source"], run_on_pipeline_sources

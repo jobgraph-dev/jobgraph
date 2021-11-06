@@ -22,6 +22,8 @@ def git_repo(tmpdir):
 
     repo_dir = _init_repo(tmpdir, "git")
 
+    subprocess.check_output(["git", "branch", "--move", "main"], cwd=repo_dir, env=env)
+
     subprocess.check_output(
         ["git", "config", "user.email", "integration@tests.test"], cwd=repo_dir, env=env
     )
@@ -60,8 +62,8 @@ def repo(git_repo):
 @pytest.mark.parametrize(
     "commit_message",
     (
-        "commit message in… pure utf8",
-        "commit message in... ascii",
+        "commit message in… pure utf8\n\n",
+        "commit message in... ascii\n\n",
     ),
 )
 def test_get_commit_message(repo, commit_message):
@@ -127,35 +129,3 @@ def test_branch(repo):
 
     repo.update("test")
     assert repo.branch == "test"
-
-
-def test_working_directory_clean(repo):
-    assert repo.working_directory_clean()
-
-    # untracked file
-    bar = os.path.join(repo.path, "bar")
-    with open(bar, "w") as fh:
-        fh.write("bar")
-
-    assert repo.working_directory_clean()
-    assert not repo.working_directory_clean(untracked=True)
-    repo.run("add", "bar")
-    assert not repo.working_directory_clean()
-
-    repo.run("commit", "-m", "Second commit")
-    assert repo.working_directory_clean()
-
-    # modified file
-    with open(bar, "a") as fh:
-        fh.write("bar2")
-    assert not repo.working_directory_clean()
-
-    if repo.tool == "git":
-        repo.run("reset", "--hard", "HEAD")
-    else:
-        repo.run("revert", "-a")
-    assert repo.working_directory_clean()
-
-    # removed file
-    repo.run("rm", bar)
-    assert not repo.working_directory_clean()

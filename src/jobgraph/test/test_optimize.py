@@ -43,12 +43,17 @@ class TestOptimize(unittest.TestCase):
     ):
         task_def = task_def or {"sample": "task-def"}
         task = Job(
-            kind="test", label=label, attributes={}, actual_gitlab_ci_job=task_def
+            kind="test",
+            label=label,
+            description="some test description",
+            attributes={},
+            actual_gitlab_ci_job=task_def,
         )
         task.optimization = optimization
         task.task_id = task_id
         if dependencies is not None:
-            task.actual_gitlab_ci_job["dependencies"] = sorted(dependencies)
+            task.actual_gitlab_ci_job["needs"] = sorted(dependencies)
+            task.actual_gitlab_ci_job["stage"] = "test"
         return task
 
     def make_graph(self, *tasks_and_edges):
@@ -57,7 +62,7 @@ class TestOptimize(unittest.TestCase):
         return JobGraph(tasks, graph.Graph(set(tasks), edges))
 
     def make_opt_graph(self, *tasks_and_edges):
-        tasks = {t.task_id: t for t in tasks_and_edges if isinstance(t, Job)}
+        tasks = {t.label: t for t in tasks_and_edges if isinstance(t, Job)}
         edges = {e for e in tasks_and_edges if not isinstance(e, Job)}
         return JobGraph(tasks, graph.Graph(set(tasks), edges))
 
@@ -101,7 +106,7 @@ class TestOptimize(unittest.TestCase):
     def test_remove_tasks_blocked(self):
         "Removable tasks that are depended on by non-removable tasks are not removed"
         graph = self.make_triangle(t1={"remove": None}, t3={"remove": None})
-        self.assert_remove_tasks(graph, {"t3"})
+        self.assert_remove_tasks(graph, {"t1", "t3"})
 
     def test_remove_tasks_do_not_optimize(self):
         "Removable tasks that are marked do_not_optimize are not removed"
@@ -110,7 +115,7 @@ class TestOptimize(unittest.TestCase):
             t2={"remove": None},  # but do_not_optimize
             t3={"remove": None},
         )
-        self.assert_remove_tasks(graph, {"t3"}, do_not_optimize={"t2"})
+        self.assert_remove_tasks(graph, {"t1", "t3"}, do_not_optimize={"t2"})
 
     def assert_replace_tasks(
         self,
@@ -191,12 +196,14 @@ class TestOptimize(unittest.TestCase):
         optimize.slugid = partial(next, ("tid%d" % i for i in range(1, 10)))
         try:
             got_subgraph = optimize.get_subgraph(
-                graph, removed_tasks, replaced_tasks, "DECISION-TASK"
+                graph,
+                removed_tasks,
+                replaced_tasks,
             )
         finally:
             optimize.slugid = slugid
         self.assertEqual(got_subgraph.graph, exp_subgraph.graph)
-        self.assertEqual(got_subgraph.jobs, exp_subgraph.tasks)
+        self.assertEqual(got_subgraph.jobs, exp_subgraph.jobs)
 
     def test_get_subgraph_no_change(self):
         "get_subgraph returns a similarly-shaped subgraph when nothing is removed"
@@ -205,16 +212,16 @@ class TestOptimize(unittest.TestCase):
             graph,
             set(),
             set(),
-            {},
             self.make_opt_graph(
-                self.make_task("t1", task_id="tid1", dependencies={}),
-                self.make_task("t2", task_id="tid2", dependencies={"tid1"}),
-                self.make_task("t3", task_id="tid3", dependencies={"tid1", "tid2"}),
-                ("tid3", "tid2", "dep"),
-                ("tid3", "tid1", "dep2"),
-                ("tid2", "tid1", "dep"),
+                self.make_task("t1", task_id="TO-BE-REMOVED", dependencies={}),
+                self.make_task("t2", task_id="TO-BE-REMOVED", dependencies={"t1"}),
+                self.make_task(
+                    "t3", task_id="TO-BE-REMOVED", dependencies={"t1", "t2"}
+                ),
+                ("t3", "t2", "dep"),
+                ("t3", "t1", "dep2"),
+                ("t2", "t1", "dep"),
             ),
-            {"t1": "tid1", "t2": "tid2", "t3": "tid3"},
         )
 
     def test_get_subgraph_removed(self):
@@ -224,27 +231,7 @@ class TestOptimize(unittest.TestCase):
             graph,
             {"t2", "t3"},
             set(),
-            {},
-            self.make_opt_graph(self.make_task("t1", task_id="tid1", dependencies={})),
-            {"t1": "tid1"},
-        )
-
-    def test_get_subgraph_replaced(self):
-        "get_subgraph returns a smaller subgraph when tasks are replaced"
-        graph = self.make_triangle()
-        self.assert_subgraph(
-            graph,
-            set(),
-            {"t1", "t2"},
-            {"t1": "e1", "t2": "e2"},
             self.make_opt_graph(
-                self.make_task("t3", task_id="tid1", dependencies={"e1", "e2"})
+                self.make_task("t1", task_id="TO-BE-REMOVED", dependencies={})
             ),
-            {"t1": "e1", "t2": "e2", "t3": "tid1"},
         )
-
-    def test_get_subgraph_removed_dep(self):
-        "get_subgraph raises an Exception when a task depends on a removed task"
-        graph = self.make_triangle()
-        with self.assertRaises(Exception):
-            optimize.get_subgraph(graph, {"t2"}, set(), {})

@@ -19,12 +19,14 @@ class TestJobGraph(unittest.TestCase):
             "a": Job(
                 kind="test",
                 label="a",
+                description="some test a",
                 attributes={"attr": "a-task"},
                 actual_gitlab_ci_job={"taskdef": True},
             ),
             "b": Job(
                 kind="test",
                 label="b",
+                description="some test b",
                 attributes={},
                 actual_gitlab_ci_job={"task": "def"},
                 optimization={"seta": None},
@@ -44,8 +46,9 @@ class TestJobGraph(unittest.TestCase):
                 "a": {
                     "kind": "test",
                     "label": "a",
+                    "description": "some test a",
                     "attributes": {"attr": "a-task", "kind": "test"},
-                    "task": {"taskdef": True},
+                    "actual_gitlab_ci_job": {"taskdef": True},
                     "dependencies": {"edgelabel": "b"},
                     "soft_dependencies": [],
                     "optimization": None,
@@ -53,8 +56,9 @@ class TestJobGraph(unittest.TestCase):
                 "b": {
                     "kind": "test",
                     "label": "b",
+                    "description": "some test b",
                     "attributes": {"kind": "test"},
-                    "task": {"task": "def"},
+                    "actual_gitlab_ci_job": {"task": "def"},
                     "dependencies": {},
                     "soft_dependencies": [],
                     "optimization": {"seta": None},
@@ -68,6 +72,7 @@ class TestJobGraph(unittest.TestCase):
                 "a": Job(
                     kind="fancy",
                     label="a",
+                    description="some fancy a",
                     attributes={},
                     dependencies={"prereq": "b"},  # must match edges, below
                     optimization={"seta": None},
@@ -76,6 +81,7 @@ class TestJobGraph(unittest.TestCase):
                 "b": Job(
                     kind="pre",
                     label="b",
+                    description="some pre b",
                     attributes={},
                     dependencies={},
                     optimization={"seta": None},
@@ -93,6 +99,7 @@ class TestJobGraph(unittest.TestCase):
             "a": Job(
                 kind="fancy",
                 label="a",
+                description="some fancy a",
                 attributes={},
                 dependencies={"prereq": "b"},  # must match edges, below
                 optimization={"seta": None},
@@ -101,6 +108,7 @@ class TestJobGraph(unittest.TestCase):
             "b": Job(
                 kind="pre",
                 label="b",
+                description="some pre b",
                 attributes={},
                 dependencies={},
                 optimization={"seta": None},
