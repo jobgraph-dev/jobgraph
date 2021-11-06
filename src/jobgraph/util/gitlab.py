@@ -26,16 +26,22 @@ def extract_gitlab_instance_and_namespace_and_name(url):
 
 
 def get_image_full_location(
-        gitlab_domain_name,
-        project_namespace,
-        project_name,
-        image_name,
-        image_tag,
-        resolve_digest=True):
+    gitlab_domain_name,
+    project_namespace,
+    project_name,
+    image_name,
+    image_tag,
+    resolve_digest=True,
+):
     if resolve_digest:
         try:
             image_digest = "@" + get_container_registry_image_digest(
-                gitlab_domain_name, project_namespace, project_name, image_name, image_tag)
+                gitlab_domain_name,
+                project_namespace,
+                project_name,
+                image_name,
+                image_tag,
+            )
         except ValueError:
             image_digest = ""
     else:
@@ -50,19 +56,14 @@ def get_image_full_location(
 # TODO Retry request
 @memoize
 def get_container_registry_image_digest(
-        gitlab_domain_name,
-        project_namespace,
-        project_name,
-        image_name,
-        image_tag):
+    gitlab_domain_name, project_namespace, project_name, image_name, image_tag
+):
     # Logic taken from:
     #  * https://www.pimwiddershoven.nl/entry/request-an-api-bearer-token-from-gitlab-jwt-authentication-to-control-your-private-docker-registry    # noqa: E501
     #  * https://github.com/lbolla/kubectl-plugin-outdated/pull/1
     token = _get_container_registry_token(
-        gitlab_domain_name,
-        project_namespace,
-        project_name,
-        image_name)
+        gitlab_domain_name, project_namespace, project_name, image_name
+    )
 
     url = (
         f"https://registry.{gitlab_domain_name}/v2/{project_namespace}/"
@@ -73,7 +74,7 @@ def get_container_registry_image_digest(
         headers={
             "Accept": "application/vnd.docker.distribution.manifest.v2+json",
             "Authorization": f"Bearer {token}",
-        }
+        },
     )
     if response.status_code == 404:
         raise ValueError(f"No digest found for tag: {image_tag}")
@@ -86,9 +87,7 @@ def _get_container_registry_token(
     gitlab_domain_name, project_namespace, project_name, image_name
 ):
     session = requests.Session()
-    session.auth = (
-        os.environ["CI_REGISTRY_USER"], os.environ["CI_REGISTRY_PASSWORD"]
-    )
+    session.auth = (os.environ["CI_REGISTRY_USER"], os.environ["CI_REGISTRY_PASSWORD"])
 
     url = (
         f"https://{gitlab_domain_name}/jwt/auth?"

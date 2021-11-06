@@ -56,7 +56,12 @@ class TestTargetTasks(unittest.TestCase):
         method = target_tasks.get_method("default")
         graph = JobGraph(
             jobs={
-                "a": Job(kind="build", label="a", attributes=attributes, actual_gitlab_ci_job={}),
+                "a": Job(
+                    kind="build",
+                    label="a",
+                    attributes=attributes,
+                    actual_gitlab_ci_job={},
+                ),
             },
             graph=Graph(nodes={"a"}, edges=set()),
         )
@@ -64,13 +69,19 @@ class TestTargetTasks(unittest.TestCase):
 
     def test_default_pipeline_source(self):
         self.assertTrue(self.default_matches_pipeline_source(None, "push"))
-        self.assertTrue(self.default_matches_pipeline_source(None, "merge_request_event"))
+        self.assertTrue(
+            self.default_matches_pipeline_source(None, "merge_request_event")
+        )
 
         self.assertFalse(self.default_matches_pipeline_source([], "push"))
-        self.assertFalse(self.default_matches_pipeline_source([], "merge_request_event"))
+        self.assertFalse(
+            self.default_matches_pipeline_source([], "merge_request_event")
+        )
 
         self.assertTrue(self.default_matches_pipeline_source(["all"], "push"))
-        self.assertTrue(self.default_matches_pipeline_source(["all"], "merge_request_event"))
+        self.assertTrue(
+            self.default_matches_pipeline_source(["all"], "merge_request_event")
+        )
 
         self.assertTrue(self.default_matches_pipeline_source(["push"], "push"))
         self.assertFalse(
@@ -97,24 +108,16 @@ class TestTargetTasks(unittest.TestCase):
                 None, "merge_request_event", None, "some-branch"
             )
         )
-        self.assertTrue(
-            self.default_matches_git_branches(None, "push", None, "master")
-        )
-        self.assertTrue(
-            self.default_matches_git_branches(None, "push", None, "main")
-        )
+        self.assertTrue(self.default_matches_git_branches(None, "push", None, "master"))
+        self.assertTrue(self.default_matches_git_branches(None, "push", None, "main"))
         self.assertTrue(
             self.default_matches_git_branches(None, "push", None, "some-branch")
         )
         self.assertTrue(
-            self.default_matches_git_branches(
-                None, "push", None, "release/v1.0"
-            )
+            self.default_matches_git_branches(None, "push", None, "release/v1.0")
         )
         self.assertTrue(
-            self.default_matches_git_branches(
-                None, "push", None, "release_v2.0"
-            )
+            self.default_matches_git_branches(None, "push", None, "release_v2.0")
         )
 
         self.assertFalse(
@@ -125,27 +128,17 @@ class TestTargetTasks(unittest.TestCase):
                 [], "merge_request_event", None, "some-branch"
             )
         )
-        self.assertFalse(
-            self.default_matches_git_branches([], "push", None, "master")
-        )
-        self.assertFalse(
-            self.default_matches_git_branches([], "push", None, "main")
-        )
+        self.assertFalse(self.default_matches_git_branches([], "push", None, "master"))
+        self.assertFalse(self.default_matches_git_branches([], "push", None, "main"))
         self.assertFalse(
             self.default_matches_git_branches([], "push", None, "some-branch")
         )
+        self.assertFalse(self.default_matches_git_branches([], "push", None, "master"))
         self.assertFalse(
-            self.default_matches_git_branches([], "push", None, "master")
+            self.default_matches_git_branches([], "push", None, "release/v1.0")
         )
         self.assertFalse(
-            self.default_matches_git_branches(
-                [], "push", None, "release/v1.0"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                [], "push", None, "release_v2.0"
-            )
+            self.default_matches_git_branches([], "push", None, "release_v2.0")
         )
 
         self.assertTrue(
@@ -159,14 +152,10 @@ class TestTargetTasks(unittest.TestCase):
             )
         )
         self.assertTrue(
-            self.default_matches_git_branches(
-                ["all"], "push", ["master"], "master"
-            )
+            self.default_matches_git_branches(["all"], "push", ["master"], "master")
         )
         self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "push", ["master"], "main"
-            )
+            self.default_matches_git_branches(["all"], "push", ["master"], "main")
         )
         self.assertFalse(
             self.default_matches_git_branches(
@@ -174,9 +163,7 @@ class TestTargetTasks(unittest.TestCase):
             )
         )
         self.assertTrue(
-            self.default_matches_git_branches(
-                ["all"], "push", ["master"], "master"
-            )
+            self.default_matches_git_branches(["all"], "push", ["master"], "master")
         )
         self.assertFalse(
             self.default_matches_git_branches(
@@ -205,9 +192,7 @@ class TestTargetTasks(unittest.TestCase):
             )
         )
         self.assertFalse(
-            self.default_matches_git_branches(
-                ["all"], "push", [r"release/.+"], "main"
-            )
+            self.default_matches_git_branches(["all"], "push", [r"release/.+"], "main")
         )
         self.assertFalse(
             self.default_matches_git_branches(
@@ -318,7 +303,12 @@ class TestTargetTasks(unittest.TestCase):
     def make_task_graph(self):
         tasks = {
             "a": Job(kind=None, label="a", attributes={}, actual_gitlab_ci_job={}),
-            "b": Job(kind=None, label="b", attributes={"at-at": "yep"}, actual_gitlab_ci_job={}),
+            "b": Job(
+                kind=None,
+                label="b",
+                attributes={"at-at": "yep"},
+                actual_gitlab_ci_job={},
+            ),
         }
         graph = Graph(nodes=set("abc"), edges=set())
         return JobGraph(tasks, graph)

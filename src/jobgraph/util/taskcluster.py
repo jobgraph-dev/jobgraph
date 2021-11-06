@@ -31,7 +31,7 @@ CONCURRENCY = 50
 def get_root_url():
     """Get the current TASKCLUSTER_ROOT_URL.  When running in a task, this must
     come from $TASKCLUSTER_ROOT_URL; when run on the command line, we apply a
-    defualt that points to the production deployment of Taskcluster. """
+    defualt that points to the production deployment of Taskcluster."""
     if "TASKCLUSTER_ROOT_URL" not in os.environ:
         logger.debug("Using default TASKCLUSTER_ROOT_URL (Firefox CI production)")
         return PRODUCTION_TASKCLUSTER_ROOT_URL
@@ -161,9 +161,7 @@ def rerun_task(task_id):
 
 
 def get_purge_cache_url(worker_type):
-    url_tmpl = liburls.api(
-        get_root_url(), "purge-cache", "v1", "purge-cache/{}/{}"
-    )
+    url_tmpl = liburls.api(get_root_url(), "purge-cache", "v1", "purge-cache/{}/{}")
     return url_tmpl.format(worker_type)
 
 

@@ -573,14 +573,17 @@ def image_digest(args):
     help='URL for "head" repository to fetch revision from',
 )
 @argument(
-    "--head-ref", required=True, help="Commit reference (branch name or tag, for instance)"
+    "--head-ref",
+    required=True,
+    help="Commit reference (branch name or tag, for instance)",
 )
 @argument(
     "--head-rev", required=True, help="Commit revision to use from head repository"
 )
 @argument("--head-tag", help="Tag attached to the revision", default="")
 @argument(
-    "--pipeline-source", required=True,
+    "--pipeline-source",
+    required=True,
     help="the pipeline_source value used to generate this task",
     # List defined in CI_PIPELINE_SOURCE at
     # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
@@ -597,7 +600,7 @@ def image_digest(args):
         "trigger",
         "web",
         "webide",
-    )
+    ),
 )
 @argument("--try-task-config-file", help="path to try task configuration file")
 def decision(options):

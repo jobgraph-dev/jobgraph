@@ -319,9 +319,7 @@ class JobGraphGenerator:
         yield verifications("full_task_graph", full_task_graph, graph_config)
 
         logger.info("Generating target task set")
-        target_task_set = JobGraph(
-            dict(all_tasks), Graph(set(all_tasks.keys()), set())
-        )
+        target_task_set = JobGraph(dict(all_tasks), Graph(set(all_tasks.keys()), set()))
         for fltr in filters:
             old_len = len(target_task_set.graph.nodes)
             target_tasks = set(fltr(target_task_set, parameters, graph_config))
@@ -374,9 +372,7 @@ class JobGraphGenerator:
 
         yield verifications("optimized_task_graph", optimized_task_graph, graph_config)
 
-        morphed_task_graph = morph(
-            optimized_task_graph, parameters, graph_config
-        )
+        morphed_task_graph = morph(optimized_task_graph, parameters, graph_config)
 
         yield verifications("morphed_task_graph", morphed_task_graph, graph_config)
 

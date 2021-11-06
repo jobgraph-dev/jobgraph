@@ -79,11 +79,10 @@ def add_registry_specific_config(config, tasks):
                 '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
             )
             task.setdefault("optimization", {}).setdefault(
-                "skip-if-on-gitlab-container-registry", True)
-        else:
-            raise ValueError(
-                f"Unknown container-registry-type: {registry_type}"
+                "skip-if-on-gitlab-container-registry", True
             )
+        else:
+            raise ValueError(f"Unknown container-registry-type: {registry_type}")
 
         yield task
 
@@ -154,7 +153,9 @@ def fill_template(config, tasks):
         if parent:
             deps = taskdesc.setdefault("dependencies", {})
             deps["parent"] = f"build-docker-image-{parent}"
-            worker["env"]["DOCKER_IMAGE_PARENT"] = {"docker-image-reference": "<parent>"}
+            worker["env"]["DOCKER_IMAGE_PARENT"] = {
+                "docker-image-reference": "<parent>"
+            }
             args = taskdesc.setdefault("args", {})
             args |= {"DOCKER_IMAGE_PARENT": "$DOCKER_IMAGE_PARENT"}
 
@@ -175,14 +176,17 @@ def define_docker_commands(config, tasks):
         definition = task.get("definition", image_name)
         docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
         build_args = " ".join(
-            f'--build-arg "{argument_name}={argument_value}"' for argument_name,
-            argument_value in arguments.items())
-        worker["command"] = " && ".join((
-            worker.get("command", ""),
-            f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
-            f'"$CI_PROJECT_DIR/{docker_file}" {build_args} .',
-            'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
-        ))
+            f'--build-arg "{argument_name}={argument_value}"'
+            for argument_name, argument_value in arguments.items()
+        )
+        worker["command"] = " && ".join(
+            (
+                worker.get("command", ""),
+                f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
+                f'"$CI_PROJECT_DIR/{docker_file}" {build_args} .',
+                'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
+            )
+        )
 
         yield task
 
@@ -204,10 +208,13 @@ def fill_context_hash(config, tasks):
             context_hash = "0" * 40
 
         worker = task.setdefault("worker", {})
-        gitlab_domain_name, repo_namespace, repo_name = \
-            extract_gitlab_instance_and_namespace_and_name(
-                config.params["head_repository"]
-            )
+        (
+            gitlab_domain_name,
+            repo_namespace,
+            repo_name,
+        ) = extract_gitlab_instance_and_namespace_and_name(
+            config.params["head_repository"]
+        )
         task["attributes"] |= {
             "context_hash": context_hash,
             "docker_image_full_location": get_image_full_location(
@@ -216,8 +223,9 @@ def fill_context_hash(config, tasks):
                 repo_name,
                 image_name,
                 image_tag=context_hash,
-                resolve_digest=True),
-         }
+                resolve_digest=True,
+            ),
+        }
         worker["env"] |= {
             # We use hashes as tags to reduce potential collisions of regular tags
             "DOCKER_IMAGE_TAG": context_hash,

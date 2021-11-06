@@ -60,8 +60,13 @@ class TransformConfig:
     @property
     @memoize
     def repo_config(self):
-        gitlab_instance_domain, namespace, name = extract_gitlab_instance_and_namespace_and_name(
-            self.params["base_repository"])
+        (
+            gitlab_instance_domain,
+            namespace,
+            name,
+        ) = extract_gitlab_instance_and_namespace_and_name(
+            self.params["base_repository"]
+        )
 
         return RepoConfig(
             gitlab_instance_domain=gitlab_instance_domain,

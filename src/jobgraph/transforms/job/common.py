@@ -120,9 +120,7 @@ def support_vcs_checkout(config, job, taskdesc, repo_config):
     env = taskdesc["worker"].setdefault("env", {})
     env.update(
         {
-            "REPOSITORIES": json.dumps(
-                {repo_config.namespace: repo_config.name}
-            ),
+            "REPOSITORIES": json.dumps({repo_config.namespace: repo_config.name}),
             "VCS_PATH": vcsdir,
         }
     )

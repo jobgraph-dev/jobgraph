@@ -199,19 +199,19 @@ def get_subgraph(
         }
 
         docker_images = {
-            name: target_task_graph.jobs[dep_label].attributes["docker_image_full_location"]
+            name: target_task_graph.jobs[dep_label].attributes[
+                "docker_image_full_location"
+            ]
             for name, dep_label in named_links_dict.get(label, {}).items()
-            if target_task_graph.jobs[dep_label].attributes.get("docker_image_full_location")
+            if target_task_graph.jobs[dep_label].attributes.get(
+                "docker_image_full_location"
+            )
         }
 
         # Add remaining soft dependencies
         if task.soft_dependencies:
             named_task_dependencies.update(
-                {
-                    label: label
-                    for label in task.soft_dependencies
-                    if label not in omit
-                }
+                {label: label for label in task.soft_dependencies if label not in omit}
             )
 
         task.actual_gitlab_ci_job = resolve_task_references(
@@ -290,7 +290,9 @@ class Either(OptimizationStrategy):
 @register_strategy("skip-unless-changed")
 class SkipUnlessChanged(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
-        raise NotImplementedError("Please implement this optimization strategy on Gitlab CI.")
+        raise NotImplementedError(
+            "Please implement this optimization strategy on Gitlab CI."
+        )
 
 
 @register_strategy("never")

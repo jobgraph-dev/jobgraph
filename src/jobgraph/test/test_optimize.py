@@ -42,7 +42,9 @@ class TestOptimize(unittest.TestCase):
         dependencies=None,
     ):
         task_def = task_def or {"sample": "task-def"}
-        task = Job(kind="test", label=label, attributes={}, actual_gitlab_ci_job=task_def)
+        task = Job(
+            kind="test", label=label, attributes={}, actual_gitlab_ci_job=task_def
+        )
         task.optimization = optimization
         task.task_id = task_id
         if dependencies is not None:
@@ -152,9 +154,7 @@ class TestOptimize(unittest.TestCase):
     def test_replace_tasks_blocked(self):
         "A task cannot be replaced if it depends on one that was not replaced"
         graph = self.make_triangle(t1={"replace": "e1"}, t3={"replace": "e3"})
-        self.assert_replace_tasks(
-            graph, exp_replaced={"t1"}
-        )
+        self.assert_replace_tasks(graph, exp_replaced={"t1"})
 
     def test_replace_tasks_do_not_optimize(self):
         "A task cannot be replaced if it depends on one that was not replaced"

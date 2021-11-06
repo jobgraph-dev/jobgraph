@@ -187,9 +187,7 @@ def build_docker_worker_payload(config, task, task_def):
             # Find VOLUME in Dockerfile.
             volumes = dockerutil.parse_volumes(name)
             if volumes:
-                raise Exception(
-                    "volumes defined in Dockerfiles are not supported."
-                )
+                raise Exception("volumes defined in Dockerfiles are not supported.")
 
         else:
             raise Exception("unknown docker image type")
@@ -197,7 +195,9 @@ def build_docker_worker_payload(config, task, task_def):
     features = {}
 
     if worker.get("docker-in-docker"):
-        task_def["services"] = [config.graph_config["jobgraph"]["docker-in-docker-image"]]
+        task_def["services"] = [
+            config.graph_config["jobgraph"]["docker-in-docker-image"]
+        ]
 
     capabilities = {}
 
@@ -215,12 +215,9 @@ def build_docker_worker_payload(config, task, task_def):
 
     if "artifacts" in worker:
         task_def["artifacts"] = {
-            "expire_in": "3 months",    # TODO: Parametrize
-            "paths": [
-                artifact["path"]
-                for artifact in worker["artifacts"]
-            ],
-            "public": False,    # TODO: Parametrize
+            "expire_in": "3 months",  # TODO: Parametrize
+            "paths": [artifact["path"] for artifact in worker["artifacts"]],
+            "public": False,  # TODO: Parametrize
             "reports": {},  # TODO: Support different types of reports
         }
 
@@ -389,7 +386,9 @@ def build_task(config, tasks):
         )
 
         attributes = task.get("attributes", {})
-        attributes["run_on_pipeline_sources"] = task.get("run-on-pipeline-sources", ["all"])
+        attributes["run_on_pipeline_sources"] = task.get(
+            "run-on-pipeline-sources", ["all"]
+        )
         attributes["run_on_git_branches"] = task.get("run-on-git-branches", ["all"])
         attributes["always_target"] = task["always-target"]
 

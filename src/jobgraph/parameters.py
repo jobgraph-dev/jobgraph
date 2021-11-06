@@ -161,7 +161,9 @@ class Parameters(ReadOnlyDict):
         Determine whether this graph is being built on a try project or for
         `mach try fuzzy`.
         """
-        return "try" in self["project"] or self["pipeline_source"] == "merge_request_event"
+        return (
+            "try" in self["project"] or self["pipeline_source"] == "merge_request_event"
+        )
 
     def file_url(self, path, pretty=False):
         """
@@ -177,7 +179,10 @@ class Parameters(ReadOnlyDict):
         # For getting the file URL for git repositories, we only support a Github HTTPS remote
         repo = self["head_repository"]
         repo_providers = [
-            repo_provider for repo_provider in GIT_REPO_PROVIDERS if repo_provider in repo]
+            repo_provider
+            for repo_provider in GIT_REPO_PROVIDERS
+            if repo_provider in repo
+        ]
         if len(repo_providers) > 1:
             raise ParameterMismatch(
                 f"Too many repo providers matched this repo: {repo}. "
@@ -197,7 +202,9 @@ class Parameters(ReadOnlyDict):
         elif repo.startswith(f"git@{repo_provider}.com:"):
             if repo.endswith(".git"):
                 repo = repo[:-4]
-            https_repo = repo.replace(f"git@{repo_provider}.com:", f"https://{repo_provider}.com/")
+            https_repo = repo.replace(
+                f"git@{repo_provider}.com:", f"https://{repo_provider}.com/"
+            )
         else:
             raise ParameterMismatch(
                 "Identified github or gitlab URL but cannot determine file URL. Repo: {repo}"

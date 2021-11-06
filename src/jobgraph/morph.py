@@ -46,7 +46,5 @@ def morph(jobgraph, parameters, graph_config):
     morphs = []
 
     for m in morphs:
-        jobgraph = m(
-            jobgraph, parameters, graph_config
-        )
+        jobgraph = m(jobgraph, parameters, graph_config)
     return jobgraph

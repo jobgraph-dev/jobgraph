@@ -34,8 +34,12 @@ def filter_out_cron(task, parameters):
 
 
 def filter_for_pipeline_source(task, parameters):
-    run_on_pipeline_sources = set(task.attributes.get("run_on_pipeline_sources", ["all"]))
-    return match_run_on_pipeline_sources(parameters["pipeline_source"], run_on_pipeline_sources)
+    run_on_pipeline_sources = set(
+        task.attributes.get("run_on_pipeline_sources", ["all"])
+    )
+    return match_run_on_pipeline_sources(
+        parameters["pipeline_source"], run_on_pipeline_sources
+    )
 
 
 def filter_for_git_branch(task, parameters):
