@@ -8,7 +8,6 @@ consistency.
 """
 
 
-import hashlib
 import json
 
 from jobgraph.util.taskcluster import get_artifact_prefix

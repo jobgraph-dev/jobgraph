@@ -3,17 +3,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-import json
 import logging
 import os
 import re
 
 import jobgraph
 from jobgraph.transforms.base import TransformSequence
-from jobgraph.util.docker import (
-    generate_context_hash,
-    create_context_tar,
-)
+from jobgraph.util.docker import generate_context_hash
 from jobgraph.util.schema import (
     Schema,
 )
@@ -25,7 +21,6 @@ from voluptuous import (
     Optional,
     Required,
 )
-from .task import task_description_schema
 
 logger = logging.getLogger(__name__)
 
@@ -72,16 +67,23 @@ def add_registry_specific_config(config, tasks):
             worker = task.setdefault("worker", {})
             env = worker.setdefault("env", {})
 
-            # See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
+            # See
+            # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
             env["DOCKER_HOST"] = "tcp://docker:2376"
             env["DOCKER_TLS_CERTDIR"] = "/certs"
             env["DOCKER_TLS_VERIFY"] = "1"
             env["DOCKER_CERT_PATH"] = "$DOCKER_TLS_CERTDIR/client"
 
-            worker["command"] = 'docker login --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
-            task.setdefault("optimization", {}).setdefault("skip-if-on-gitlab-container-registry", True)
+            worker["command"] = (
+                'docker login --username "$CI_REGISTRY_USER" --password '
+                '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
+            )
+            task.setdefault("optimization", {}).setdefault(
+                "skip-if-on-gitlab-container-registry", True)
         else:
-            raise ValueError(f"Unknown container-registry-type: {registry_type}")
+            raise ValueError(
+                f"Unknown container-registry-type: {registry_type}"
+            )
 
         yield task
 
@@ -172,10 +174,13 @@ def define_docker_commands(config, tasks):
         image_name = task.pop("name")
         definition = task.get("definition", image_name)
         docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
-        build_args = " ".join(f'--build-arg "{argument_name}={argument_value}"' for argument_name, argument_value in arguments.items())
+        build_args = " ".join(
+            f'--build-arg "{argument_name}={argument_value}"' for argument_name,
+            argument_value in arguments.items())
         worker["command"] = " && ".join((
             worker.get("command", ""),
-            f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file "$CI_PROJECT_DIR/{docker_file}" {build_args} .',
+            f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
+            f'"$CI_PROJECT_DIR/{docker_file}" {build_args} .',
             'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
         ))
 
@@ -199,16 +204,32 @@ def fill_context_hash(config, tasks):
             context_hash = "0" * 40
 
         worker = task.setdefault("worker", {})
-        gitlab_domain_name, repo_namespace, repo_name = extract_gitlab_instance_and_namespace_and_name(config.params["head_repository"])
+        gitlab_domain_name, repo_namespace, repo_name = \
+            extract_gitlab_instance_and_namespace_and_name(
+                config.params["head_repository"]
+            )
         task["attributes"] |= {
             "context_hash": context_hash,
-            "docker_image_full_location": get_image_full_location(gitlab_domain_name, repo_namespace, repo_name, image_name, image_tag=context_hash, resolve_digest=True),
-        }
+            "docker_image_full_location": get_image_full_location(
+                gitlab_domain_name,
+                repo_namespace,
+                repo_name,
+                image_name,
+                image_tag=context_hash,
+                resolve_digest=True),
+         }
         worker["env"] |= {
             # We use hashes as tags to reduce potential collisions of regular tags
             "DOCKER_IMAGE_TAG": context_hash,
             # We shouldn't resolve digest if we build and push image in this job
-            "DOCKER_IMAGE_FULL_LOCATION": get_image_full_location(gitlab_domain_name, repo_namespace, repo_name, image_name, image_tag=context_hash, resolve_digest=False),
+            "DOCKER_IMAGE_FULL_LOCATION": get_image_full_location(
+                gitlab_domain_name,
+                repo_namespace,
+                repo_name,
+                image_name,
+                image_tag=context_hash,
+                resolve_digest=False,
+            ),
         }
 
         yield task

@@ -17,7 +17,6 @@ import os
 
 
 from jobgraph.transforms.base import TransformSequence
-from jobgraph.util import path as mozpath
 from jobgraph.util.schema import (
     validate_schema,
     Schema,
@@ -299,12 +298,6 @@ def use_fetches(config, jobs):
                     if dest is not None:
                         fetch["dest"] = dest
                     job_fetches.append(fetch)
-
-        job_artifact_prefixes = {
-            mozpath.dirname(fetch["artifact"])
-            for fetch in job_fetches
-            if not fetch["artifact"].startswith("public/")
-        }
 
         env = worker.setdefault("env", {})
         env["MOZ_FETCHES"] = {"task-reference": json.dumps(job_fetches, sort_keys=True)}

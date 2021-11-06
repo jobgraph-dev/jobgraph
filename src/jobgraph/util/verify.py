@@ -4,7 +4,6 @@
 
 
 import logging
-import sys
 
 import attr
 
@@ -43,22 +42,6 @@ class VerificationSequence:
 
 
 verifications = VerificationSequence()
-
-
-@verifications.add("full_task_graph")
-def verify_notification_filters(task, jobgraph, scratch_pad, graph_config):
-    """
-    This function ensures that only understood filters for notifications are
-    specified.
-
-    See: https://docs.taskcluster.net/reference/core/taskcluster-notify/docs/usage
-    """
-    if task is None:
-        return
-    valid_filters = ("on-any", "on-completed", "on-failed", "on-exception")
-    task_dict = task.actual_gitlab_ci_job
-
-    # TODO support notification without Taskcluster's routes
 
 
 @verifications.add("optimized_task_graph")

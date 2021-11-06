@@ -5,7 +5,6 @@
 
 import os
 import subprocess
-from textwrap import dedent
 
 import pytest
 

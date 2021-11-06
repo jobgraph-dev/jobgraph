@@ -3,7 +3,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-import re
 from typing import AnyStr
 
 import attr
@@ -61,12 +60,13 @@ class TransformConfig:
     @property
     @memoize
     def repo_config(self):
-        gitlab_instance_domain, namespace, name = extract_gitlab_instance_and_namespace_and_name(self.params["base_repository"])
+        gitlab_instance_domain, namespace, name = extract_gitlab_instance_and_namespace_and_name(
+            self.params["base_repository"])
 
         return RepoConfig(
             gitlab_instance_domain=gitlab_instance_domain,
             name=name,
-            namespace = namespace,
+            namespace=namespace,
             base_repository=self.params["base_repository"],
             head_repository=self.params["head_repository"],
             head_ref=self.params["head_ref"],

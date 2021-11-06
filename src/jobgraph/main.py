@@ -580,8 +580,10 @@ def image_digest(args):
 )
 @argument("--head-tag", help="Tag attached to the revision", default="")
 @argument(
-    "--pipeline-source", required=True, help="the pipeline_source value used to generate this task",
-    # List defined in CI_PIPELINE_SOURCE at https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+    "--pipeline-source", required=True,
+    help="the pipeline_source value used to generate this task",
+    # List defined in CI_PIPELINE_SOURCE at
+    # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
     choices=(
         "api",
         "chat",

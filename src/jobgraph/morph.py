@@ -20,14 +20,9 @@ the graph.
 
 import logging
 import os
-import re
 
-from slugid import nice as slugid
-
-from .job import Job
 from .graph import Graph
 from .jobgraph import JobGraph
-from .util.workertypes import get_worker_type
 
 here = os.path.abspath(os.path.dirname(__file__))
 logger = logging.getLogger(__name__)

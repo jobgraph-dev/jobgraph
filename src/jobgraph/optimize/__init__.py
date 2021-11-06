@@ -28,6 +28,7 @@ TOPSRCDIR = os.path.abspath(os.path.join(__file__, "../../../"))
 
 strategies = {}
 
+
 def register_strategy(name, args=()):
     def wrap(cls):
         if name not in strategies:
@@ -291,8 +292,9 @@ class SkipUnlessChanged(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
         raise NotImplementedError("Please implement this optimization strategy on Gitlab CI.")
 
+
 @register_strategy("never")
-class SkipUnlessChanged(OptimizationStrategy):
+class Never(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
         return False
 

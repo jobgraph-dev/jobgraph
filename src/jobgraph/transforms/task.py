@@ -11,25 +11,17 @@ complexities of worker implementations.
 
 import hashlib
 import os
-import re
-import time
-from copy import deepcopy
 
 import attr
 
 from jobgraph.util.hash import hash_path
-from jobgraph.util.keyed_by import evaluate_keyed_by
 from jobgraph.util.memoize import memoize
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.schema import (
     validate_schema,
     Schema,
-    optionally_keyed_by,
-    resolve_keyed_by,
-    OptimizationSchema,
     taskref_or_string,
 )
-from jobgraph.util.workertypes import worker_type_implementation
 from voluptuous import Any, Required, Optional, Extra, All, NotIn
 from jobgraph import MAX_DEPENDENCIES
 from ..util import docker as dockerutil

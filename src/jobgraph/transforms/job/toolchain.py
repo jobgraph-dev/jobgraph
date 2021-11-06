@@ -7,7 +7,7 @@ Support for running toolchain-building jobs via dedicated scripts
 
 
 from jobgraph.util.schema import Schema
-from voluptuous import Optional, Required, Any
+from voluptuous import Optional, Required
 
 from jobgraph.transforms.job import (
     configure_taskdesc_for_run,

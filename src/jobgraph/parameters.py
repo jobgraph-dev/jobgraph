@@ -7,7 +7,6 @@ import hashlib
 import json
 import os
 import time
-from datetime import datetime
 from pprint import pformat
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -19,7 +18,6 @@ from jobgraph.util.vcs import get_repository
 from voluptuous import (
     ALLOW_EXTRA,
     Required,
-    Optional,
     Schema,
 )
 
@@ -178,9 +176,13 @@ class Parameters(ReadOnlyDict):
         """
         # For getting the file URL for git repositories, we only support a Github HTTPS remote
         repo = self["head_repository"]
-        repo_providers = [repo_provider for repo_provider in GIT_REPO_PROVIDERS if repo_provider in repo]
+        repo_providers = [
+            repo_provider for repo_provider in GIT_REPO_PROVIDERS if repo_provider in repo]
         if len(repo_providers) > 1:
-            raise ParameterMismatch(f"Too many repo providers matched this repo: {repo}. Matched providers: {repo_providers}")
+            raise ParameterMismatch(
+                f"Too many repo providers matched this repo: {repo}. "
+                "Matched providers: {repo_providers}"
+            )
         elif len(repo_providers) == 0:
             raise ParameterMismatch(
                 "Don't know how to determine file URL for non-github or non-gitlab"

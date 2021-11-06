@@ -8,9 +8,6 @@ import subprocess
 from abc import ABC, abstractproperty, abstractmethod
 from shutil import which
 
-import requests
-from redo import retry
-
 
 class Repository(ABC):
     def __init__(self, path):

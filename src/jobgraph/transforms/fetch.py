@@ -111,13 +111,6 @@ def configure_fetch(config, typ, name, fetch):
 
 @transforms.add
 def make_task(config, jobs):
-    # Fetch tasks are idempotent and immutable. Have them live for
-    # essentially forever.
-    if config.params["level"] == "3":
-        expires = "1000 years"
-    else:
-        expires = "28 days"
-
     for job in jobs:
         name = job["name"]
         artifact_prefix = job.get("artifact-prefix", "public")

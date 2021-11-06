@@ -14,7 +14,8 @@ class Job:
     - kind: the name of the task kind
     - label; the label for this task
     - attributes: a dictionary of attributes for this task (used for filtering)
-    - actual_gitlab_ci_job: the job definition (JSON-able dictionary) which will be output to `.gitlab-ci.yml`
+    - actual_gitlab_ci_job: the job definition (JSON-able dictionary) which
+      will be output to `.gitlab-ci.yml`
     - optimization: optimization to apply to the task (see jobgraph.optimize)
     - dependencies: tasks this one depends on, in the form {name: label}, for example
       {'build': 'build-linux64/opt', 'docker-image': 'build-docker-image-desktop-test'}
