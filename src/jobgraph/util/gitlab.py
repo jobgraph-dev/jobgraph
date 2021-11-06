@@ -47,10 +47,7 @@ def get_image_full_location(
     else:
         image_digest = ""
 
-    return (
-        f"registry.{gitlab_domain_name}/{project_namespace}/{project_name}/"
-        f"{image_name}:{image_tag}{image_digest}".lower()
-    )
+    return f"registry.{gitlab_domain_name}/{project_namespace}/{project_name}/{image_name}:{image_tag}{image_digest}".lower()  # noqa E501
 
 
 # TODO Retry request
@@ -65,10 +62,7 @@ def get_container_registry_image_digest(
         gitlab_domain_name, project_namespace, project_name, image_name
     )
 
-    url = (
-        f"https://registry.{gitlab_domain_name}/v2/{project_namespace}/"
-        "{project_name}/{image_name}/manifests/{image_tag}"
-    )
+    url = f"https://registry.{gitlab_domain_name}/v2/{project_namespace}/{project_name}/{image_name}/manifests/{image_tag}"  # noqa E501
     response = requests.get(
         url.lower(),
         headers={
@@ -89,12 +83,7 @@ def _get_container_registry_token(
     session = requests.Session()
     session.auth = (os.environ["CI_REGISTRY_USER"], os.environ["CI_REGISTRY_PASSWORD"])
 
-    url = (
-        f"https://{gitlab_domain_name}/jwt/auth?"
-        "client_id=docker&offline_token=true&"
-        "service=container_registry"
-        "&scope=repository:{project_namespace}/{project_name}/{image_name}:pull"
-    )
+    url = f"https://{gitlab_domain_name}/jwt/auth?client_id=docker&offline_token=true&service=container_registry&scope=repository:{project_namespace}/{project_name}/{image_name}:pull".lower()  # noqa E501
     response = session.get(url.lower())
     response.raise_for_status()
     return response.json()["token"]
