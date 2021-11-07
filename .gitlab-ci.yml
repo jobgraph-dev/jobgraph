@@ -9,7 +9,7 @@ decision:
         expire_in: 1 year
         paths:
             - artifacts/*
-    image: registry.gitlab.com/johanlorenzo/jobgraph/decision@sha256:bfadac4a6e87372a1566e659c3e3e76e985847878e1eebf0756df279e5784105
+    image: registry.gitlab.com/johanlorenzo/jobgraph/decision@sha256:92dbab416ab1538e2df8daf6880f2383bb1719d7e73d1954c0d19d4054d687b9
     retry:
         max: 2
         when:
@@ -18,7 +18,6 @@ decision:
             - runner_system_failure
             - stuck_or_timeout_failure
     script:
-        - pip install --user --require-hashes --requirement "$CI_PROJECT_DIR/requirements/base.txt"
         # We reinstall jobgraph to use the cloned version instead of the version in the docker image
         - pip install --prefix "/runner/.local" --no-deps --editable "$CI_PROJECT_DIR"
         - >-
