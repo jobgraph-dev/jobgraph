@@ -31,6 +31,5 @@ setup(
             "run-task/run-task",
             "run-task/fetch-content",
         ],
-        "jobgraph.test": ["automationrelevance.json"],
     },
 )
