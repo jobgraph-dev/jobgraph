@@ -15,6 +15,7 @@ import logging
 import json
 import os
 
+from collections import deque
 
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.schema import (
@@ -23,7 +24,6 @@ from jobgraph.util.schema import (
 )
 from jobgraph.util.taskcluster import get_artifact_prefix
 from jobgraph.util.workertypes import worker_type_implementation
-from jobgraph.transforms.cached_tasks import order_tasks
 from jobgraph.transforms.task import task_description_schema
 from voluptuous import (
     Extra,
@@ -307,6 +307,33 @@ def use_fetches(config, jobs):
         env.setdefault("MOZ_FETCHES_DIR", "fetches")
 
         yield job
+
+
+def order_tasks(config, tasks):
+    """Iterate image tasks in an order where parent tasks come first."""
+    if config.kind == "docker-image":
+        kind_prefix = "build-docker-image-"
+    else:
+        kind_prefix = config.kind + "-"
+
+    pending = deque(tasks)
+    task_labels = {task["label"] for task in pending}
+    emitted = set()
+    while True:
+        try:
+            task = pending.popleft()
+        except IndexError:
+            break
+        parents = {
+            task
+            for task in task.get("dependencies", {}).values()
+            if task.startswith(kind_prefix)
+        }
+        if parents and not emitted.issuperset(parents & task_labels):
+            pending.append(task)
+            continue
+        emitted.add(task["label"])
+        yield task
 
 
 @transforms.add

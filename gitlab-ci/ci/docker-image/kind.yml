@@ -7,7 +7,6 @@ loader: jobgraph.loader.transform:loader
 
 transforms:
     - jobgraph.transforms.docker_image:transforms
-    - jobgraph.transforms.cached_tasks:transforms
     - jobgraph.transforms.task:transforms
 
 
