@@ -15,17 +15,17 @@ def test_kind_ordering(maketgg):
             ("_fake1", {"kind-dependencies": []}),
         ]
     )
-    tgg._run_until("full_task_set")
+    tgg._run_until("full_job_set")
     assert FakeKind.loaded_kinds == ["_fake1", "_fake2", "_fake3"]
 
 
-def test_full_task_set(maketgg):
-    "The full_task_set property has all tasks"
+def test_full_job_set(maketgg):
+    "The full_job_set property has all tasks"
     tgg = maketgg()
-    assert tgg.full_task_set.graph == graph.Graph(
+    assert tgg.full_job_set.graph == graph.Graph(
         {"_fake-t-0", "_fake-t-1", "_fake-t-2"}, set()
     )
-    assert sorted(tgg.full_task_set.jobs.keys()) == sorted(
+    assert sorted(tgg.full_job_set.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_fake-t-2"]
     )
 

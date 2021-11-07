@@ -147,13 +147,13 @@ class JobGraphGenerator:
         return self._run_until("parameters")
 
     @property
-    def full_task_set(self):
+    def full_job_set(self):
         """
         The full task set: all tasks defined by any kind (a graph without edges)
 
         @type: JobGraph
         """
-        return self._run_until("full_task_set")
+        return self._run_until("full_job_set")
 
     @property
     def full_job_graph(self):
@@ -302,19 +302,19 @@ class JobGraphGenerator:
                     raise Exception("duplicate tasks with label " + task.label)
                 all_tasks[task.label] = task
             logger.info(f"Generated {len(new_tasks)} tasks for kind {kind_name}")
-        full_task_set = JobGraph(all_tasks, Graph(set(all_tasks), set()))
-        yield verifications("full_task_set", full_task_set, graph_config)
+        full_job_set = JobGraph(all_tasks, Graph(set(all_tasks), set()))
+        yield verifications("full_job_set", full_job_set, graph_config)
 
         logger.info("Generating full task graph")
         edges = set()
-        for t in full_task_set:
+        for t in full_job_set:
             for depname, dep in t.dependencies.items():
                 edges.add((t.label, dep, depname))
 
-        full_job_graph = JobGraph(all_tasks, Graph(full_task_set.graph.nodes, edges))
+        full_job_graph = JobGraph(all_tasks, Graph(full_job_set.graph.nodes, edges))
         logger.info(
             "Full task graph contains %d tasks and %d dependencies"
-            % (len(full_task_set.graph.nodes), len(edges))
+            % (len(full_job_set.graph.nodes), len(edges))
         )
         yield verifications("full_job_graph", full_job_graph, graph_config)
 
@@ -399,6 +399,6 @@ def load_tasks_for_kind(parameters, kind, root_dir=None):
     jgg = JobGraphGenerator(root_dir=root_dir, parameters=parameters)
     return {
         task.actual_gitlab_ci_job["metadata"]["name"]: task
-        for task in jgg.full_task_set
+        for task in jgg.full_job_set
         if task.kind == kind
     }

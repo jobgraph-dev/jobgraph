@@ -206,7 +206,7 @@ def generate_jobgraph(options, parameters, logdir):
 @command(
     "tasks",
     help="Show all jobs in the jobgraph.",
-    defaults={"graph_attr": "full_task_set"},
+    defaults={"graph_attr": "full_job_set"},
 )
 @command(
     "full", help="Show the full jobgraph.", defaults={"graph_attr": "full_job_graph"}
