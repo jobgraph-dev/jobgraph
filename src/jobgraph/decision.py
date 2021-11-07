@@ -44,13 +44,13 @@ try_task_config_schema_v2 = Schema(
 
 def jobgraph_decision(options, parameters=None):
     """
-    Run the decision task.  This function implements `jobgraph decision`,
+    Run the decision job.  This function implements `jobgraph decision`,
     and is responsible for
 
-     * processing decision task command-line options into parameters
-     * running task-graph generation exactly the same way the other `jobgraph` commands do
+     * processing decision job command-line options into parameters
+     * running jobgraph generation exactly the same way the other `jobgraph` commands do
      * generating a set of artifacts to memorialize the graph
-     * calling TaskCluster APIs to create the graph
+     * calling Gitlab APIs to create the graph
     """
 
     parameters = parameters or (
@@ -68,18 +68,17 @@ def jobgraph_decision(options, parameters=None):
     write_artifact("parameters.yml", dict(**jgg.parameters))
 
     # write out the full graph for reference
-    full_task_json = jgg.full_job_graph.to_json()
-    write_artifact("full-task-graph.yml", full_task_json)
+    full_job_json = jgg.full_job_graph.to_json()
+    write_artifact("full-job-graph.yml", full_job_json)
 
     # this is just a test to check whether the from_json() function is working
-    _, _ = JobGraph.from_json(full_task_json)
+    _, _ = JobGraph.from_json(full_job_json)
 
-    # write out the target task set to allow reproducing this as input
-    write_artifact("target-tasks.yml", list(jgg.target_job_set.jobs.keys()))
+    # write out the target job set to allow reproducing this as input
+    write_artifact("target-jobs.yml", list(jgg.target_job_set.jobs.keys()))
 
-    # write out the optimized task graph to describe what will actually happen,
-    # and the map of labels to taskids
-    write_artifact("task-graph.yml", jgg.morphed_job_graph.to_json())
+    # write out the optimized job graph to describe what will actually happen
+    write_artifact("optimized-job-graph.yml", jgg.morphed_job_graph.to_json())
     write_artifact("generated-gitlab-ci.yml", jgg.morphed_job_graph.to_gitlab_ci_jobs())
 
 
