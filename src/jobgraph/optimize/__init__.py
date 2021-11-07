@@ -57,7 +57,7 @@ def optimize_task_graph(
 
     optimizations = _get_optimizations(target_job_graph, strategies)
 
-    removed_tasks = remove_jobs(
+    removed_jobs = remove_jobs(
         target_job_graph=target_job_graph,
         optimizations=optimizations,
         params=params,
@@ -70,12 +70,12 @@ def optimize_task_graph(
         params=params,
         do_not_optimize=do_not_optimize,
         existing_tasks=existing_tasks,
-        removed_tasks=removed_tasks,
+        removed_jobs=removed_jobs,
     )
 
     return get_subgraph(
         target_job_graph,
-        removed_tasks,
+        removed_jobs,
         replaced_tasks,
     )
 
@@ -133,7 +133,7 @@ def replace_tasks(
     params,
     optimizations,
     do_not_optimize,
-    removed_tasks,
+    removed_jobs,
     existing_tasks,
 ):
     """
@@ -150,7 +150,7 @@ def replace_tasks(
             continue
 
         # if this task depends on un-replaced, un-removed tasks, do not replace
-        if any(l not in replaced and l not in removed_tasks for l in links_dict[label]):
+        if any(l not in replaced and l not in removed_jobs for l in links_dict[label]):
             continue
 
         # if the task already exists, that's an easy replacement
@@ -168,7 +168,7 @@ def replace_tasks(
             if repl is True:
                 # True means remove this task; get_subgraph will catch any
                 # problems with removed tasks being depended on
-                removed_tasks.add(label)
+                removed_jobs.add(label)
             else:
                 replaced.add(label)
             opt_counts[opt_by] += 1
@@ -180,7 +180,7 @@ def replace_tasks(
 
 def get_subgraph(
     target_job_graph,
-    removed_tasks,
+    removed_jobs,
     replaced_tasks,
 ):
     """
@@ -190,7 +190,7 @@ def get_subgraph(
 
     # populate task['dependencies']
     named_links_dict = target_job_graph.graph.named_links_dict()
-    omit = removed_tasks | replaced_tasks
+    omit = removed_jobs | replaced_tasks
     for label, task in target_job_graph.jobs.items():
         if label in omit:
             continue

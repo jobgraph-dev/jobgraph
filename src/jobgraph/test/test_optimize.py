@@ -123,11 +123,11 @@ class TestOptimize(unittest.TestCase):
         exp_replaced,
         exp_removed=set(),
         do_not_optimize=None,
-        removed_tasks=None,
+        removed_jobs=None,
         existing_tasks=None,
     ):
         do_not_optimize = do_not_optimize or set()
-        removed_tasks = removed_tasks or set()
+        removed_jobs = removed_jobs or set()
         existing_tasks = existing_tasks or {}
 
         got_replaced = optimize.replace_tasks(
@@ -135,11 +135,11 @@ class TestOptimize(unittest.TestCase):
             optimizations=optimize._get_optimizations(graph, self.strategies),
             params={},
             do_not_optimize=do_not_optimize,
-            removed_tasks=removed_tasks,
+            removed_jobs=removed_jobs,
             existing_tasks=existing_tasks,
         )
         self.assertEqual(got_replaced, exp_replaced)
-        self.assertEqual(removed_tasks, exp_removed)
+        self.assertEqual(removed_jobs, exp_removed)
 
     def test_replace_tasks_never(self):
         "No tasks are replaced when strategy is 'never'"
@@ -188,7 +188,7 @@ class TestOptimize(unittest.TestCase):
     def assert_subgraph(
         self,
         graph,
-        removed_tasks,
+        removed_jobs,
         replaced_tasks,
         exp_subgraph,
     ):
@@ -197,7 +197,7 @@ class TestOptimize(unittest.TestCase):
         try:
             got_subgraph = optimize.get_subgraph(
                 graph,
-                removed_tasks,
+                removed_jobs,
                 replaced_tasks,
             )
         finally:
