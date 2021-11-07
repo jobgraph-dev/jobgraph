@@ -8,7 +8,7 @@ import copy
 import attr
 from typing import AnyStr
 
-from . import filter_tasks
+from . import filter_jobs
 from .graph import Graph
 from .jobgraph import JobGraph
 from .job import Job
@@ -255,7 +255,7 @@ class JobGraphGenerator:
         # Always add legacy target tasks method until we deprecate that API.
         if "target_jobs_method" not in filters:
             filters.insert(0, "target_jobs_method")
-        filters = [filter_tasks.filter_task_functions[f] for f in filters]
+        filters = [filter_jobs.filter_job_functions[f] for f in filters]
 
         yield ("parameters", parameters)
 

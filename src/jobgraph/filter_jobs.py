@@ -11,20 +11,20 @@ from . import (
 
 logger = logging.getLogger(__name__)
 
-filter_task_functions = {}
+filter_job_functions = {}
 
 
-def filter_task(name):
+def filter_job(name):
     """Generator to declare a task filter function."""
 
     def wrap(func):
-        filter_task_functions[name] = func
+        filter_job_functions[name] = func
         return func
 
     return wrap
 
 
-@filter_task("target_jobs_method")
+@filter_job("target_jobs_method")
 def filter_target_jobs(graph, parameters, graph_config):
     """Proxy filter to use legacy target tasks code.
 
