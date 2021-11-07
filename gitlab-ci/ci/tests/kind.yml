@@ -23,6 +23,9 @@ job-defaults:
 jobs:
     unit:
         description: "Run `unit tests` to validate the latest changes"
+        optimization:
+            skip-unless-changed:
+                - "**/*.py"
         run:
             command: >-
                 pip install --prefix "/runner/.local" --no-deps --editable . &&
@@ -30,11 +33,17 @@ jobs:
 
     flake8:
         description: "Run `flake8` on Python 3 to validate the latest changes"
+        optimization:
+            skip-unless-changed:
+                - "**/*.py"
         run:
             command: flake8
 
     black:
         description: "Run `black` to validate the latest changes"
+        optimization:
+            skip-unless-changed:
+                - "**/*.py"
         run:
             command: black --check .
 
