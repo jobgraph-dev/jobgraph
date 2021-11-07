@@ -217,7 +217,7 @@ def use_fetches(config, jobs):
                 aliases[f"{task.kind}-{value}"] = task.label
 
     artifact_prefixes = {}
-    for job in order_tasks(config, jobs):
+    for job in order_jobs(config, jobs):
         artifact_prefixes[job["label"]] = get_artifact_prefix(job)
 
         fetches = job.pop("fetches", None)
@@ -309,31 +309,31 @@ def use_fetches(config, jobs):
         yield job
 
 
-def order_tasks(config, tasks):
-    """Iterate image tasks in an order where parent tasks come first."""
+def order_jobs(config, jobs):
+    """Iterate image jobs in an order where parent jobs come first."""
     if config.kind == "docker-image":
         kind_prefix = "build-docker-image-"
     else:
         kind_prefix = config.kind + "-"
 
-    pending = deque(tasks)
-    task_labels = {task["label"] for task in pending}
+    pending = deque(jobs)
+    job_labels = {job["label"] for job in pending}
     emitted = set()
     while True:
         try:
-            task = pending.popleft()
+            job = pending.popleft()
         except IndexError:
             break
         parents = {
-            task
-            for task in task.get("dependencies", {}).values()
-            if task.startswith(kind_prefix)
+            job
+            for job in job.get("dependencies", {}).values()
+            if job.startswith(kind_prefix)
         }
-        if parents and not emitted.issuperset(parents & task_labels):
-            pending.append(task)
+        if parents and not emitted.issuperset(parents & job_labels):
+            pending.append(job)
             continue
-        emitted.add(task["label"])
-        yield task
+        emitted.add(job["label"])
+        yield job
 
 
 @transforms.add
