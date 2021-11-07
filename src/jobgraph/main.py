@@ -492,46 +492,6 @@ def build_image(args):
         build_context(args["image_name"], args["context_only"], os.environ)
 
 
-@command(
-    "load-image",
-    help="Load a pre-built Docker image. Note that you need to "
-    "have docker installed and running for this to work.",
-)
-@argument(
-    "--task-id",
-    help="Load the image at public/image.tar.zst in this task, "
-    "rather than searching the index",
-)
-@argument(
-    "-t",
-    "--tag",
-    help="tag that the image should be loaded as. If not "
-    "image will be loaded with tag from the tarball",
-    metavar="name:tag",
-)
-@argument(
-    "image_name",
-    nargs="?",
-    help="Load the image of this name based on the current "
-    "contents of the tree (as built for mozilla-central "
-    "or mozilla-inbound)",
-)
-def load_image(args):
-    from jobgraph.docker import load_image_by_task_id
-
-    if not args.get("image_name") and not args.get("task_id"):
-        print("Specify either IMAGE-NAME or TASK-ID")
-        sys.exit(1)
-    try:
-        if args["task_id"]:
-            ok = load_image_by_task_id(args["task_id"], args.get("tag"))
-        if not ok:
-            sys.exit(1)
-    except Exception:
-        traceback.print_exc()
-        sys.exit(1)
-
-
 @command("image-digest", help="Print the digest of a docker image.")
 @argument(
     "image_name",

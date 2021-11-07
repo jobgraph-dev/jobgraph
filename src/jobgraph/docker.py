@@ -9,10 +9,7 @@ import tarfile
 from io import BytesIO
 
 from jobgraph.util import docker
-from jobgraph.util.taskcluster import (
-    get_artifact_url,
-    get_session,
-)
+from jobgraph.util.taskcluster import get_session
 
 
 def get_image_digest(image_name):
@@ -26,18 +23,6 @@ def get_image_digest(image_name):
     tasks = load_jobs_for_kind(params, "docker-image")
     task = tasks[f"build-docker-image-{image_name}"]
     return task.attributes["cached_task"]["digest"]
-
-
-def load_image_by_task_id(task_id, tag=None):
-    artifact_url = get_artifact_url(task_id, "public/image.tar.zst")
-    result = load_image(artifact_url, tag)
-    print("Found docker image: {}:{}".format(result["image"], result["tag"]))
-    if tag:
-        print(f"Re-tagged as: {tag}")
-    else:
-        tag = "{}:{}".format(result["image"], result["tag"])
-    print(f"Try: docker run -ti --rm {tag} bash")
-    return True
 
 
 def build_context(name, outputFile, args=None):
