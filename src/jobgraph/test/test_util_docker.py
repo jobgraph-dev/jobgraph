@@ -152,49 +152,6 @@ class TestDocker(unittest.TestCase):
         finally:
             shutil.rmtree(tmp)
 
-    def test_create_context_absolute_path(self):
-        tmp = tempfile.mkdtemp()
-        try:
-            d = os.path.join(tmp, "test-image")
-            os.mkdir(d)
-
-            # Absolute paths in %include syntax are not allowed.
-            with open(os.path.join(d, "Dockerfile"), "wb") as fh:
-                fh.write(b"# %include /etc/shadow\n")
-
-            with self.assertRaisesRegex(Exception, "cannot be absolute"):
-                docker.create_context_tar(tmp, d, os.path.join(tmp, "tar"), "test")
-        finally:
-            shutil.rmtree(tmp)
-
-    def test_create_context_outside_topsrcdir(self):
-        tmp = tempfile.mkdtemp()
-        try:
-            d = os.path.join(tmp, "test-image")
-            os.mkdir(d)
-
-            with open(os.path.join(d, "Dockerfile"), "wb") as fh:
-                fh.write(b"# %include foo/../../../etc/shadow\n")
-
-            with self.assertRaisesRegex(Exception, "path outside topsrcdir"):
-                docker.create_context_tar(tmp, d, os.path.join(tmp, "tar"), "test")
-        finally:
-            shutil.rmtree(tmp)
-
-    def test_create_context_missing_extra(self):
-        tmp = tempfile.mkdtemp()
-        try:
-            d = os.path.join(tmp, "test-image")
-            os.mkdir(d)
-
-            with open(os.path.join(d, "Dockerfile"), "wb") as fh:
-                fh.write(b"# %include does/not/exist\n")
-
-            with self.assertRaisesRegex(Exception, "path does not exist"):
-                docker.create_context_tar(tmp, d, os.path.join(tmp, "tar"), "test")
-        finally:
-            shutil.rmtree(tmp)
-
     @pytest.mark.xfail(sys.version_info >= (3, 8), reason="Hash is different")
     def test_create_context_extra_directory(self):
         tmp = tempfile.mkdtemp()

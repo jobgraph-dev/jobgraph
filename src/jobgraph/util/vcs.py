@@ -9,6 +9,7 @@ import subprocess
 
 from abc import ABC, abstractproperty, abstractmethod
 from shutil import which
+from pathlib import Path
 
 
 class Repository(ABC):
@@ -87,6 +88,10 @@ class GitRepository(Repository):
     @property
     def branch(self):
         return self.run("branch", "--show-current").strip() or None
+
+    @property
+    def tracked_files(self):
+        return {Path(file) for file in self.run("ls-files").splitlines()}
 
     def get_main_branch(self, remote=DEFAULT_REMOTE_NAME):
         output = self.run("ls-remote", "--symref", remote, "HEAD")

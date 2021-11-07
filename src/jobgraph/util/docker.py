@@ -4,7 +4,7 @@
 
 
 import hashlib
-import io
+import itertools
 import json
 import os
 import re
@@ -12,8 +12,12 @@ import requests_unixsocket
 import sys
 import urllib.parse
 
-from .archive import create_tar_gz_from_files
-from .memoize import memoize
+from dockerfile_parse import DockerfileParser
+from pathlib import Path
+
+from jobgraph.util.archive import create_tar_gz_from_files
+from jobgraph.util.memoize import memoize
+from jobgraph.parameters import get_repo
 
 
 IMAGE_DIR = os.path.join(".", "gitlab-ci", "docker")
@@ -158,9 +162,42 @@ class VoidWriter:
 
 
 def generate_context_hash(topsrcdir, image_path, args=None):
-    """Generates a sha256 hash for context directory used to build an image."""
+    copied_files = _get_copied_files_to_docker_image(image_path, args)
+    return stream_context_tar(
+        topsrcdir, image_path, VoidWriter(), copied_files=copied_files, args=args
+    )
 
-    return stream_context_tar(topsrcdir, image_path, VoidWriter(), args=args)
+
+def _get_copied_files_to_docker_image(image_path, args):
+    docker_file = DockerfileParser(
+        path=image_path, env_replace=True, build_args=args, cache_content=True
+    )
+    tracked_files = get_repo().tracked_files
+
+    files_instructions = (
+        instruction["value"]
+        for instruction in docker_file.structure
+        if instruction.get("instruction") in ("ADD", "COPY")
+    )
+    # We will consume the following list twice so it can't be a generator
+    copied_files_or_dirs = [
+        Path(file_argument)
+        for file_instruction in files_instructions
+        for file_argument in file_instruction.split(" ")
+        if not file_argument.startswith("--chown")
+        and file_argument != file_instruction.split(" ")[-1]
+    ]
+    copied_dirs = (dir for dir in copied_files_or_dirs if dir.is_dir())
+    copied_files_in_dirs = (
+        str(file_in_dir)
+        for dir in copied_dirs
+        for file_in_dir in dir.glob("**/*")
+        if file_in_dir.is_file() and file_in_dir in tracked_files
+    )
+    copied_files = (str(file) for file in copied_files_or_dirs if file.is_file())
+    all_copied_files = itertools.chain(copied_files_in_dirs, copied_files)
+
+    return sorted(list(all_copied_files))
 
 
 class HashingWriter:
@@ -224,12 +261,15 @@ RUN_TASK_SNIPPET = [
 ]
 
 
-def stream_context_tar(topsrcdir, context_dir, out_file, image_name=None, args=None):
+def stream_context_tar(
+    topsrcdir, context_dir, out_file, image_name=None, copied_files=None, args=None
+):
     """Like create_context_tar, but streams the tar file to the `out_file` file
     object."""
-    archive_files = {}
-    replace = []
-    content = []
+    copied_files = {} if copied_files is None else copied_files
+    args = {} if args is None else args
+
+    archive_files = {file: open(file, "rb") for file in copied_files}
 
     topsrcdir = os.path.abspath(topsrcdir)
     context_dir = os.path.join(topsrcdir, context_dir)
@@ -240,57 +280,12 @@ def stream_context_tar(topsrcdir, context_dir, out_file, image_name=None, args=N
             archive_path = source_path[len(context_dir) + 1 :]
             archive_files[archive_path] = open(source_path, "rb")
 
-    # Parse Dockerfile for special syntax of extra files to include.
-    content = []
-    with open(os.path.join(context_dir, "Dockerfile")) as fh:
-        for line in fh:
-            if line.startswith("# %ARG"):
-                p = line[len("# %ARG ") :].strip()
-                if not args or p not in args:
-                    raise Exception(f"missing argument: {p}")
-                replace.append((re.compile(fr"\${p}\b"), args[p]))
-                continue
-
-            for regexp, s in replace:
-                line = re.sub(regexp, s, line)
-
-            content.append(line)
-
-            if not line.startswith("# %include"):
-                continue
-
-            if line.strip() == "# %include-run-task":
-                content.extend(RUN_TASK_SNIPPET)
-                archive_files.update(RUN_TASK_FILES)
-                continue
-
-            p = line[len("# %include ") :].strip()
-            if os.path.isabs(p):
-                raise Exception("extra include path cannot be absolute: %s" % p)
-
-            fs_path = os.path.normpath(os.path.join(topsrcdir, p))
-            # Check for filesystem traversal exploits.
-            if not fs_path.startswith(topsrcdir):
-                raise Exception("extra include path outside topsrcdir: %s" % p)
-
-            if not os.path.exists(fs_path):
-                raise Exception("extra include path does not exist: %s" % p)
-
-            if os.path.isdir(fs_path):
-                for root, dirs, files in os.walk(fs_path):
-                    for f in files:
-                        source_path = os.path.join(root, f)
-                        rel = source_path[len(fs_path) + 1 :]
-                        archive_path = os.path.join("topsrcdir", p, rel)
-                        archive_files[archive_path] = source_path
-            else:
-                archive_path = os.path.join("topsrcdir", p)
-                archive_files[archive_path] = fs_path
-
-    archive_files["Dockerfile"] = io.BytesIO("".join(content).encode("utf-8"))
-
     writer = HashingWriter(out_file)
     create_tar_gz_from_files(writer, archive_files, image_name)
+
+    for arg_name, arg_value in args.items():
+        writer.write(f"ARG {arg_name}={arg_value}".encode("utf-8"))
+
     return writer.hexdigest()
 
 
