@@ -64,19 +64,9 @@ def optimize_task_graph(
         do_not_optimize=do_not_optimize,
     )
 
-    replaced_tasks = replace_tasks(
-        target_job_graph=target_job_graph,
-        optimizations=optimizations,
-        params=params,
-        do_not_optimize=do_not_optimize,
-        existing_tasks=existing_tasks,
-        removed_jobs=removed_jobs,
-    )
-
     return get_subgraph(
         target_job_graph,
         removed_jobs,
-        replaced_tasks,
     )
 
 
@@ -181,7 +171,6 @@ def replace_tasks(
 def get_subgraph(
     target_job_graph,
     removed_jobs,
-    replaced_tasks,
 ):
     """
     Return the subgraph of target_job_graph consisting only of
@@ -190,7 +179,7 @@ def get_subgraph(
 
     # populate task['dependencies']
     named_links_dict = target_job_graph.graph.named_links_dict()
-    omit = removed_jobs | replaced_tasks
+    omit = removed_jobs
     for label, task in target_job_graph.jobs.items():
         if label in omit:
             continue

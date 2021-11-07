@@ -117,79 +117,10 @@ class TestOptimize(unittest.TestCase):
         )
         self.assert_remove_jobs(graph, {"t1", "t3"}, do_not_optimize={"t2"})
 
-    def assert_replace_tasks(
-        self,
-        graph,
-        exp_replaced,
-        exp_removed=set(),
-        do_not_optimize=None,
-        removed_jobs=None,
-        existing_tasks=None,
-    ):
-        do_not_optimize = do_not_optimize or set()
-        removed_jobs = removed_jobs or set()
-        existing_tasks = existing_tasks or {}
-
-        got_replaced = optimize.replace_tasks(
-            target_job_graph=graph,
-            optimizations=optimize._get_optimizations(graph, self.strategies),
-            params={},
-            do_not_optimize=do_not_optimize,
-            removed_jobs=removed_jobs,
-            existing_tasks=existing_tasks,
-        )
-        self.assertEqual(got_replaced, exp_replaced)
-        self.assertEqual(removed_jobs, exp_removed)
-
-    def test_replace_tasks_never(self):
-        "No tasks are replaced when strategy is 'never'"
-        graph = self.make_triangle()
-        self.assert_replace_tasks(graph, set())
-
-    def test_replace_tasks_all(self):
-        "All replacable tasks are replaced when strategy is 'replace'"
-        graph = self.make_triangle(
-            t1={"replace": "e1"}, t2={"replace": "e2"}, t3={"replace": "e3"}
-        )
-        self.assert_replace_tasks(
-            graph,
-            exp_replaced={"t1", "t2", "t3"},
-        )
-
-    def test_replace_tasks_blocked(self):
-        "A task cannot be replaced if it depends on one that was not replaced"
-        graph = self.make_triangle(t1={"replace": "e1"}, t3={"replace": "e3"})
-        self.assert_replace_tasks(graph, exp_replaced={"t1"})
-
-    def test_replace_tasks_do_not_optimize(self):
-        "A task cannot be replaced if it depends on one that was not replaced"
-        graph = self.make_triangle(
-            t1={"replace": "e1"},
-            t2={"replace": "xxx"},  # but do_not_optimize
-            t3={"replace": "e3"},
-        )
-        self.assert_replace_tasks(
-            graph,
-            exp_replaced={"t1"},
-            do_not_optimize={"t2"},
-        )
-
-    def test_replace_tasks_removed(self):
-        "A task can be replaced with nothing"
-        graph = self.make_triangle(
-            t1={"replace": "e1"}, t2={"replace": True}, t3={"replace": True}
-        )
-        self.assert_replace_tasks(
-            graph,
-            exp_replaced={"t1"},
-            exp_removed={"t2", "t3"},
-        )
-
     def assert_subgraph(
         self,
         graph,
         removed_jobs,
-        replaced_tasks,
         exp_subgraph,
     ):
         self.maxDiff = None
@@ -198,7 +129,6 @@ class TestOptimize(unittest.TestCase):
             got_subgraph = optimize.get_subgraph(
                 graph,
                 removed_jobs,
-                replaced_tasks,
             )
         finally:
             optimize.slugid = slugid
@@ -210,7 +140,6 @@ class TestOptimize(unittest.TestCase):
         graph = self.make_triangle()
         self.assert_subgraph(
             graph,
-            set(),
             set(),
             self.make_opt_graph(
                 self.make_task("t1", task_id="TO-BE-REMOVED", dependencies={}),
@@ -230,7 +159,6 @@ class TestOptimize(unittest.TestCase):
         self.assert_subgraph(
             graph,
             {"t2", "t3"},
-            set(),
             self.make_opt_graph(
                 self.make_task("t1", task_id="TO-BE-REMOVED", dependencies={})
             ),
