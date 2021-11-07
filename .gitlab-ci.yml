@@ -26,6 +26,15 @@ decision:
             else
                 export BASE_REPOSITORY="$CI_PROJECT_URL"
             fi
+
+        # We fetch the main branch of the repository so that jobgraph can determine
+        # the actual base revision in case $CI_COMMIT_BEFORE_SHA equals
+        # "0000000000000000000000000000000000000000".
+        #
+        # See https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+        - export DEFAULT_BRANCH_SHORT_NAME="$(git ls-remote --symref origin HEAD | awk '/^ref:/ {sub(/refs\/heads\//, "", $2); print $2}')"
+        - git fetch "$GIT_REMOTE_NAME" "$DEFAULT_BRANCH_SHORT_NAME"
+
         - >-
             jobgraph decision
             --base-repository="$BASE_REPOSITORY"
@@ -41,6 +50,9 @@ decision:
             --project='jobgraph'
             --pushdate='0'
     stage: decision
+    variables:
+        GIT_STRATEGY: clone
+        GIT_REMOTE_NAME: origin
 
 
 generated-pipeline:

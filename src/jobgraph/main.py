@@ -571,12 +571,10 @@ def image_digest(args):
 @argument(
     "--base-rev",
     required=True,
-    help="The previous latest commit present on a branch. "
-    # TODO: support the 0000000000000000000000000000000000000000 case
-    # 'If set to '
-    # '"0000000000000000000000000000000000000000", then jobgraph will '
-    # 'determine the most recent ancestor between the current revision '
-    # 'and the main branch'
+    help="The previous latest commit present on a branch. If set to "
+    '"0000000000000000000000000000000000000000", then jobgraph will '
+    "determine the most recent ancestor between the current revision "
+    "and the main branch",
 )
 @argument(
     "--head-repository",

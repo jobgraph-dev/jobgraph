@@ -4,7 +4,9 @@
 
 
 import os
+import re
 import subprocess
+
 from abc import ABC, abstractproperty, abstractmethod
 from shutil import which
 
@@ -61,6 +63,11 @@ class Repository(ABC):
         """Update the working directory to the specified reference."""
 
 
+NULL_GIT_COMMIT = "0000000000000000000000000000000000000000"
+DEFAULT_REMOTE_NAME = "origin"
+_LS_REMOTE_PATTERN = re.compile(r"ref:\s+refs/heads/(?P<branch_name>\S+)\s+HEAD")
+
+
 class GitRepository(Repository):
     tool = "git"
 
@@ -81,7 +88,18 @@ class GitRepository(Repository):
     def branch(self):
         return self.run("branch", "--show-current").strip() or None
 
-    def get_url(self, remote="origin"):
+    def get_main_branch(self, remote=DEFAULT_REMOTE_NAME):
+        output = self.run("ls-remote", "--symref", remote, "HEAD")
+        matches = _LS_REMOTE_PATTERN.search(output)
+        if not matches:
+            raise RuntimeError(
+                f'Could not find the main branch of remote repository "{remote}". Got: {output}'
+            )
+
+        short_branch_name = matches.group("branch_name")
+        return f"{remote}/{short_branch_name}"
+
+    def get_url(self, remote=DEFAULT_REMOTE_NAME):
         return self.run("remote", "get-url", remote).strip()
 
     def get_commit_message(self, revision=None):
@@ -109,6 +127,9 @@ class GitRepository(Repository):
         return self.run(
             "diff", "--no-color", "--name-only", f"{base_revision}..{head_revision}"
         ).splitlines()
+
+    def find_first_common_revision(self, base_branch, head_rev):
+        return self.run("merge-base", base_branch, head_rev).strip()
 
 
 def get_repository(path):

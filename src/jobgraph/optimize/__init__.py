@@ -21,8 +21,8 @@ from pathlib import Path
 
 from ..graph import Graph
 from ..jobgraph import JobGraph
-from ..util.parameterization import resolve_task_references
 from ..parameters import get_repo
+from ..util.parameterization import resolve_task_references
 
 
 logger = logging.getLogger(__name__)

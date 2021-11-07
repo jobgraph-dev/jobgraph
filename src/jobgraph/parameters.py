@@ -5,6 +5,7 @@
 
 import hashlib
 import json
+import logging
 import os
 import time
 from pprint import pformat
@@ -14,12 +15,14 @@ from urllib.request import urlopen
 from jobgraph.util.memoize import memoize
 from jobgraph.util.readonlydict import ReadOnlyDict
 from jobgraph.util.schema import validate_schema
-from jobgraph.util.vcs import get_repository
+from jobgraph.util.vcs import get_repository, NULL_GIT_COMMIT
 from voluptuous import (
     ALLOW_EXTRA,
     Required,
     Schema,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ParameterMismatch(Exception):
@@ -81,6 +84,8 @@ class Parameters(ReadOnlyDict):
         if not self.strict:
             # apply defaults to missing parameters
             kwargs = Parameters._fill_defaults(**kwargs)
+
+        kwargs = _determine_base_rev(kwargs)
 
         ReadOnlyDict.__init__(self, **kwargs)
 
@@ -222,6 +227,34 @@ class Parameters(ReadOnlyDict):
 
     def __repr__(self):
         return pformat(dict(self), indent=2)
+
+
+def _determine_base_rev(kwargs):
+    if kwargs.get("base_rev") == NULL_GIT_COMMIT:
+        logger.info(
+            f'base_rev equals "{NULL_GIT_COMMIT}". Finding the most common ancestor...'
+        )
+        if kwargs["base_repository"] != kwargs["head_repository"]:
+            # TODO Clone the base repo to determine the first common
+            # ancestor revision
+            raise NotImplementedError(
+                "Cannot yet determine what files have changed between base "
+                f'repository ({kwargs["base_repository"]} and head one '
+                f'({kwargs["head_repository"]}))'
+            )
+
+        repo = get_repo()
+        # Gitlab runners check out a detached HEAD which prevents us
+        # from getting the remote repository of the kwargs["head_ref"]
+        # branch. Thus, we have to rely on the fact that "origin" is
+        # the only remote
+        main_branch = repo.get_main_branch()
+        kwargs["base_rev"] = repo.find_first_common_revision(
+            main_branch, kwargs["head_rev"]
+        )
+        logger.info(f'base_rev has been set to "{kwargs["base_rev"]}"')
+
+    return kwargs
 
 
 def load_parameters_file(spec, strict=True, overrides=None, trust_domain=None):
