@@ -21,15 +21,13 @@ job-defaults:
         cwd: '{checkout}'
 
 jobs:
-    unit:
-        description: "Run `unit tests` to validate the latest changes"
+    black:
+        description: "Run `black` to validate the latest changes"
         optimization:
             skip-unless-changed:
                 - "**/*.py"
         run:
-            command: >-
-                pip install --prefix "/runner/.local" --no-deps --editable . &&
-                pytest --pyargs jobgraph
+            command: black --check .
 
     flake8:
         description: "Run `flake8` on Python 3 to validate the latest changes"
@@ -39,14 +37,6 @@ jobs:
         run:
             command: flake8
 
-    black:
-        description: "Run `black` to validate the latest changes"
-        optimization:
-            skip-unless-changed:
-                - "**/*.py"
-        run:
-            command: black --check .
-
     pyupgrade:
         description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
         optimization:
@@ -54,6 +44,16 @@ jobs:
                 - "**/*.py"
         run:
             command: pyupgrade --py310-plus $(find . -name '*.py')
+
+    unit:
+        description: "Run `unit tests` to validate the latest changes"
+        optimization:
+            skip-unless-changed:
+                - "**/*.py"
+        run:
+            command: >-
+                pip install --prefix "/runner/.local" --no-deps --editable . &&
+                pytest --pyargs jobgraph
 
     yamllint:
         description: "Run `yamllint` to validate the latest changes"
