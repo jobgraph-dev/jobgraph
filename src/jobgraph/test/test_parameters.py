@@ -24,7 +24,7 @@ class TestParameters(unittest.TestCase):
         "build_date": 0,
         "do_not_optimize": [],
         "existing_tasks": {},
-        "filters": ["target_tasks_method"],
+        "filters": ["target_jobs_method"],
         "head_ref": "ref",
         "head_repository": "repository",
         "head_rev": "rev",
@@ -34,7 +34,7 @@ class TestParameters(unittest.TestCase):
         "owner": "nobody@mozilla.com",
         "project": "project",
         "pushdate": 0,
-        "target_tasks_method": "default",
+        "target_jobs_method": "default",
         "pipeline_source": "push",
     }
 

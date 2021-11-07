@@ -54,7 +54,7 @@ base_schema = Schema(
         Required("pushdate"): int,
         # target-kind is not included, since it should never be
         # used at run-time
-        Required("target_tasks_method"): str,
+        Required("target_jobs_method"): str,
         Required("pipeline_source"): str,
     }
 )
@@ -129,7 +129,7 @@ class Parameters(ReadOnlyDict):
             "build_date": int(time.time()),
             "do_not_optimize": [],
             "existing_tasks": {},
-            "filters": ["target_tasks_method"],
+            "filters": ["target_jobs_method"],
             "head_ref": get_repo().head_ref,
             "head_repository": get_repo().get_url(),
             "head_rev": get_repo().head_ref,
@@ -139,7 +139,7 @@ class Parameters(ReadOnlyDict):
             "owner": "nobody@mozilla.com",
             "project": get_repo().get_url().rsplit("/", 1)[1],
             "pushdate": int(time.time()),
-            "target_tasks_method": "default",
+            "target_jobs_method": "default",
             "pipeline_source": "",
         }
 

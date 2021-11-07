@@ -253,8 +253,8 @@ class JobGraphGenerator:
 
         filters = parameters.get("filters", [])
         # Always add legacy target tasks method until we deprecate that API.
-        if "target_tasks_method" not in filters:
-            filters.insert(0, "target_tasks_method")
+        if "target_jobs_method" not in filters:
+            filters.insert(0, "target_jobs_method")
         filters = [filter_tasks.filter_task_functions[f] for f in filters]
 
         yield ("parameters", parameters)

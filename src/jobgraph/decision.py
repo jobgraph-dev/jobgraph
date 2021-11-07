@@ -30,7 +30,7 @@ ARTIFACTS_DIR = "artifacts"
 PER_PROJECT_PARAMETERS = {
     # the default parameters are used for projects that do not match above.
     "default": {
-        "target_tasks_method": "default",
+        "target_jobs_method": "default",
     }
 }
 
@@ -105,7 +105,7 @@ def get_decision_parameters(graph_config, options):
             "pushdate",
             "owner",
             "level",
-            "target_tasks_method",
+            "target_jobs_method",
             "pipeline_source",
         ]
         if n in options
@@ -117,7 +117,7 @@ def get_decision_parameters(graph_config, options):
     # Define default filter list, as most configurations shouldn't need
     # custom filters.
     parameters["filters"] = [
-        "target_tasks_method",
+        "target_jobs_method",
     ]
     parameters["optimize_target_tasks"] = True
     parameters["existing_tasks"] = {}
@@ -142,15 +142,15 @@ def get_decision_parameters(graph_config, options):
         )
         parameters.update(PER_PROJECT_PARAMETERS["default"])
 
-    # `target_tasks_method` has higher precedence than `project` parameters
-    if options.get("target_tasks_method"):
-        parameters["target_tasks_method"] = options["target_tasks_method"]
+    # `target_jobs_method` has higher precedence than `project` parameters
+    if options.get("target_jobs_method"):
+        parameters["target_jobs_method"] = options["target_jobs_method"]
 
     # ..but can be overridden by the commit message: if it contains the special
     # string "DONTBUILD" and this is an on-push decision task, then use the
     # special 'nothing' target task method.
     if "DONTBUILD" in commit_message and options["pipeline_source"] == "push":
-        parameters["target_tasks_method"] = "nothing"
+        parameters["target_jobs_method"] = "nothing"
 
     if options.get("optimize_target_tasks") is not None:
         parameters["optimize_target_tasks"] = options["optimize_target_tasks"]
