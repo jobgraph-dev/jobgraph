@@ -200,7 +200,7 @@ def fill_context_hash(config, jobs):
 
         if not jobgraph.fast:
             context_path = os.path.join("gitlab-ci", "docker", definition)
-            topsrcdir = os.path.dirname(config.graph_config.taskcluster_yml)
+            topsrcdir = os.path.dirname(config.graph_config.gitlab_ci_yml)
             context_hash = generate_context_hash(topsrcdir, context_path, args)
         else:
             if config.write_artifacts:

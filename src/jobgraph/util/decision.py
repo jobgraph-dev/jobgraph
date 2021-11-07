@@ -19,7 +19,7 @@ from .time import current_json_time
 def make_decision_task(params, root, context, head_rev=None):
     """Generate a basic decision task, based on the root .taskcluster.yml"""
     with open(os.path.join(root, ".taskcluster.yml"), "rb") as f:
-        taskcluster_yml = yaml.safe_load(f)
+        gitlab_ci_yml = yaml.safe_load(f)
 
     if not head_rev:
         head_rev = params["head_rev"]
@@ -55,7 +55,7 @@ def make_decision_task(params, root, context, head_rev=None):
         context,
     )
 
-    rendered = jsone.render(taskcluster_yml, context)
+    rendered = jsone.render(gitlab_ci_yml, context)
     if len(rendered["tasks"]) != 1:
         raise Exception("Expected .taskcluster.yml to only produce one cron task")
     task = rendered["tasks"][0]

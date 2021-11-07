@@ -1,5 +1,6 @@
 appdirs
 attrs
+dockerfile-parse
 json-e
 PyYAML
 redo

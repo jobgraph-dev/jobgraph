@@ -88,15 +88,15 @@ class GraphConfig:
         return os.path.dirname(os.path.dirname(self.root_dir))
 
     @property
-    def taskcluster_yml(self):
+    def gitlab_ci_yml(self):
         if path.split(self.root_dir)[-2:] != ["gitlab-ci", "ci"]:
             raise Exception(
-                "Not guessing path to `.taskcluster.yml`. "
+                "Not guessing path to `.gitlab-ci.yml`. "
                 "Graph config in non-standard location."
             )
         return os.path.join(
             os.path.dirname(os.path.dirname(self.root_dir)),
-            ".taskcluster.yml",
+            ".gitlab-ci.yml",
         )
 
 
