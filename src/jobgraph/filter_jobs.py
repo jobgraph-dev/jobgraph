@@ -31,6 +31,6 @@ def filter_target_jobs(graph, parameters, graph_config):
     This should go away once target_jobs are converted to filters.
     """
 
-    attr = parameters.get("target_jobs_method", "all_tasks")
+    attr = parameters.get("target_jobs_method", "all_jobs")
     fn = target_jobs.get_method(attr)
     return fn(graph, parameters, graph_config)

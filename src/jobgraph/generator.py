@@ -284,25 +284,25 @@ class JobGraphGenerator:
             kind_graph = kind_graph.transitive_closure({target_kind, "docker-image"})
 
         logger.info("Generating full task set")
-        all_tasks = {}
+        all_jobs = {}
         for kind_name in kind_graph.visit_postorder():
             logger.debug(f"Loading tasks for kind {kind_name}")
             kind = kinds[kind_name]
             try:
                 new_tasks = kind.load_tasks(
                     parameters,
-                    list(all_tasks.values()),
+                    list(all_jobs.values()),
                     self._write_artifacts,
                 )
             except Exception:
                 logger.exception(f"Error loading tasks for kind {kind_name}:")
                 raise
             for task in new_tasks:
-                if task.label in all_tasks:
+                if task.label in all_jobs:
                     raise Exception("duplicate tasks with label " + task.label)
-                all_tasks[task.label] = task
+                all_jobs[task.label] = task
             logger.info(f"Generated {len(new_tasks)} tasks for kind {kind_name}")
-        full_job_set = JobGraph(all_tasks, Graph(set(all_tasks), set()))
+        full_job_set = JobGraph(all_jobs, Graph(set(all_jobs), set()))
         yield verifications("full_job_set", full_job_set, graph_config)
 
         logger.info("Generating full task graph")
@@ -311,7 +311,7 @@ class JobGraphGenerator:
             for depname, dep in t.dependencies.items():
                 edges.add((t.label, dep, depname))
 
-        full_job_graph = JobGraph(all_tasks, Graph(full_job_set.graph.nodes, edges))
+        full_job_graph = JobGraph(all_jobs, Graph(full_job_set.graph.nodes, edges))
         logger.info(
             "Full task graph contains %d tasks and %d dependencies"
             % (len(full_job_set.graph.nodes), len(edges))
@@ -319,12 +319,12 @@ class JobGraphGenerator:
         yield verifications("full_job_graph", full_job_graph, graph_config)
 
         logger.info("Generating target task set")
-        target_job_set = JobGraph(dict(all_tasks), Graph(set(all_tasks.keys()), set()))
+        target_job_set = JobGraph(dict(all_jobs), Graph(set(all_jobs.keys()), set()))
         for fltr in filters:
             old_len = len(target_job_set.graph.nodes)
             target_jobs = set(fltr(target_job_set, parameters, graph_config))
             target_job_set = JobGraph(
-                {l: all_tasks[l] for l in target_jobs}, Graph(target_jobs, set())
+                {l: all_jobs[l] for l in target_jobs}, Graph(target_jobs, set())
             )
             logger.info(
                 "Filter %s pruned %d tasks (%d remain)"
@@ -354,7 +354,7 @@ class JobGraphGenerator:
             target_jobs | docker_image_tasks | always_target_jobs
         )
         target_job_graph = JobGraph(
-            {l: all_tasks[l] for l in target_graph.nodes}, target_graph
+            {l: all_jobs[l] for l in target_graph.nodes}, target_graph
         )
         yield verifications("target_job_graph", target_job_graph, graph_config)
 
