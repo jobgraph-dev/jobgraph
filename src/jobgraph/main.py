@@ -224,7 +224,7 @@ def generate_jobgraph(options, parameters, logdir):
 @command(
     "optimized",
     help="Show the optimized graph.",
-    defaults={"graph_attr": "optimized_task_graph"},
+    defaults={"graph_attr": "optimized_job_graph"},
 )
 @command(
     "morphed",

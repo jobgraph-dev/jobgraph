@@ -88,15 +88,15 @@ def test_always_target_tasks(maketgg):
     assert sorted(tgg.target_job_graph.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1", "_ignore-t-2"]
     )
-    assert sorted(t.label for t in tgg.optimized_task_graph.jobs.values()) == sorted(
+    assert sorted(t.label for t in tgg.optimized_job_graph.jobs.values()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"]
     )
 
 
-def test_optimized_task_graph(maketgg):
+def test_optimized_job_graph(maketgg):
     "The optimized task graph contains task ids"
     tgg = maketgg(["_fake-t-2"])
-    assert tgg.optimized_task_graph.graph == graph.Graph(
+    assert tgg.optimized_job_graph.graph == graph.Graph(
         {"_fake-t-0", "_fake-t-1", "_fake-t-2"},
         {
             ("_fake-t-1", "_fake-t-0", "prev"),

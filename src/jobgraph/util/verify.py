@@ -44,7 +44,7 @@ class VerificationSequence:
 verifications = VerificationSequence()
 
 
-@verifications.add("optimized_task_graph")
+@verifications.add("optimized_job_graph")
 def verify_always_optimized(task, jobgraph, scratch_pad, graph_config):
     """
     This function ensures that always-optimized tasks have been optimized.

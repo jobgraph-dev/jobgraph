@@ -184,7 +184,7 @@ class JobGraphGenerator:
         return self._run_until("target_job_graph")
 
     @property
-    def optimized_task_graph(self):
+    def optimized_job_graph(self):
         """
         The set of targetted tasks and all of their dependencies; tasks that
         have been optimized out are either omitted or replaced with a Task
@@ -192,7 +192,7 @@ class JobGraphGenerator:
 
         @type: JobGraph
         """
-        return self._run_until("optimized_task_graph")
+        return self._run_until("optimized_job_graph")
 
     @property
     def morphed_job_graph(self):
@@ -363,16 +363,16 @@ class JobGraphGenerator:
         do_not_optimize = set(parameters.get("do_not_optimize", []))
         if not parameters.get("optimize_target_jobs", True):
             do_not_optimize = set(target_job_set.graph.nodes).union(do_not_optimize)
-        optimized_task_graph = optimize_task_graph(
+        optimized_job_graph = optimize_task_graph(
             target_job_graph,
             parameters,
             do_not_optimize,
             existing_tasks=existing_tasks,
         )
 
-        yield verifications("optimized_task_graph", optimized_task_graph, graph_config)
+        yield verifications("optimized_job_graph", optimized_job_graph, graph_config)
 
-        morphed_job_graph = morph(optimized_task_graph, parameters, graph_config)
+        morphed_job_graph = morph(optimized_job_graph, parameters, graph_config)
 
         yield verifications("morphed_job_graph", morphed_job_graph, graph_config)
 
