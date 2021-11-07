@@ -12,7 +12,7 @@ from ..util.yaml import load_yaml
 logger = logging.getLogger(__name__)
 
 
-def loader(kind, path, config, params, loaded_tasks):
+def loader(kind, path, config, params, loaded_jobs):
     """
     Get the input elements that will be transformed into tasks in a generic
     way.  The elements themselves are free-form, and become the input to the

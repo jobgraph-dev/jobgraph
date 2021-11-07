@@ -10,7 +10,7 @@ from jobgraph.optimize import OptimizationStrategy
 from jobgraph.util.templates import merge
 
 
-def fake_loader(kind, path, config, parameters, loaded_tasks):
+def fake_loader(kind, path, config, parameters, loaded_jobs):
     for i in range(3):
         dependencies = {}
         if i >= 1:
@@ -37,9 +37,9 @@ class FakeKind(Kind):
     def _get_loader(self):
         return fake_loader
 
-    def load_tasks(self, parameters, loaded_tasks, write_artifacts):
+    def load_jobs(self, parameters, loaded_jobs, write_artifacts):
         FakeKind.loaded_kinds.append(self.name)
-        return super().load_tasks(parameters, loaded_tasks, write_artifacts)
+        return super().load_jobs(parameters, loaded_jobs, write_artifacts)
 
 
 class WithFakeKind(JobGraphGenerator):

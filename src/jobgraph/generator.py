@@ -47,16 +47,16 @@ class Kind:
             raise KeyError(f"{self.path!r} does not define `loader`")
         return find_object(loader)
 
-    def load_tasks(self, parameters, loaded_tasks, write_artifacts):
+    def load_jobs(self, parameters, loaded_jobs, write_artifacts):
         loader = self._get_loader()
         config = copy.deepcopy(self.config)
 
         kind_dependencies = config.get("kind-dependencies", [])
-        kind_dependencies_tasks = [
-            task for task in loaded_tasks if task.kind in kind_dependencies
+        kind_dependencies_jobs = [
+            job for job in loaded_jobs if job.kind in kind_dependencies
         ]
 
-        inputs = loader(self.name, self.path, config, parameters, loaded_tasks)
+        inputs = loader(self.name, self.path, config, parameters, loaded_jobs)
 
         transforms = TransformSequence()
         for xform_path in config["transforms"]:
@@ -69,11 +69,11 @@ class Kind:
             self.path,
             config,
             parameters,
-            kind_dependencies_tasks,
+            kind_dependencies_jobs,
             self.graph_config,
             write_artifacts=write_artifacts,
         )
-        tasks = [
+        jobs = [
             Job(
                 self.name,
                 label=job_dict["label"],
@@ -85,7 +85,7 @@ class Kind:
             )
             for job_dict in transforms(trans_config, inputs)
         ]
-        return tasks
+        return jobs
 
     @classmethod
     def load(cls, root_dir, graph_config, kind_name):
@@ -289,7 +289,7 @@ class JobGraphGenerator:
             logger.debug(f"Loading tasks for kind {kind_name}")
             kind = kinds[kind_name]
             try:
-                new_tasks = kind.load_tasks(
+                new_tasks = kind.load_jobs(
                     parameters,
                     list(all_jobs.values()),
                     self._write_artifacts,
