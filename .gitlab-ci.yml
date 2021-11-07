@@ -18,6 +18,7 @@ decision:
             - runner_system_failure
             - stuck_or_timeout_failure
     script:
+        - pip install --user --require-hashes --requirement "$CI_PROJECT_DIR/requirements/base.txt"
         # We reinstall jobgraph to use the cloned version instead of the version in the docker image
         - pip install --prefix "/runner/.local" --no-deps --editable "$CI_PROJECT_DIR"
         - >-
