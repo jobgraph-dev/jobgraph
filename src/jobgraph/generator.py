@@ -156,14 +156,14 @@ class JobGraphGenerator:
         return self._run_until("full_task_set")
 
     @property
-    def full_task_graph(self):
+    def full_job_graph(self):
         """
         The full task graph: the full task set, with edges representing
         dependencies.
 
         @type: JobGraph
         """
-        return self._run_until("full_task_graph")
+        return self._run_until("full_job_graph")
 
     @property
     def target_job_set(self):
@@ -311,12 +311,12 @@ class JobGraphGenerator:
             for depname, dep in t.dependencies.items():
                 edges.add((t.label, dep, depname))
 
-        full_task_graph = JobGraph(all_tasks, Graph(full_task_set.graph.nodes, edges))
+        full_job_graph = JobGraph(all_tasks, Graph(full_task_set.graph.nodes, edges))
         logger.info(
             "Full task graph contains %d tasks and %d dependencies"
             % (len(full_task_set.graph.nodes), len(edges))
         )
-        yield verifications("full_task_graph", full_task_graph, graph_config)
+        yield verifications("full_job_graph", full_job_graph, graph_config)
 
         logger.info("Generating target task set")
         target_job_set = JobGraph(dict(all_tasks), Graph(set(all_tasks.keys()), set()))
@@ -337,20 +337,20 @@ class JobGraphGenerator:
         # include all docker-image build tasks here, in case they are needed for a graph morph
         docker_image_tasks = {
             t.label
-            for t in full_task_graph.jobs.values()
+            for t in full_job_graph.jobs.values()
             if t.attributes["kind"] == "docker-image"
         }
         # include all tasks with `always_target` set
         always_target_tasks = {
             t.label
-            for t in full_task_graph.jobs.values()
+            for t in full_job_graph.jobs.values()
             if t.attributes.get("always_target")
         }
         logger.info(
             "Adding %d tasks with `always_target` attribute"
             % (len(always_target_tasks) - len(always_target_tasks & target_tasks))
         )
-        target_graph = full_task_graph.graph.transitive_closure(
+        target_graph = full_job_graph.graph.transitive_closure(
             target_tasks | docker_image_tasks | always_target_tasks
         )
         target_task_graph = JobGraph(

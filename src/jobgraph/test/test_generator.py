@@ -30,17 +30,17 @@ def test_full_task_set(maketgg):
     )
 
 
-def test_full_task_graph(maketgg):
-    "The full_task_graph property has all tasks, and links"
+def test_full_job_graph(maketgg):
+    "The full_job_graph property has all tasks, and links"
     tgg = maketgg()
-    assert tgg.full_task_graph.graph == graph.Graph(
+    assert tgg.full_job_graph.graph == graph.Graph(
         {"_fake-t-0", "_fake-t-1", "_fake-t-2"},
         {
             ("_fake-t-1", "_fake-t-0", "prev"),
             ("_fake-t-2", "_fake-t-1", "prev"),
         },
     )
-    assert sorted(tgg.full_task_graph.jobs.keys()) == sorted(
+    assert sorted(tgg.full_job_graph.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_fake-t-2"]
     )
 

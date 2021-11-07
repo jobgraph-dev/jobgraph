@@ -87,7 +87,7 @@ def maketgg(monkeypatch):
         FakeKind.loaded_kinds = []
         target_tasks = target_tasks or []
 
-        def target_jobs_method(full_task_graph, parameters, graph_config):
+        def target_jobs_method(full_job_graph, parameters, graph_config):
             return target_tasks
 
         target_tasks_mod._target_task_methods["test_method"] = target_jobs_method

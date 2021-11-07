@@ -69,14 +69,12 @@ def standard_filter(task, parameters):
 
 
 @_target_task("default")
-def target_tasks_default(full_task_graph, parameters, graph_config):
+def target_tasks_default(full_job_graph, parameters, graph_config):
     """Target the tasks which have indicated they should be run based on attributes."""
-    return [
-        l for l, t in full_task_graph.jobs.items() if standard_filter(t, parameters)
-    ]
+    return [l for l, t in full_job_graph.jobs.items() if standard_filter(t, parameters)]
 
 
 @_target_task("nothing")
-def target_tasks_nothing(full_task_graph, parameters, graph_config):
+def target_tasks_nothing(full_job_graph, parameters, graph_config):
     """Select nothing, for DONTBUILD pushes"""
     return []

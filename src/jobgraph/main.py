@@ -209,7 +209,7 @@ def generate_jobgraph(options, parameters, logdir):
     defaults={"graph_attr": "full_task_set"},
 )
 @command(
-    "full", help="Show the full jobgraph.", defaults={"graph_attr": "full_task_graph"}
+    "full", help="Show the full jobgraph.", defaults={"graph_attr": "full_job_graph"}
 )
 @command(
     "target",

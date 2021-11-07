@@ -68,7 +68,7 @@ def jobgraph_decision(options, parameters=None):
     write_artifact("parameters.yml", dict(**jgg.parameters))
 
     # write out the full graph for reference
-    full_task_json = jgg.full_task_graph.to_json()
+    full_task_json = jgg.full_job_graph.to_json()
     write_artifact("full-task-graph.yml", full_task_json)
 
     # this is just a test to check whether the from_json() function is working
