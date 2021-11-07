@@ -361,7 +361,7 @@ class JobGraphGenerator:
         logger.info("Generating optimized task graph")
         existing_tasks = parameters.get("existing_tasks")
         do_not_optimize = set(parameters.get("do_not_optimize", []))
-        if not parameters.get("optimize_target_tasks", True):
+        if not parameters.get("optimize_target_jobs", True):
             do_not_optimize = set(target_task_set.graph.nodes).union(do_not_optimize)
         optimized_task_graph = optimize_task_graph(
             target_task_graph,

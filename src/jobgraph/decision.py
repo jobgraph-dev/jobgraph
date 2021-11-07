@@ -119,7 +119,7 @@ def get_decision_parameters(graph_config, options):
     parameters["filters"] = [
         "target_jobs_method",
     ]
-    parameters["optimize_target_tasks"] = True
+    parameters["optimize_target_jobs"] = True
     parameters["existing_tasks"] = {}
     parameters["do_not_optimize"] = []
 
@@ -152,8 +152,8 @@ def get_decision_parameters(graph_config, options):
     if "DONTBUILD" in commit_message and options["pipeline_source"] == "push":
         parameters["target_jobs_method"] = "nothing"
 
-    if options.get("optimize_target_tasks") is not None:
-        parameters["optimize_target_tasks"] = options["optimize_target_tasks"]
+    if options.get("optimize_target_jobs") is not None:
+        parameters["optimize_target_jobs"] = options["optimize_target_jobs"]
 
     if "decision-parameters" in graph_config["jobgraph"]:
         find_object(graph_config["jobgraph"]["decision-parameters"])(

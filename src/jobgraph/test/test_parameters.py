@@ -30,7 +30,7 @@ class TestParameters(unittest.TestCase):
         "head_rev": "rev",
         "head_tag": "",
         "level": "3",
-        "optimize_target_tasks": True,
+        "optimize_target_jobs": True,
         "owner": "nobody@mozilla.com",
         "project": "project",
         "pushdate": 0,

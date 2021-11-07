@@ -65,7 +65,7 @@ task_description_schema = Schema(
         Optional("run-on-git-branches"): [str],
         # The `always-target` attribute will cause the task to be included in the
         # target_task_graph regardless of filtering. Tasks included in this manner
-        # will be candidates for optimization even when `optimize_target_tasks` is
+        # will be candidates for optimization even when `optimize_target_jobs` is
         # False, unless the task was also explicitly chosen by the target_tasks
         # method.
         Required("always-target"): bool,
