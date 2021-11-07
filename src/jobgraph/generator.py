@@ -195,7 +195,7 @@ class JobGraphGenerator:
         return self._run_until("optimized_task_graph")
 
     @property
-    def morphed_task_graph(self):
+    def morphed_job_graph(self):
         """
         The optimized task graph, with any subsequent morphs applied. This graph
         will have the same meaning as the optimized task graph, but be in a form
@@ -203,7 +203,7 @@ class JobGraphGenerator:
 
         @type: JobGraph
         """
-        return self._run_until("morphed_task_graph")
+        return self._run_until("morphed_job_graph")
 
     @property
     def graph_config(self):
@@ -372,9 +372,9 @@ class JobGraphGenerator:
 
         yield verifications("optimized_task_graph", optimized_task_graph, graph_config)
 
-        morphed_task_graph = morph(optimized_task_graph, parameters, graph_config)
+        morphed_job_graph = morph(optimized_task_graph, parameters, graph_config)
 
-        yield verifications("morphed_task_graph", morphed_task_graph, graph_config)
+        yield verifications("morphed_job_graph", morphed_job_graph, graph_config)
 
     def _run_until(self, name):
         while name not in self._run_results:

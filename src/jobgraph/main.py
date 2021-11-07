@@ -229,7 +229,7 @@ def generate_jobgraph(options, parameters, logdir):
 @command(
     "morphed",
     help="Show the morphed graph.",
-    defaults={"graph_attr": "morphed_task_graph"},
+    defaults={"graph_attr": "morphed_job_graph"},
 )
 @argument("--root", "-r", help="root of the jobgraph definition relative to topsrcdir")
 @argument("--quiet", "-q", action="store_true", help="suppress all logging output")
