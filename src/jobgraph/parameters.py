@@ -120,6 +120,7 @@ class Parameters(ReadOnlyDict):
     def _fill_defaults(**kwargs):
         defaults = {
             "base_repository": get_repo().get_url(),
+            "base_rev": "0",  # TODO
             "build_date": int(time.time()),
             "do_not_optimize": [],
             "existing_tasks": {},

@@ -47,6 +47,7 @@ class TestGetDecisionParameters(unittest.TestCase):
     def setUp(self):
         self.options = {
             "base_repository": "https://gitlab.com/some-user/some-project",
+            "base_rev": "0123",
             "head_repository": "https://gitlab.com/some-other-user/some-project",
             "head_rev": "abcd",
             "head_ref": "ef01",

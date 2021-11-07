@@ -106,7 +106,9 @@ class GitRepository(Repository):
         self.run("checkout", ref)
 
     def get_list_of_changed_files(self, base_revision, head_revision):
-        return self.run("diff", "--no-color", "--name-only", f"{base_revision}..{head_revision}").splitlines()
+        return self.run(
+            "diff", "--no-color", "--name-only", f"{base_revision}..{head_revision}"
+        ).splitlines()
 
 
 def get_repository(path):

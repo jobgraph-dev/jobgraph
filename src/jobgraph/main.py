@@ -571,7 +571,7 @@ def image_digest(args):
 @argument(
     "--base-rev",
     required=True,
-    help='The previous latest commit present on a branch. '
+    help="The previous latest commit present on a branch. "
     # TODO: support the 0000000000000000000000000000000000000000 case
     # 'If set to '
     # '"0000000000000000000000000000000000000000", then jobgraph will '

@@ -308,8 +308,12 @@ class SkipUnlessChanged(OptimizationStrategy):
         repo = get_repo()
         repo_root = Path(repo.path)
 
-        changed_files = repo.get_list_of_changed_files(params["base_rev"], params["head_rev"])
-        tracked_files = [file for pattern in file_patterns for file in repo_root.glob(pattern)]
+        changed_files = repo.get_list_of_changed_files(
+            params["base_rev"], params["head_rev"]
+        )
+        tracked_files = [
+            file for pattern in file_patterns for file in repo_root.glob(pattern)
+        ]
 
         has_any_tracked_file_changed = any(
             Path(repo_root / changed_file) == tracked_file

@@ -20,6 +20,7 @@ class TestParameters(unittest.TestCase):
 
     vals = {
         "base_repository": "repository",
+        "base_rev": "baserev",
         "build_date": 0,
         "do_not_optimize": [],
         "existing_tasks": {},
