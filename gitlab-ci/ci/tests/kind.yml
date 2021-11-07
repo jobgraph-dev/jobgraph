@@ -47,6 +47,14 @@ jobs:
         run:
             command: black --check .
 
+    pyupgrade:
+        description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
+        optimization:
+            skip-unless-changed:
+                - "**/*.py"
+        run:
+            command: pyupgrade --py310-plus $(find . -name '*.py')
+
     yamllint:
         description: "Run `yamllint` to validate the latest changes"
         optimization:
