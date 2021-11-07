@@ -2,7 +2,7 @@ import pytest
 
 from jobgraph import (
     generator,
-    target_tasks as target_tasks_mod,
+    target_jobs as target_jobs_mod,
 )
 from jobgraph.config import GraphConfig
 from jobgraph.generator import JobGraphGenerator, Kind
@@ -82,15 +82,15 @@ class FakeOptimization(OptimizationStrategy):
 
 @pytest.fixture
 def maketgg(monkeypatch):
-    def inner(target_tasks=None, kinds=[("_fake", [])], params=None):
+    def inner(target_jobs=None, kinds=[("_fake", [])], params=None):
         params = params or {}
         FakeKind.loaded_kinds = []
-        target_tasks = target_tasks or []
+        target_jobs = target_jobs or []
 
         def target_jobs_method(full_job_graph, parameters, graph_config):
-            return target_tasks
+            return target_jobs
 
-        target_tasks_mod._target_task_methods["test_method"] = target_jobs_method
+        target_jobs_mod._target_task_methods["test_method"] = target_jobs_method
 
         parameters = FakeParameters(
             {

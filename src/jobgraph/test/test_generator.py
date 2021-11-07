@@ -63,10 +63,10 @@ def test_target_job_graph(maketgg):
     )
 
 
-def test_always_target_tasks(maketgg):
+def test_always_target_jobs(maketgg):
     "The target_job_graph includes tasks with 'always_target'"
     tgg_args = {
-        "target_tasks": ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"],
+        "target_jobs": ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"],
         "kinds": [
             ("_fake", {"job-defaults": {"optimization": {"odd": None}}}),
             (

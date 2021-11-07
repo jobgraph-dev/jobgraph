@@ -10,7 +10,7 @@ from jobgraph.main import main as jobgraph_main
 @pytest.fixture
 def run_main(maketgg, monkeypatch):
     def inner(args, **kwargs):
-        kwargs.setdefault("target_tasks", ["_fake-t-0", "_fake-t-1"])
+        kwargs.setdefault("target_jobs", ["_fake-t-0", "_fake-t-1"])
         tgg = maketgg(**kwargs)
 
         def fake_get_jobgraph_generator(*args):

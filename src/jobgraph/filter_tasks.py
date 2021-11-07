@@ -6,7 +6,7 @@
 import logging
 
 from . import (
-    target_tasks,
+    target_jobs,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,12 +25,12 @@ def filter_task(name):
 
 
 @filter_task("target_jobs_method")
-def filter_target_tasks(graph, parameters, graph_config):
+def filter_target_jobs(graph, parameters, graph_config):
     """Proxy filter to use legacy target tasks code.
 
-    This should go away once target_tasks are converted to filters.
+    This should go away once target_jobs are converted to filters.
     """
 
     attr = parameters.get("target_jobs_method", "all_tasks")
-    fn = target_tasks.get_method(attr)
+    fn = target_jobs.get_method(attr)
     return fn(graph, parameters, graph_config)

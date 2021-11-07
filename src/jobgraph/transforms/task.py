@@ -66,7 +66,7 @@ task_description_schema = Schema(
         # The `always-target` attribute will cause the task to be included in the
         # target_job_graph regardless of filtering. Tasks included in this manner
         # will be candidates for optimization even when `optimize_target_jobs` is
-        # False, unless the task was also explicitly chosen by the target_tasks
+        # False, unless the task was also explicitly chosen by the target_jobs
         # method.
         Required("always-target"): bool,
         # Optimization to perform on this task during the optimization phase.

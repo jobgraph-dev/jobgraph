@@ -322,13 +322,13 @@ class JobGraphGenerator:
         target_job_set = JobGraph(dict(all_tasks), Graph(set(all_tasks.keys()), set()))
         for fltr in filters:
             old_len = len(target_job_set.graph.nodes)
-            target_tasks = set(fltr(target_job_set, parameters, graph_config))
+            target_jobs = set(fltr(target_job_set, parameters, graph_config))
             target_job_set = JobGraph(
-                {l: all_tasks[l] for l in target_tasks}, Graph(target_tasks, set())
+                {l: all_tasks[l] for l in target_jobs}, Graph(target_jobs, set())
             )
             logger.info(
                 "Filter %s pruned %d tasks (%d remain)"
-                % (fltr.__name__, old_len - len(target_tasks), len(target_tasks))
+                % (fltr.__name__, old_len - len(target_jobs), len(target_jobs))
             )
 
         yield verifications("target_job_set", target_job_set, graph_config)
@@ -341,17 +341,17 @@ class JobGraphGenerator:
             if t.attributes["kind"] == "docker-image"
         }
         # include all tasks with `always_target` set
-        always_target_tasks = {
+        always_target_jobs = {
             t.label
             for t in full_job_graph.jobs.values()
             if t.attributes.get("always_target")
         }
         logger.info(
             "Adding %d tasks with `always_target` attribute"
-            % (len(always_target_tasks) - len(always_target_tasks & target_tasks))
+            % (len(always_target_jobs) - len(always_target_jobs & target_jobs))
         )
         target_graph = full_job_graph.graph.transitive_closure(
-            target_tasks | docker_image_tasks | always_target_tasks
+            target_jobs | docker_image_tasks | always_target_jobs
         )
         target_job_graph = JobGraph(
             {l: all_tasks[l] for l in target_graph.nodes}, target_graph

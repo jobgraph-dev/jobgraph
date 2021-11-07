@@ -5,7 +5,7 @@
 
 import unittest
 
-from jobgraph import target_tasks
+from jobgraph import target_jobs
 from jobgraph.graph import Graph
 from jobgraph.jobgraph import JobGraph
 from jobgraph.job import Job
@@ -56,7 +56,7 @@ class TestTargetTasks(unittest.TestCase):
         )
 
     def default_matches(self, attributes, parameters):
-        method = target_tasks.get_method("default")
+        method = target_jobs.get_method("default")
         graph = JobGraph(
             jobs={
                 "a": Job(
