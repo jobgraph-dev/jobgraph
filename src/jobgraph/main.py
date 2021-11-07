@@ -513,7 +513,6 @@ def image_digest(args):
     required=False,
     help=argparse.SUPPRESS,
 )
-@argument("--pushdate", dest="pushdate", required=True, type=int, default=0)
 @argument("--owner", required=True, help="email address of who owns this graph")
 @argument("--level", required=True, help="SCM level of this repository")
 @argument(

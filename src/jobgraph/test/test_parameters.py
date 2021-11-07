@@ -31,7 +31,6 @@ class TestParameters(unittest.TestCase):
         "level": "3",
         "optimize_target_jobs": True,
         "owner": "nobody@mozilla.com",
-        "pushdate": 0,
         "target_jobs_method": "default",
         "pipeline_source": "push",
     }
@@ -139,7 +138,6 @@ def test_parameters_id():
     # purposes of this test.
     defaults = {
         "build_date": 0,
-        "pushdate": 0,
     }
 
     params1 = Parameters(strict=False, spec=None, foo="bar", **defaults)

@@ -86,7 +86,6 @@ def get_decision_parameters(graph_config, options):
             "head_rev",
             "head_ref",
             "head_tag",
-            "pushdate",
             "owner",
             "level",
             "target_jobs_method",
@@ -111,8 +110,7 @@ def get_decision_parameters(graph_config, options):
     if "@" not in parameters["owner"]:
         parameters["owner"] += "@noreply.mozilla.org"
 
-    # use the pushdate as build_date if given, else use current time
-    parameters["build_date"] = parameters["pushdate"] or int(time.time())
+    parameters["build_date"] = int(time.time())
     parameters["target_jobs_method"] = options.get("target_jobs_method", "default")
 
     # ..but can be overridden by the commit message: if it contains the special

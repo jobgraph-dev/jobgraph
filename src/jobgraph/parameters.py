@@ -49,7 +49,6 @@ base_schema = Schema(
         Required("level"): str,
         Required("optimize_target_jobs"): bool,
         Required("owner"): str,
-        Required("pushdate"): int,
         # target-kind is not included, since it should never be
         # used at run-time
         Required("target_jobs_method"): str,
@@ -134,7 +133,6 @@ class Parameters(ReadOnlyDict):
             "level": "3",
             "optimize_target_jobs": True,
             "owner": "nobody@mozilla.com",
-            "pushdate": int(time.time()),
             "target_jobs_method": "default",
             "pipeline_source": "",
         }

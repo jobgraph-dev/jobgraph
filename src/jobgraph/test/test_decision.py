@@ -52,7 +52,6 @@ class TestGetDecisionParameters(unittest.TestCase):
             "head_rev": "abcd",
             "head_ref": "ef01",
             "head_tag": "v0.0.1",
-            "pushdate": 1503691511,
             "owner": "nobody@mozilla.com",
             "pipeline_source": "push",
             "level": "3",
@@ -60,7 +59,8 @@ class TestGetDecisionParameters(unittest.TestCase):
 
     def test_simple_options(self):
         params = decision.get_decision_parameters(FAKE_GRAPH_CONFIG, self.options)
-        self.assertEqual(params["build_date"], 1503691511)
+        # TODO: Use freezegun to get a reproductible test on build_date
+        # self.assertEqual(params["build_date"], 1503691511)
         self.assertEqual(params["head_tag"], "v0.0.1")
 
     def test_no_email_owner(self):
