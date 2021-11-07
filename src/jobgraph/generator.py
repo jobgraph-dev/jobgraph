@@ -103,7 +103,7 @@ class Kind:
 class JobGraphGenerator:
     """
     The central controller for jobgraph.  This handles all phases of graph
-    generation.  The task is generated from all of the kinds defined in
+    generation.  The job is generated from all of the kinds defined in
     subdirectories of the generator's root directory.
 
     Access to the results of this generation, as well as intermediate values at
@@ -111,7 +111,7 @@ class JobGraphGenerator:
     the provision of all generation inputs at instance construction time.
     """
 
-    # Task-graph generation is implemented as a Python generator that yields
+    # jobgraph generation is implemented as a Python generator that yields
     # each "phase" of generation.  This allows some mach subcommands to short-
     # circuit generation of the entire graph by never completing the generator.
 
@@ -123,7 +123,7 @@ class JobGraphGenerator:
     ):
         """
         @param root_dir: root directory, with subdirectories for each kind
-        @param paramaters: parameters for this task-graph generation, or callable
+        @param paramaters: parameters for this jobgraph generation, or callable
             taking a `GraphConfig` and returning parameters
         @type parameters: Union[Parameters, Callable[[GraphConfig], Parameters]]
         """
@@ -149,7 +149,7 @@ class JobGraphGenerator:
     @property
     def full_job_set(self):
         """
-        The full task set: all tasks defined by any kind (a graph without edges)
+        The full job set: all jobs defined by any kind (a graph without edges)
 
         @type: JobGraph
         """
@@ -158,7 +158,7 @@ class JobGraphGenerator:
     @property
     def full_job_graph(self):
         """
-        The full task graph: the full task set, with edges representing
+        The full job graph: the full job set, with edges representing
         dependencies.
 
         @type: JobGraph
@@ -168,7 +168,7 @@ class JobGraphGenerator:
     @property
     def target_job_set(self):
         """
-        The set of targetted tasks (a graph without edges)
+        The set of targetted jobs (a graph without edges)
 
         @type: JobGraph
         """
@@ -177,7 +177,7 @@ class JobGraphGenerator:
     @property
     def target_job_graph(self):
         """
-        The set of targetted tasks and all of their dependencies
+        The set of targetted jobs and all of their dependencies
 
         @type: JobGraph
         """
@@ -186,9 +186,9 @@ class JobGraphGenerator:
     @property
     def optimized_job_graph(self):
         """
-        The set of targetted tasks and all of their dependencies; tasks that
-        have been optimized out are either omitted or replaced with a Task
-        instance containing only a task_id.
+        The set of targetted jobs and all of their dependencies; jobs that
+        have been optimized out are either omitted or replaced with a Job
+        instance.
 
         @type: JobGraph
         """
@@ -197,9 +197,9 @@ class JobGraphGenerator:
     @property
     def morphed_job_graph(self):
         """
-        The optimized task graph, with any subsequent morphs applied. This graph
-        will have the same meaning as the optimized task graph, but be in a form
-        more palatable to TaskCluster.
+        The optimized job graph, with any subsequent morphs applied. This graph
+        will have the same meaning as the optimized job graph, but be in a form
+        more palatable to Gitlab CI.
 
         @type: JobGraph
         """
@@ -252,7 +252,7 @@ class JobGraphGenerator:
         logger.debug("Dumping parameters:\n{}".format(repr(parameters)))
 
         filters = parameters.get("filters", [])
-        # Always add legacy target tasks method until we deprecate that API.
+        # Always add legacy target jobs method until we deprecate that API.
         if "target_jobs_method" not in filters:
             filters.insert(0, "target_jobs_method")
         filters = [filter_jobs.filter_job_functions[f] for f in filters]
@@ -283,29 +283,29 @@ class JobGraphGenerator:
         if parameters.get("target-kind"):
             kind_graph = kind_graph.transitive_closure({target_kind, "docker-image"})
 
-        logger.info("Generating full task set")
+        logger.info("Generating full job set")
         all_jobs = {}
         for kind_name in kind_graph.visit_postorder():
-            logger.debug(f"Loading tasks for kind {kind_name}")
+            logger.debug(f"Loading jobs for kind {kind_name}")
             kind = kinds[kind_name]
             try:
-                new_tasks = kind.load_jobs(
+                new_jobs = kind.load_jobs(
                     parameters,
                     list(all_jobs.values()),
                     self._write_artifacts,
                 )
             except Exception:
-                logger.exception(f"Error loading tasks for kind {kind_name}:")
+                logger.exception(f"Error loading jobs for kind {kind_name}:")
                 raise
-            for task in new_tasks:
-                if task.label in all_jobs:
-                    raise Exception("duplicate tasks with label " + task.label)
-                all_jobs[task.label] = task
-            logger.info(f"Generated {len(new_tasks)} tasks for kind {kind_name}")
+            for job in new_jobs:
+                if job.label in all_jobs:
+                    raise Exception("duplicate jobs with label " + job.label)
+                all_jobs[job.label] = job
+            logger.info(f"Generated {len(new_jobs)} jobs for kind {kind_name}")
         full_job_set = JobGraph(all_jobs, Graph(set(all_jobs), set()))
         yield verifications("full_job_set", full_job_set, graph_config)
 
-        logger.info("Generating full task graph")
+        logger.info("Generating full job graph")
         edges = set()
         for t in full_job_set:
             for depname, dep in t.dependencies.items():
@@ -313,12 +313,12 @@ class JobGraphGenerator:
 
         full_job_graph = JobGraph(all_jobs, Graph(full_job_set.graph.nodes, edges))
         logger.info(
-            "Full task graph contains %d tasks and %d dependencies"
+            "Full job graph contains %d jobs and %d dependencies"
             % (len(full_job_set.graph.nodes), len(edges))
         )
         yield verifications("full_job_graph", full_job_graph, graph_config)
 
-        logger.info("Generating target task set")
+        logger.info("Generating target job set")
         target_job_set = JobGraph(dict(all_jobs), Graph(set(all_jobs.keys()), set()))
         for fltr in filters:
             old_len = len(target_job_set.graph.nodes)
@@ -327,38 +327,38 @@ class JobGraphGenerator:
                 {l: all_jobs[l] for l in target_jobs}, Graph(target_jobs, set())
             )
             logger.info(
-                "Filter %s pruned %d tasks (%d remain)"
+                "Filter %s pruned %d jobs (%d remain)"
                 % (fltr.__name__, old_len - len(target_jobs), len(target_jobs))
             )
 
         yield verifications("target_job_set", target_job_set, graph_config)
 
-        logger.info("Generating target task graph")
-        # include all docker-image build tasks here, in case they are needed for a graph morph
-        docker_image_tasks = {
-            t.label
-            for t in full_job_graph.jobs.values()
-            if t.attributes["kind"] == "docker-image"
+        logger.info("Generating target job graph")
+        # include all docker-image build jobs here, in case they are needed for a graph morph
+        docker_image_jobs = {
+            job.label
+            for job in full_job_graph.jobs.values()
+            if job.attributes["kind"] == "docker-image"
         }
-        # include all tasks with `always_target` set
+        # include all jobs with `always_target` set
         always_target_jobs = {
-            t.label
-            for t in full_job_graph.jobs.values()
-            if t.attributes.get("always_target")
+            job.label
+            for job in full_job_graph.jobs.values()
+            if job.attributes.get("always_target")
         }
         logger.info(
-            "Adding %d tasks with `always_target` attribute"
+            "Adding %d jobs with `always_target` attribute"
             % (len(always_target_jobs) - len(always_target_jobs & target_jobs))
         )
         target_graph = full_job_graph.graph.transitive_closure(
-            target_jobs | docker_image_tasks | always_target_jobs
+            target_jobs | docker_image_jobs | always_target_jobs
         )
         target_job_graph = JobGraph(
             {l: all_jobs[l] for l in target_graph.nodes}, target_graph
         )
         yield verifications("target_job_graph", target_job_graph, graph_config)
 
-        logger.info("Generating optimized task graph")
+        logger.info("Generating optimized job graph")
         do_not_optimize = set(parameters.get("do_not_optimize", []))
         if not parameters.get("optimize_target_jobs", True):
             do_not_optimize = set(target_job_set.graph.nodes).union(do_not_optimize)
@@ -386,7 +386,7 @@ class JobGraphGenerator:
 
 def load_jobs_for_kind(parameters, kind, root_dir=None):
     """
-    Get all the tasks of a given kind.
+    Get all the jobs of a given kind.
 
     This function is designed to be called from outside of jobgraph.
     """
@@ -396,7 +396,7 @@ def load_jobs_for_kind(parameters, kind, root_dir=None):
     parameters = Parameters(strict=False, **parameters)
     jgg = JobGraphGenerator(root_dir=root_dir, parameters=parameters)
     return {
-        task.actual_gitlab_ci_job["metadata"]["name"]: task
-        for task in jgg.full_job_set
-        if task.kind == kind
+        job.actual_gitlab_ci_job["metadata"]["name"]: job
+        for job in jgg.full_job_set
+        if job.kind == kind
     }
