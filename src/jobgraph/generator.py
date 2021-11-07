@@ -12,7 +12,7 @@ from . import filter_jobs
 from .graph import Graph
 from .jobgraph import JobGraph
 from .job import Job
-from .optimize import optimize_task_graph
+from .optimize import optimize_job_graph
 from .parameters import Parameters
 from .morph import morph
 from .util.python_path import find_object
@@ -362,7 +362,7 @@ class JobGraphGenerator:
         do_not_optimize = set(parameters.get("do_not_optimize", []))
         if not parameters.get("optimize_target_jobs", True):
             do_not_optimize = set(target_job_set.graph.nodes).union(do_not_optimize)
-        optimized_job_graph = optimize_task_graph(
+        optimized_job_graph = optimize_job_graph(
             target_job_graph,
             parameters,
             do_not_optimize,

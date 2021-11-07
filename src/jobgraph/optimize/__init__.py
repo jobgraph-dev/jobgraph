@@ -43,7 +43,7 @@ def register_strategy(name, args=()):
     return wrap
 
 
-def optimize_task_graph(
+def optimize_job_graph(
     target_job_graph,
     params,
     do_not_optimize,
