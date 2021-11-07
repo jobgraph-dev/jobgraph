@@ -27,7 +27,7 @@ class ParameterMismatch(Exception):
 
 
 @memoize
-def _repo():
+def get_repo():
     return get_repository(os.getcwd())
 
 
@@ -35,6 +35,7 @@ def _repo():
 base_schema = Schema(
     {
         Required("base_repository"): str,
+        Required("base_rev"): str,
         Required("build_date"): int,
         Required("do_not_optimize"): [str],
         Required("existing_tasks"): {str: str},
@@ -118,19 +119,19 @@ class Parameters(ReadOnlyDict):
     @staticmethod
     def _fill_defaults(**kwargs):
         defaults = {
-            "base_repository": _repo().get_url(),
+            "base_repository": get_repo().get_url(),
             "build_date": int(time.time()),
             "do_not_optimize": [],
             "existing_tasks": {},
             "filters": ["target_tasks_method"],
-            "head_ref": _repo().head_ref,
-            "head_repository": _repo().get_url(),
-            "head_rev": _repo().head_ref,
+            "head_ref": get_repo().head_ref,
+            "head_repository": get_repo().get_url(),
+            "head_rev": get_repo().head_ref,
             "head_tag": "",
             "level": "3",
             "optimize_target_tasks": True,
             "owner": "nobody@mozilla.com",
-            "project": _repo().get_url().rsplit("/", 1)[1],
+            "project": get_repo().get_url().rsplit("/", 1)[1],
             "pushdate": int(time.time()),
             "target_tasks_method": "default",
             "pipeline_source": "",

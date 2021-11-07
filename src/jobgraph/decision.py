@@ -95,6 +95,7 @@ def get_decision_parameters(graph_config, options):
         n: options[n]
         for n in [
             "base_repository",
+            "base_rev",
             "head_repository",
             "head_rev",
             "head_ref",

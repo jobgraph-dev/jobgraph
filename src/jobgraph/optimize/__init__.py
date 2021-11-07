@@ -15,11 +15,14 @@ See ``taskcluster/docs/optimization.rst`` for more information.
 import importlib
 import logging
 import os
+
 from collections import defaultdict
+from pathlib import Path
 
 from ..graph import Graph
 from ..jobgraph import JobGraph
 from ..util.parameterization import resolve_task_references
+from ..parameters import get_repo
 
 
 logger = logging.getLogger(__name__)
@@ -287,14 +290,6 @@ class Either(OptimizationStrategy):
         )
 
 
-@register_strategy("skip-unless-changed")
-class SkipUnlessChanged(OptimizationStrategy):
-    def should_remove_task(self, task, params, file_patterns):
-        raise NotImplementedError(
-            "Please implement this optimization strategy on Gitlab CI."
-        )
-
-
 @register_strategy("always")
 class Always(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
@@ -304,6 +299,30 @@ class Always(OptimizationStrategy):
 @register_strategy("never")
 class Never(OptimizationStrategy):
     def should_remove_task(self, task, params, file_patterns):
+        return False
+
+
+@register_strategy("skip-unless-changed")
+class SkipUnlessChanged(OptimizationStrategy):
+    def should_remove_task(self, task, params, file_patterns):
+        repo = get_repo()
+        repo_root = Path(repo.path)
+
+        changed_files = repo.get_list_of_changed_files(params["base_rev"], params["head_rev"])
+        tracked_files = [file for pattern in file_patterns for file in repo_root.glob(pattern)]
+
+        has_any_tracked_file_changed = any(
+            Path(repo_root / changed_file) == tracked_file
+            for changed_file in changed_files
+            for tracked_file in tracked_files
+        )
+
+        if not has_any_tracked_file_changed:
+            logger.debug(
+                "no files found matching a pattern in `skip-unless-changed` for "
+                + task.label
+            )
+            return True
         return False
 
 

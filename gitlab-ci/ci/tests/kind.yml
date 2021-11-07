@@ -40,5 +40,8 @@ jobs:
 
     yamllint:
         description: "Run `yamllint` to validate the latest changes"
+        optimization:
+            skip-unless-changed:
+                - "**/*.yml"
         run:
             command: yamllint .

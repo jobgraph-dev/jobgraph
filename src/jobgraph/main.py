@@ -569,6 +569,16 @@ def image_digest(args):
 )
 @argument("--base-repository", required=True, help='URL for "base" repository to clone')
 @argument(
+    "--base-rev",
+    required=True,
+    help='The previous latest commit present on a branch. '
+    # TODO: support the 0000000000000000000000000000000000000000 case
+    # 'If set to '
+    # '"0000000000000000000000000000000000000000", then jobgraph will '
+    # 'determine the most recent ancestor between the current revision '
+    # 'and the main branch'
+)
+@argument(
     "--head-repository",
     required=True,
     help='URL for "head" repository to fetch revision from',

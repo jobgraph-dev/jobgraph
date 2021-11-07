@@ -29,6 +29,7 @@ decision:
         - >-
             jobgraph decision
             --base-repository="$BASE_REPOSITORY"
+            --base-rev="$CI_COMMIT_BEFORE_SHA"
             --head-ref="$CI_COMMIT_BRANCH"
             --head-repository="$CI_PROJECT_URL"
             --head-rev="$CI_COMMIT_SHA"
