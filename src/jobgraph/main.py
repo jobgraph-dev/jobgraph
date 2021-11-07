@@ -267,10 +267,7 @@ def generate_jobgraph(options, parameters, logdir):
     action="append",
     help="Parameters to use for the generation. Can be a path to file (.yml or "
     ".json; see `taskcluster/docs/parameters.rst`), a directory (containing "
-    "parameters files), a url, of the form `project=mozilla-central` to download "
-    "latest parameters file for the specified project from CI, or of the form "
-    "`task-id=<decision task id>` to download parameters from the specified "
-    "decision task. Can be specified multiple times, in which case multiple "
+    "parameters files). Can be specified multiple times, in which case multiple "
     "generations will happen from the same invocation (one per parameters "
     "specified).",
 )
@@ -515,11 +512,6 @@ def image_digest(args):
     "--message",
     required=False,
     help=argparse.SUPPRESS,
-)
-@argument(
-    "--project",
-    required=True,
-    help="Project to use for creating task graph. Example: --project=try",
 )
 @argument("--pushdate", dest="pushdate", required=True, type=int, default=0)
 @argument("--owner", required=True, help="email address of who owns this graph")

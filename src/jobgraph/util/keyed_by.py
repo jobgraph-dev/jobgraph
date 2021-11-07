@@ -26,10 +26,7 @@ def evaluate_keyed_by(
     Items can be nested as deeply as desired::
 
         by-test-platform:
-            win.*:
-                by-project:
-                    ash: ..
-                    cedar: ..
+            win.*: 10
             linux: 13
             default: 12
 
@@ -38,11 +35,7 @@ def evaluate_keyed_by(
         item_name (str): Used to generate useful error messages.
         attributes (dict): Dictionary of attributes used to lookup 'by-<key>' with.
         defer (list):
-            Allows evaluating a by-* entry at a later time. In the example
-            above it's possible that the project attribute hasn't been set yet,
-            in which case we'd want to stop before resolving that subkey and
-            then call this function again later. This can be accomplished by
-            setting `defer=["project"]` in this example.
+            Allows evaluating a by-* entry at a later time.
         enforce_single_match (bool):
             If True (default), each task may only match a single arm of the
             evaluation.

@@ -496,42 +496,6 @@ def fetch_artifacts():
     print_line(b'fetches', b'finished fetching artifacts\n')
 
 
-def add_vcs_arguments(parser, project, name):
-    """Adds arguments to ArgumentParser to control VCS options for a project."""
-
-    parser.add_argument('--%s-checkout' % project,
-                        help='Directory where %s checkout should be created' %
-                             name)
-
-
-def collect_vcs_options(args, project, name):
-    checkout = getattr(args, '%s_checkout' % project)
-
-    env_prefix = project.upper()
-
-    base_repo = os.environ.get('%s_BASE_REPOSITORY' % env_prefix)
-    head_repo = os.environ.get('%s_HEAD_REPOSITORY' % env_prefix)
-    revision = os.environ.get('%s_HEAD_REV' % env_prefix)
-    ref = os.environ.get('%s_HEAD_REF' % env_prefix)
-    private_key_secret = os.environ.get('%s_SSH_SECRET_NAME' % env_prefix)
-
-    # Expand ~ in some paths.
-    if checkout:
-        checkout = os.path.abspath(os.path.expanduser(checkout))
-
-    return {
-        'project': project,
-        'name': name,
-        'env-prefix': env_prefix,
-        'checkout': checkout,
-        'base-repo': base_repo,
-        'head-repo': head_repo,
-        'revision': revision,
-        'ref': ref,
-        'ssh-secret-name': private_key_secret,
-    }
-
-
 def vcs_checkout_from_args(options):
 
     if not options['checkout']:
@@ -662,16 +626,9 @@ def main(args):
     else:
         repositories = {'vcs': "repository"}
 
-    for repository, name in repositories.items():
-        add_vcs_arguments(parser, repository, name)
-
     args = parser.parse_args(our_args)
 
-    repositories = [
-        collect_vcs_options(args, repository, name) for (repository, name) in repositories.items()
-    ]
-    # Sort repositories so that parent checkout paths come before children
-    repositories.sort(key=lambda repo: Path(repo['checkout'] or "/").parts)
+    repositories = []
 
     uid = gid = gids = None
     if IS_POSIX and running_as_root:

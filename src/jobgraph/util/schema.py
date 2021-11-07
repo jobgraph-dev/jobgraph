@@ -90,10 +90,7 @@ def resolve_keyed_by(item, field, item_name, **extra_values):
 
         chunks:
             by-test-platform:
-                win.*:
-                    by-project:
-                        ash: ..
-                        cedar: ..
+                win.*: 10
                 linux: 13
                 default: 12
     """

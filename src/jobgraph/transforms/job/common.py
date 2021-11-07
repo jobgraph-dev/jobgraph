@@ -60,8 +60,7 @@ def docker_worker_add_workspace_cache(config, job, taskdesc, extra=None):
         extra (str): Optional context passed in that supports extending the cache
             key name to avoid undesired conflicts with other caches.
     """
-    cache_name = "{}-build-{}-{}-workspace".format(
-        config.params["project"],
+    cache_name = "build-{}-{}-workspace".format(
         taskdesc["attributes"]["build_platform"],
         taskdesc["attributes"]["build_type"],
     )

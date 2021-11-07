@@ -12,15 +12,6 @@ from jobgraph.job import Job
 
 
 class TestTargetTasks(unittest.TestCase):
-    def default_matches_project(self, project):
-        return self.default_matches(
-            attributes={},
-            parameters={
-                "project": project,
-                "pipeline_source": "push",
-            },
-        )
-
     def default_matches_pipeline_source(self, run_on_pipeline_source, pipeline_source):
         attributes = {}
         if run_on_pipeline_source is not None:
@@ -29,7 +20,6 @@ class TestTargetTasks(unittest.TestCase):
         return self.default_matches(
             attributes=attributes,
             parameters={
-                "project": "mozilla-central",
                 "pipeline_source": pipeline_source,
                 "head_ref": "main",
             },
@@ -49,7 +39,6 @@ class TestTargetTasks(unittest.TestCase):
         return self.default_matches(
             attributes=attributes,
             parameters={
-                "project": "fenix",
                 "pipeline_source": pipeline_source,
                 "head_ref": git_branch,
             },

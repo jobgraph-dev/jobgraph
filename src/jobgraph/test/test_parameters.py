@@ -31,7 +31,6 @@ class TestParameters(unittest.TestCase):
         "level": "3",
         "optimize_target_jobs": True,
         "owner": "nobody@mozilla.com",
-        "project": "project",
         "pushdate": 0,
         "target_jobs_method": "default",
         "pipeline_source": "push",
@@ -163,7 +162,6 @@ def test_parameters_id():
         ("/bar.json", "bar"),
         ("http://example.org/bar.yml?id=0", "bar"),
         ("task-id=123", "task-id=123"),
-        ("project=autoland", "project=autoland"),
     ),
 )
 def test_parameters_format_spec(spec, expected):

@@ -49,7 +49,6 @@ base_schema = Schema(
         Required("level"): str,
         Required("optimize_target_jobs"): bool,
         Required("owner"): str,
-        Required("project"): str,
         Required("pushdate"): int,
         # target-kind is not included, since it should never be
         # used at run-time
@@ -111,7 +110,7 @@ class Parameters(ReadOnlyDict):
         if spec is None:
             return "defaults"
 
-        if any(spec.startswith(s) for s in ("task-id=", "project=")):
+        if spec.startswith("task-id="):
             return spec
 
         result = urlparse(spec)
@@ -135,7 +134,6 @@ class Parameters(ReadOnlyDict):
             "level": "3",
             "optimize_target_jobs": True,
             "owner": "nobody@mozilla.com",
-            "project": get_repo().get_url().rsplit("/", 1)[1],
             "pushdate": int(time.time()),
             "target_jobs_method": "default",
             "pipeline_source": "",
@@ -166,9 +164,7 @@ class Parameters(ReadOnlyDict):
         Determine whether this graph is being built on a try project or for
         `mach try fuzzy`.
         """
-        return (
-            "try" in self["project"] or self["pipeline_source"] == "merge_request_event"
-        )
+        return self["pipeline_source"] == "merge_request_event"
 
     def file_url(self, path, pretty=False):
         """
@@ -257,11 +253,10 @@ def _determine_base_rev(kwargs):
 
 def load_parameters_file(spec, strict=True, overrides=None, trust_domain=None):
     """
-    Load parameters from a path, url, decision task-id or project.
+    Load parameters from a path, url, decision task-id.
 
     Examples:
         task-id=fdtgsD5DQUmAQZEaGMvQ4Q
-        project=mozilla-central
     """
     from jobgraph.util.taskcluster import get_artifact_url
     from jobgraph.util import yaml
@@ -277,16 +272,10 @@ def load_parameters_file(spec, strict=True, overrides=None, trust_domain=None):
         # reading parameters from a local parameters.yml file
         f = open(spec)
     except OSError:
-        # fetching parameters.yml using task task-id, project or supplied url
+        # fetching parameters.yml using task task-id or supplied url
         task_id = None
         if spec.startswith("task-id="):
             task_id = spec.split("=")[1]
-        elif spec.startswith("project="):
-            if trust_domain is None:
-                raise ValueError(
-                    "Can't specify parameters by project "
-                    "if trust domain isn't supplied.",
-                )
         if task_id:
             spec = get_artifact_url(task_id, "public/parameters.yml")
         f = urlopen(spec)

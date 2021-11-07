@@ -47,7 +47,6 @@ decision:
             --message="$CI_COMMIT_MESSAGE"
             --owner="$CI_COMMIT_AUTHOR"
             --pipeline-source="$CI_PIPELINE_SOURCE"
-            --project='jobgraph'
             --pushdate='0'
     stage: decision
     variables:

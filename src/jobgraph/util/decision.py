@@ -40,7 +40,6 @@ def make_decision_task(params, root, context, head_rev=None):
         {
             "repository": {
                 "url": params["repository_url"],
-                "project": params["project"],
                 "level": params["level"],
             },
             "push": merge(

@@ -52,7 +52,6 @@ class TestGetDecisionParameters(unittest.TestCase):
             "head_rev": "abcd",
             "head_ref": "ef01",
             "head_tag": "v0.0.1",
-            "project": "some-project",
             "pushdate": 1503691511,
             "owner": "nobody@mozilla.com",
             "pipeline_source": "push",

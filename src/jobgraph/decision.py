@@ -25,16 +25,6 @@ logger = logging.getLogger(__name__)
 
 ARTIFACTS_DIR = "artifacts"
 
-# For each project, this gives a set of parameters specific to the project.
-# See `taskcluster/docs/parameters.rst` for information on parameters.
-PER_PROJECT_PARAMETERS = {
-    # the default parameters are used for projects that do not match above.
-    "default": {
-        "target_jobs_method": "default",
-    }
-}
-
-
 try_task_config_schema_v2 = Schema(
     {
         Optional("parameters"): {str: object},
@@ -85,7 +75,6 @@ def jobgraph_decision(options, parameters=None):
 def get_decision_parameters(graph_config, options):
     """
     Load parameters from the command-line options for 'jobgraph decision'.
-    This also applies per-project parameters, based on the given project.
 
     """
     parameters = {
@@ -97,8 +86,6 @@ def get_decision_parameters(graph_config, options):
             "head_rev",
             "head_ref",
             "head_tag",
-            "project",
-            "project_id",
             "pushdate",
             "owner",
             "level",
@@ -126,25 +113,11 @@ def get_decision_parameters(graph_config, options):
 
     # use the pushdate as build_date if given, else use current time
     parameters["build_date"] = parameters["pushdate"] or int(time.time())
-
-    project = parameters["project"]
-    try:
-        parameters.update(PER_PROJECT_PARAMETERS[project])
-    except KeyError:
-        logger.warning(
-            "using default project parameters; add {} to "
-            "PER_PROJECT_PARAMETERS in {} to customize behavior "
-            "for this project".format(project, __file__)
-        )
-        parameters.update(PER_PROJECT_PARAMETERS["default"])
-
-    # `target_jobs_method` has higher precedence than `project` parameters
-    if options.get("target_jobs_method"):
-        parameters["target_jobs_method"] = options["target_jobs_method"]
+    parameters["target_jobs_method"] = options.get("target_jobs_method", "default")
 
     # ..but can be overridden by the commit message: if it contains the special
-    # string "DONTBUILD" and this is an on-push decision task, then use the
-    # special 'nothing' target task method.
+    # string "DONTBUILD" and this is an on-push decision job, then use the
+    # special 'nothing' target job method.
     if "DONTBUILD" in commit_message and options["pipeline_source"] == "push":
         parameters["target_jobs_method"] = "nothing"
 
@@ -163,9 +136,7 @@ def get_decision_parameters(graph_config, options):
         task_config_file = os.path.join(os.getcwd(), "try_task_config.json")
 
     # load try settings
-    if ("try" in project and options["pipeline_source"] == "push") or options[
-        "pipeline_source"
-    ] == "merge_request_event":
+    if options["pipeline_source"] == "merge_request_event":
         set_try_config(parameters, task_config_file)
 
     result = Parameters(**parameters)
