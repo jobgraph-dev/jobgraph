@@ -214,7 +214,7 @@ def generate_jobgraph(options, parameters, logdir):
 @command(
     "target",
     help="Show the set of target jobs.",
-    defaults={"graph_attr": "target_task_set"},
+    defaults={"graph_attr": "target_job_set"},
 )
 @command(
     "target-graph",

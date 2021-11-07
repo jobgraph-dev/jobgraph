@@ -75,7 +75,7 @@ def jobgraph_decision(options, parameters=None):
     _, _ = JobGraph.from_json(full_task_json)
 
     # write out the target task set to allow reproducing this as input
-    write_artifact("target-tasks.yml", list(jgg.target_task_set.jobs.keys()))
+    write_artifact("target-tasks.yml", list(jgg.target_job_set.jobs.keys()))
 
     # write out the optimized task graph to describe what will actually happen,
     # and the map of labels to taskids

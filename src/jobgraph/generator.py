@@ -166,13 +166,13 @@ class JobGraphGenerator:
         return self._run_until("full_task_graph")
 
     @property
-    def target_task_set(self):
+    def target_job_set(self):
         """
         The set of targetted tasks (a graph without edges)
 
         @type: JobGraph
         """
-        return self._run_until("target_task_set")
+        return self._run_until("target_job_set")
 
     @property
     def target_task_graph(self):
@@ -319,11 +319,11 @@ class JobGraphGenerator:
         yield verifications("full_task_graph", full_task_graph, graph_config)
 
         logger.info("Generating target task set")
-        target_task_set = JobGraph(dict(all_tasks), Graph(set(all_tasks.keys()), set()))
+        target_job_set = JobGraph(dict(all_tasks), Graph(set(all_tasks.keys()), set()))
         for fltr in filters:
-            old_len = len(target_task_set.graph.nodes)
-            target_tasks = set(fltr(target_task_set, parameters, graph_config))
-            target_task_set = JobGraph(
+            old_len = len(target_job_set.graph.nodes)
+            target_tasks = set(fltr(target_job_set, parameters, graph_config))
+            target_job_set = JobGraph(
                 {l: all_tasks[l] for l in target_tasks}, Graph(target_tasks, set())
             )
             logger.info(
@@ -331,7 +331,7 @@ class JobGraphGenerator:
                 % (fltr.__name__, old_len - len(target_tasks), len(target_tasks))
             )
 
-        yield verifications("target_task_set", target_task_set, graph_config)
+        yield verifications("target_job_set", target_job_set, graph_config)
 
         logger.info("Generating target task graph")
         # include all docker-image build tasks here, in case they are needed for a graph morph
@@ -362,7 +362,7 @@ class JobGraphGenerator:
         existing_tasks = parameters.get("existing_tasks")
         do_not_optimize = set(parameters.get("do_not_optimize", []))
         if not parameters.get("optimize_target_jobs", True):
-            do_not_optimize = set(target_task_set.graph.nodes).union(do_not_optimize)
+            do_not_optimize = set(target_job_set.graph.nodes).union(do_not_optimize)
         optimized_task_graph = optimize_task_graph(
             target_task_graph,
             parameters,

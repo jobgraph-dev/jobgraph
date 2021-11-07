@@ -45,11 +45,11 @@ def test_full_task_graph(maketgg):
     )
 
 
-def test_target_task_set(maketgg):
-    "The target_task_set property has the targeted tasks"
+def test_target_job_set(maketgg):
+    "The target_job_set property has the targeted tasks"
     tgg = maketgg(["_fake-t-1"])
-    assert tgg.target_task_set.graph == graph.Graph({"_fake-t-1"}, set())
-    assert set(tgg.target_task_set.jobs.keys()) == {"_fake-t-1"}
+    assert tgg.target_job_set.graph == graph.Graph({"_fake-t-1"}, set())
+    assert set(tgg.target_job_set.jobs.keys()) == {"_fake-t-1"}
 
 
 def test_target_task_graph(maketgg):
@@ -82,7 +82,7 @@ def test_always_target_tasks(maketgg):
         "params": {"optimize_target_jobs": False},
     }
     tgg = maketgg(**tgg_args)
-    assert sorted(tgg.target_task_set.jobs.keys()) == sorted(
+    assert sorted(tgg.target_job_set.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"]
     )
     assert sorted(tgg.target_task_graph.jobs.keys()) == sorted(
