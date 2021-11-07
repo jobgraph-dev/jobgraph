@@ -2,7 +2,7 @@
 trust-domain: jobgraph
 
 jobgraph:
-    docker-in-docker-image: docker:20.10.9-dind@sha256:24628ded7711e48db56af875236ac30a8950305ac461332955b3375ac5a87e1a
+    docker-in-docker-image: docker:20.10.10-dind@sha256:4affae8ac27539b74e27ac4f2d6662902a328340c218336944bab7e482244cc4
     container-registry:
         type: gitlab
 
