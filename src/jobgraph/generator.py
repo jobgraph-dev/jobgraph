@@ -386,7 +386,7 @@ class JobGraphGenerator:
         return self._run_results[name]
 
 
-def load_tasks_for_kind(parameters, kind, root_dir=None):
+def load_jobs_for_kind(parameters, kind, root_dir=None):
     """
     Get all the tasks of a given kind.
 

@@ -16,14 +16,14 @@ from jobgraph.util.taskcluster import (
 
 
 def get_image_digest(image_name):
-    from jobgraph.generator import load_tasks_for_kind
+    from jobgraph.generator import load_jobs_for_kind
     from jobgraph.parameters import Parameters
 
     params = Parameters(
         level=os.environ.get("MOZ_SCM_LEVEL", "3"),
         strict=False,
     )
-    tasks = load_tasks_for_kind(params, "docker-image")
+    tasks = load_jobs_for_kind(params, "docker-image")
     task = tasks[f"build-docker-image-{image_name}"]
     return task.attributes["cached_task"]["digest"]
 
