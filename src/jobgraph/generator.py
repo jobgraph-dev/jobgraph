@@ -79,7 +79,7 @@ class Kind:
                 label=job_dict["label"],
                 description=job_dict["description"],
                 attributes=job_dict["attributes"],
-                actual_gitlab_ci_job=job_dict["task"],
+                actual_gitlab_ci_job=job_dict["actual_gitlab_ci_job"],
                 optimization=job_dict.get("optimization"),
                 dependencies=job_dict.get("dependencies"),
             )

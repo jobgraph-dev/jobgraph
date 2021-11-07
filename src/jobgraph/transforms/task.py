@@ -2,9 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
-These transformations take a task description and turn it into a TaskCluster
-task definition (along with attributes, label, etc.).  The input to these
-transformations is generic to any kind of task, but abstracts away some of the
+These transformations take a job description and turn it into a Gitlab CI
+job definition (along with attributes, label, etc.).  The input to these
+transformations is generic to any kind of job, but abstracts away some of the
 complexities of worker implementations.
 """
 
@@ -310,12 +310,12 @@ transforms = TransformSequence()
 
 
 @transforms.add
-def set_defaults(config, tasks):
-    for task in tasks:
-        task.setdefault("always-target", False)
-        task.setdefault("optimization", None)
+def set_defaults(config, jobs):
+    for job in jobs:
+        job.setdefault("always-target", False)
+        job.setdefault("optimization", None)
 
-        worker = task["worker"]
+        worker = job["worker"]
         if worker["implementation"] in ("kubernetes",):
             worker.setdefault("chain-of-trust", False)
             worker.setdefault("docker-in-docker", False)
@@ -324,49 +324,49 @@ def set_defaults(config, tasks):
                 for c in worker["caches"]:
                     c.setdefault("skip-untrusted", False)
 
-        yield task
+        yield job
 
 
 @transforms.add
-def task_name_from_label(config, tasks):
-    for task in tasks:
-        if "label" not in task:
-            if "name" not in task:
-                raise Exception("task has neither a name nor a label")
-            task["label"] = "{}-{}".format(config.kind, task["name"])
-        if task.get("name"):
-            del task["name"]
-        yield task
+def job_name_from_label(config, jobs):
+    for job in jobs:
+        if "label" not in job:
+            if "name" not in job:
+                raise Exception("job has neither a name nor a label")
+            job["label"] = "{}-{}".format(config.kind, job["name"])
+        if job.get("name"):
+            del job["name"]
+        yield job
 
 
 @transforms.add
-def validate(config, tasks):
-    for task in tasks:
+def validate(config, jobs):
+    for job in jobs:
         validate_schema(
             task_description_schema,
-            task,
-            "In task {!r}:".format(task.get("label", "?no-label?")),
+            job,
+            "In job {!r}:".format(job.get("label", "?no-label?")),
         )
         validate_schema(
-            payload_builders[task["worker"]["implementation"]].schema,
-            task["worker"],
-            "In task.run {!r}:".format(task.get("label", "?no-label?")),
+            payload_builders[job["worker"]["implementation"]].schema,
+            job["worker"],
+            "In job.run {!r}:".format(job.get("label", "?no-label?")),
         )
-        yield task
+        yield job
 
 
 @transforms.add
-def build_task(config, tasks):
-    for task in tasks:
+def build_job(config, jobs):
+    for job in jobs:
         level = str(config.params["level"])
 
         worker_type = get_worker_type(
             config.graph_config,
-            task["worker-type"],
+            job["worker-type"],
             level,
         )
 
-        task_def = {
+        job_def = {
             "retry": {
                 "max": 2,
                 "when": [
@@ -377,42 +377,40 @@ def build_task(config, tasks):
                 ],
             },
             "tags": [worker_type],
-            "timeout": task["worker"]["max-run-time"],
+            "timeout": job["worker"]["max-run-time"],
         }
 
         # add the payload and adjust anything else as required.
-        payload_builders[task["worker"]["implementation"]].builder(
-            config, task, task_def
-        )
+        payload_builders[job["worker"]["implementation"]].builder(config, job, job_def)
 
-        attributes = task.get("attributes", {})
-        attributes["run_on_pipeline_sources"] = task.get(
+        attributes = job.get("attributes", {})
+        attributes["run_on_pipeline_sources"] = job.get(
             "run-on-pipeline-sources", ["all"]
         )
-        attributes["run_on_git_branches"] = task.get("run-on-git-branches", ["all"])
-        attributes["always_target"] = task["always-target"]
+        attributes["run_on_git_branches"] = job.get("run-on-git-branches", ["all"])
+        attributes["always_target"] = job["always-target"]
 
         yield {
-            "label": task["label"],
-            "description": task["description"],
-            "task": task_def,
-            "dependencies": task.get("dependencies", {}),
+            "label": job["label"],
+            "description": job["description"],
+            "actual_gitlab_ci_job": job_def,
+            "dependencies": job.get("dependencies", {}),
             "attributes": attributes,
-            "optimization": task.get("optimization", None),
+            "optimization": job.get("optimization", None),
         }
 
 
 @transforms.add
-def check_task_dependencies(config, tasks):
-    """Ensures that tasks don't have more than 50 dependencies."""
-    for task in tasks:
-        if len(task["dependencies"]) > MAX_DEPENDENCIES:
+def check_job_dependencies(config, jobs):
+    """Ensures that jobs don't have more than 50 dependencies."""
+    for job in jobs:
+        if len(job["dependencies"]) > MAX_DEPENDENCIES:
             raise Exception(
-                "task {}/{} has too many dependencies ({} > {})".format(
+                "job {}/{} has too many dependencies ({} > {})".format(
                     config.kind,
-                    task["label"],
-                    len(task["dependencies"]),
+                    job["label"],
+                    len(job["dependencies"]),
                     MAX_DEPENDENCIES,
                 )
             )
-        yield task
+        yield job

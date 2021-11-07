@@ -112,19 +112,19 @@ class TransformSequence:
 class ValidateSchema:
     schema = attr.ib(type=Schema)
 
-    def __call__(self, config, tasks):
-        for task in tasks:
-            if "name" in task:
-                error = "In {kind} kind task {name!r}:".format(
-                    kind=config.kind, name=task["name"]
+    def __call__(self, config, jobs):
+        for job in jobs:
+            if "name" in job:
+                error = "In {kind} kind job {name!r}:".format(
+                    kind=config.kind, name=job["name"]
                 )
-            elif "label" in task:
-                error = "In job {label!r}:".format(label=task["label"])
-            elif "primary-dependency" in task:
-                error = "In {kind} kind task for {dependency!r}:".format(
-                    kind=config.kind, dependency=task["primary-dependency"].label
+            elif "label" in job:
+                error = "In job {label!r}:".format(label=job["label"])
+            elif "primary-dependency" in job:
+                error = "In {kind} kind job for {dependency!r}:".format(
+                    kind=config.kind, dependency=job["primary-dependency"].label
                 )
             else:
-                error = "In unknown task:"
-            validate_schema(self.schema, task, error)
-            yield task
+                error = "In unknown job:"
+            validate_schema(self.schema, job, error)
+            yield job

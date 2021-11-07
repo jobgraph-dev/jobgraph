@@ -21,7 +21,7 @@ def fake_loader(kind, path, config, parameters, loaded_tasks):
             "label": f"{kind}-t-{i}",
             "description": f"{kind} task {i}",
             "attributes": {"_tasknum": str(i)},
-            "task": {
+            "actual_gitlab_ci_job": {
                 "i": i,
                 "metadata": {"name": f"t-{i}"},
                 "deadline": "soon",

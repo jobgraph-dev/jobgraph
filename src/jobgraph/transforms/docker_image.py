@@ -45,7 +45,7 @@ docker_image_schema = Schema(
         # Name of the docker image definition under gitlab-ci/docker, when
         # different from the docker image name.
         Optional("definition"): str,
-        # List of package tasks this docker image depends on.
+        # List of package jobs this docker image depends on.
         Optional("packages"): [str],
         Optional(
             "cache",
@@ -59,12 +59,12 @@ transforms.add_validate(docker_image_schema)
 
 
 @transforms.add
-def add_registry_specific_config(config, tasks):
-    for task in tasks:
-        registry_type = task.pop("container-registry-type")
+def add_registry_specific_config(config, jobs):
+    for job in jobs:
+        registry_type = job.pop("container-registry-type")
         # TODO Use decorators instead
         if registry_type == "gitlab":
-            worker = task.setdefault("worker", {})
+            worker = job.setdefault("worker", {})
             env = worker.setdefault("env", {})
 
             # See
@@ -78,30 +78,30 @@ def add_registry_specific_config(config, tasks):
                 'docker login --username "$CI_REGISTRY_USER" --password '
                 '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
             )
-            task.setdefault("optimization", {}).setdefault(
+            job.setdefault("optimization", {}).setdefault(
                 "skip-if-on-gitlab-container-registry", True
             )
         else:
             raise ValueError(f"Unknown container-registry-type: {registry_type}")
 
-        yield task
+        yield job
 
 
 @transforms.add
-def fill_template(config, tasks):
+def fill_template(config, jobs):
     available_packages = set()
-    for task in config.kind_dependencies_tasks:
-        if task.kind != "packages":
+    for job in config.kind_dependencies_tasks:
+        if job.kind != "packages":
             continue
-        name = task.label.replace("packages-", "")
+        name = job.label.replace("packages-", "")
         available_packages.add(name)
 
-    tasks = list(tasks)
+    jobs = list(jobs)
 
-    for task in tasks:
-        image_name = task["name"]
-        packages = task.get("packages", [])
-        parent = task.pop("parent", None)
+    for job in jobs:
+        image_name = job["name"]
+        packages = job.get("packages", [])
+        parent = job.pop("parent", None)
 
         for p in packages:
             if p not in available_packages:
@@ -111,13 +111,13 @@ def fill_template(config, tasks):
                     )
                 )
 
-        description = "Build the docker image {} for use by dependent tasks".format(
+        description = "Build the docker image {} for use by dependent jobs".format(
             image_name
         )
 
         dind_image = config.graph_config["jobgraph"]["docker-in-docker-image"]
 
-        worker = task.setdefault("worker", {})
+        worker = job.setdefault("worker", {})
         worker |= {
             "implementation": "kubernetes",
             "os": "linux",
@@ -130,9 +130,9 @@ def fill_template(config, tasks):
             "DOCKER_IMAGE_NAME": image_name,
         }
 
-        # include some information that is useful in reconstructing this task
+        # include some information that is useful in reconstructing this job
         # from JSON
-        taskdesc = {
+        jobdesc = {
             "label": f"build-docker-image-{image_name}",
             "description": description,
             "attributes": {
@@ -140,40 +140,40 @@ def fill_template(config, tasks):
                 "image_name": image_name,
             },
             "name": image_name,
-            "optimization": task.get("optimization", None),
+            "optimization": job.get("optimization", None),
             "worker-type": "images",
             "worker": worker,
         }
 
         if packages:
-            deps = taskdesc.setdefault("dependencies", {})
+            deps = jobdesc.setdefault("dependencies", {})
             for p in sorted(packages):
                 deps[p] = f"packages-{p}"
 
         if parent:
-            deps = taskdesc.setdefault("dependencies", {})
+            deps = jobdesc.setdefault("dependencies", {})
             deps["parent"] = f"build-docker-image-{parent}"
             worker["env"]["DOCKER_IMAGE_PARENT"] = {
                 "docker-image-reference": "<parent>"
             }
-            args = taskdesc.setdefault("args", {})
+            args = jobdesc.setdefault("args", {})
             args |= {"DOCKER_IMAGE_PARENT": "$DOCKER_IMAGE_PARENT"}
 
-        yield taskdesc
+        yield jobdesc
 
 
 @transforms.add
-def define_docker_commands(config, tasks):
-    for task in tasks:
-        packages = task.pop("packages", [])
-        arguments = task.get("args", {})
-        worker = task.setdefault("worker", {})
+def define_docker_commands(config, jobs):
+    for job in jobs:
+        packages = job.pop("packages", [])
+        arguments = job.get("args", {})
+        worker = job.setdefault("worker", {})
 
         if packages:
             arguments["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
 
-        image_name = task.pop("name")
-        definition = task.get("definition", image_name)
+        image_name = job.pop("name")
+        definition = job.get("definition", image_name)
         docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
         build_args = " ".join(
             f'--build-arg "{argument_name}={argument_value}"'
@@ -188,15 +188,15 @@ def define_docker_commands(config, tasks):
             )
         )
 
-        yield task
+        yield job
 
 
 @transforms.add
-def fill_context_hash(config, tasks):
-    for task in tasks:
-        image_name = task["attributes"]["image_name"]
-        definition = task.pop("definition", image_name)
-        args = task.pop("args", {})
+def fill_context_hash(config, jobs):
+    for job in jobs:
+        image_name = job["attributes"]["image_name"]
+        definition = job.pop("definition", image_name)
+        args = job.pop("args", {})
 
         if not jobgraph.fast:
             context_path = os.path.join("gitlab-ci", "docker", definition)
@@ -207,7 +207,7 @@ def fill_context_hash(config, tasks):
                 raise Exception("Can't write artifacts if `jobgraph.fast` is set.")
             context_hash = "0" * 40
 
-        worker = task.setdefault("worker", {})
+        worker = job.setdefault("worker", {})
         (
             gitlab_domain_name,
             repo_namespace,
@@ -215,7 +215,7 @@ def fill_context_hash(config, tasks):
         ) = extract_gitlab_instance_and_namespace_and_name(
             config.params["head_repository"]
         )
-        task["attributes"] |= {
+        job["attributes"] |= {
             "context_hash": context_hash,
             "docker_image_full_location": get_image_full_location(
                 gitlab_domain_name,
@@ -240,4 +240,4 @@ def fill_context_hash(config, tasks):
             ),
         }
 
-        yield task
+        yield job
