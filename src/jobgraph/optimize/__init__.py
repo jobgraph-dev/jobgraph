@@ -57,7 +57,7 @@ def optimize_task_graph(
 
     optimizations = _get_optimizations(target_job_graph, strategies)
 
-    removed_tasks = remove_tasks(
+    removed_tasks = remove_jobs(
         target_job_graph=target_job_graph,
         optimizations=optimizations,
         params=params,
@@ -104,7 +104,7 @@ def _log_optimization(verb, opt_counts):
         logger.info(f"No tasks {verb} during optimization")
 
 
-def remove_tasks(target_job_graph, params, optimizations, do_not_optimize):
+def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
     """
     Implement the "Removing Tasks" phase, returning a set of task labels of all removed tasks.
     """

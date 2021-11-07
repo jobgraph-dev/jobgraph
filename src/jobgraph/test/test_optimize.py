@@ -82,8 +82,8 @@ class TestOptimize(unittest.TestCase):
             ("t2", "t1", "dep"),
         )
 
-    def assert_remove_tasks(self, graph, exp_removed, do_not_optimize=set()):
-        got_removed = optimize.remove_tasks(
+    def assert_remove_jobs(self, graph, exp_removed, do_not_optimize=set()):
+        got_removed = optimize.remove_jobs(
             target_job_graph=graph,
             optimizations=optimize._get_optimizations(graph, self.strategies),
             params={},
@@ -91,31 +91,31 @@ class TestOptimize(unittest.TestCase):
         )
         self.assertEqual(got_removed, exp_removed)
 
-    def test_remove_tasks_never(self):
+    def test_remove_jobs_never(self):
         "A graph full of optimization=never has nothing removed"
         graph = self.make_triangle()
-        self.assert_remove_tasks(graph, set())
+        self.assert_remove_jobs(graph, set())
 
-    def test_remove_tasks_all(self):
+    def test_remove_jobs_all(self):
         "A graph full of optimization=remove has removes everything"
         graph = self.make_triangle(
             t1={"remove": None}, t2={"remove": None}, t3={"remove": None}
         )
-        self.assert_remove_tasks(graph, {"t1", "t2", "t3"})
+        self.assert_remove_jobs(graph, {"t1", "t2", "t3"})
 
-    def test_remove_tasks_blocked(self):
+    def test_remove_jobs_blocked(self):
         "Removable tasks that are depended on by non-removable tasks are not removed"
         graph = self.make_triangle(t1={"remove": None}, t3={"remove": None})
-        self.assert_remove_tasks(graph, {"t1", "t3"})
+        self.assert_remove_jobs(graph, {"t1", "t3"})
 
-    def test_remove_tasks_do_not_optimize(self):
+    def test_remove_jobs_do_not_optimize(self):
         "Removable tasks that are marked do_not_optimize are not removed"
         graph = self.make_triangle(
             t1={"remove": None},
             t2={"remove": None},  # but do_not_optimize
             t3={"remove": None},
         )
-        self.assert_remove_tasks(graph, {"t1", "t3"}, do_not_optimize={"t2"})
+        self.assert_remove_jobs(graph, {"t1", "t3"}, do_not_optimize={"t2"})
 
     def assert_replace_tasks(
         self,
