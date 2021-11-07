@@ -248,8 +248,8 @@ class JobGraphGenerator:
         else:
             parameters = self._parameters
 
-        logger.info("Using {}".format(parameters))
-        logger.debug("Dumping parameters:\n{}".format(repr(parameters)))
+        logger.info(f"Using {parameters}")
+        logger.debug(f"Dumping parameters:\n{repr(parameters)}")
 
         filters = parameters.get("filters", [])
         # Always add legacy target jobs method until we deprecate that API.

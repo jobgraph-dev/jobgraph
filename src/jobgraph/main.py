@@ -16,7 +16,7 @@ import json
 from collections import namedtuple
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import appdirs
 import yaml
@@ -152,7 +152,7 @@ def dump_output(out, path=None, params_spec=None):
         fh = open(path, "w")
     else:
         print(
-            "Dumping result with parameters from {}:".format(params_name),
+            f"Dumping result with parameters from {params_name}:",
             file=sys.stderr,
         )
     print(out + "\n", file=fh)
@@ -352,7 +352,7 @@ def show_jobgraph(options):
         )
         print(f"Generating {options['graph_attr']} @ {cur_ref}", file=sys.stderr)
 
-    parameters: List[Any[str, Parameters]] = options.pop("parameters")
+    parameters: list[Any[str, Parameters]] = options.pop("parameters")
     if not parameters:
         kwargs = {
             "target-kind": options.get("target_kind"),
@@ -435,9 +435,8 @@ def show_jobgraph(options):
             try:
                 proc = subprocess.run(
                     diffcmd + [base_path, cur_path],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    universal_newlines=True,
+                    capture_output=True,
+                    text=True,
                     check=True,
                 )
                 diff_output = proc.stdout
@@ -466,7 +465,7 @@ def show_jobgraph(options):
             )
 
     if len(parameters) > 1:
-        print("See '{}' for logs".format(logdir), file=sys.stderr)
+        print(f"See '{logdir}' for logs", file=sys.stderr)
 
 
 @command("build-image", help="Build a Docker image")
