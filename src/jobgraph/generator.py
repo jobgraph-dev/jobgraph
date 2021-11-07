@@ -359,7 +359,6 @@ class JobGraphGenerator:
         yield verifications("target_job_graph", target_job_graph, graph_config)
 
         logger.info("Generating optimized task graph")
-        existing_tasks = parameters.get("existing_tasks")
         do_not_optimize = set(parameters.get("do_not_optimize", []))
         if not parameters.get("optimize_target_jobs", True):
             do_not_optimize = set(target_job_set.graph.nodes).union(do_not_optimize)
@@ -367,7 +366,6 @@ class JobGraphGenerator:
             target_job_graph,
             parameters,
             do_not_optimize,
-            existing_tasks=existing_tasks,
         )
 
         yield verifications("optimized_job_graph", optimized_job_graph, graph_config)

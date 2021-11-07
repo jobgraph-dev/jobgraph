@@ -23,7 +23,6 @@ class TestParameters(unittest.TestCase):
         "base_rev": "baserev",
         "build_date": 0,
         "do_not_optimize": [],
-        "existing_tasks": {},
         "filters": ["target_jobs_method"],
         "head_ref": "ref",
         "head_repository": "repository",

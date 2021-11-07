@@ -41,7 +41,6 @@ base_schema = Schema(
         Required("base_rev"): str,
         Required("build_date"): int,
         Required("do_not_optimize"): [str],
-        Required("existing_tasks"): {str: str},
         Required("filters"): [str],
         Required("head_ref"): str,
         Required("head_repository"): str,
@@ -128,7 +127,6 @@ class Parameters(ReadOnlyDict):
             "base_rev": "0",  # TODO
             "build_date": int(time.time()),
             "do_not_optimize": [],
-            "existing_tasks": {},
             "filters": ["target_jobs_method"],
             "head_ref": get_repo().head_ref,
             "head_repository": get_repo().get_url(),

@@ -118,7 +118,6 @@ def get_decision_parameters(graph_config, options):
         "target_jobs_method",
     ]
     parameters["optimize_target_jobs"] = True
-    parameters["existing_tasks"] = {}
     parameters["do_not_optimize"] = []
 
     # owner must be an email, but sometimes (e.g., for ffxbld) it is not, in which

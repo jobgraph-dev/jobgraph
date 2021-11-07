@@ -47,14 +47,10 @@ def optimize_task_graph(
     target_job_graph,
     params,
     do_not_optimize,
-    existing_tasks=None,
 ):
     """
     Perform task optimization, returning a JobGraph.
     """
-    if not existing_tasks:
-        existing_tasks = {}
-
     optimizations = _get_optimizations(target_job_graph, strategies)
 
     removed_jobs = remove_jobs(
@@ -116,56 +112,6 @@ def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
 
     _log_optimization("removed", opt_counts)
     return removed
-
-
-def replace_tasks(
-    target_job_graph,
-    params,
-    optimizations,
-    do_not_optimize,
-    removed_jobs,
-    existing_tasks,
-):
-    """
-    Implement the "Replacing Tasks" phase, returning a set of task labels of
-    all replaced tasks.
-    """
-    opt_counts = defaultdict(int)
-    replaced = set()
-    links_dict = target_job_graph.graph.links_dict()
-
-    for label in target_job_graph.graph.visit_postorder():
-        # if we're not allowed to optimize, that's easy..
-        if label in do_not_optimize:
-            continue
-
-        # if this task depends on un-replaced, un-removed tasks, do not replace
-        if any(l not in replaced and l not in removed_jobs for l in links_dict[label]):
-            continue
-
-        # if the task already exists, that's an easy replacement
-        repl = existing_tasks.get(label)
-        if repl:
-            replaced.add(label)
-            opt_counts["existing_tasks"] += 1
-            continue
-
-        # call the optimization strategy
-        task = target_job_graph.jobs[label]
-        opt_by, opt, arg = optimizations(label)
-        repl = opt.should_replace_task(task, params, arg)
-        if repl:
-            if repl is True:
-                # True means remove this task; get_subgraph will catch any
-                # problems with removed tasks being depended on
-                removed_jobs.add(label)
-            else:
-                replaced.add(label)
-            opt_counts[opt_by] += 1
-            continue
-
-    _log_optimization("replaced", opt_counts)
-    return replaced
 
 
 def get_subgraph(
