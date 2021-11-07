@@ -44,7 +44,7 @@ def register_strategy(name, args=()):
 
 
 def optimize_task_graph(
-    target_task_graph,
+    target_job_graph,
     params,
     do_not_optimize,
     existing_tasks=None,
@@ -55,17 +55,17 @@ def optimize_task_graph(
     if not existing_tasks:
         existing_tasks = {}
 
-    optimizations = _get_optimizations(target_task_graph, strategies)
+    optimizations = _get_optimizations(target_job_graph, strategies)
 
     removed_tasks = remove_tasks(
-        target_task_graph=target_task_graph,
+        target_job_graph=target_job_graph,
         optimizations=optimizations,
         params=params,
         do_not_optimize=do_not_optimize,
     )
 
     replaced_tasks = replace_tasks(
-        target_task_graph=target_task_graph,
+        target_job_graph=target_job_graph,
         optimizations=optimizations,
         params=params,
         do_not_optimize=do_not_optimize,
@@ -74,15 +74,15 @@ def optimize_task_graph(
     )
 
     return get_subgraph(
-        target_task_graph,
+        target_job_graph,
         removed_tasks,
         replaced_tasks,
     )
 
 
-def _get_optimizations(target_task_graph, strategies):
+def _get_optimizations(target_job_graph, strategies):
     def optimizations(label):
-        task = target_task_graph.jobs[label]
+        task = target_job_graph.jobs[label]
         if task.optimization:
             opt_by, arg = list(task.optimization.items())[0]
             return (opt_by, strategies[opt_by], arg)
@@ -104,20 +104,20 @@ def _log_optimization(verb, opt_counts):
         logger.info(f"No tasks {verb} during optimization")
 
 
-def remove_tasks(target_task_graph, params, optimizations, do_not_optimize):
+def remove_tasks(target_job_graph, params, optimizations, do_not_optimize):
     """
     Implement the "Removing Tasks" phase, returning a set of task labels of all removed tasks.
     """
     opt_counts = defaultdict(int)
     removed = set()
 
-    for label in target_task_graph.graph.visit_preorder():
+    for label in target_job_graph.graph.visit_preorder():
         # if we're not allowed to optimize, that's easy..
         if label in do_not_optimize:
             continue
 
         # call the optimization strategy
-        task = target_task_graph.jobs[label]
+        task = target_job_graph.jobs[label]
         opt_by, opt, arg = optimizations(label)
         if opt.should_remove_task(task, params, arg):
             removed.add(label)
@@ -129,7 +129,7 @@ def remove_tasks(target_task_graph, params, optimizations, do_not_optimize):
 
 
 def replace_tasks(
-    target_task_graph,
+    target_job_graph,
     params,
     optimizations,
     do_not_optimize,
@@ -142,9 +142,9 @@ def replace_tasks(
     """
     opt_counts = defaultdict(int)
     replaced = set()
-    links_dict = target_task_graph.graph.links_dict()
+    links_dict = target_job_graph.graph.links_dict()
 
-    for label in target_task_graph.graph.visit_postorder():
+    for label in target_job_graph.graph.visit_postorder():
         # if we're not allowed to optimize, that's easy..
         if label in do_not_optimize:
             continue
@@ -161,7 +161,7 @@ def replace_tasks(
             continue
 
         # call the optimization strategy
-        task = target_task_graph.jobs[label]
+        task = target_job_graph.jobs[label]
         opt_by, opt, arg = optimizations(label)
         repl = opt.should_replace_task(task, params, arg)
         if repl:
@@ -179,19 +179,19 @@ def replace_tasks(
 
 
 def get_subgraph(
-    target_task_graph,
+    target_job_graph,
     removed_tasks,
     replaced_tasks,
 ):
     """
-    Return the subgraph of target_task_graph consisting only of
+    Return the subgraph of target_job_graph consisting only of
     non-optimized tasks and edges between them.
     """
 
     # populate task['dependencies']
-    named_links_dict = target_task_graph.graph.named_links_dict()
+    named_links_dict = target_job_graph.graph.named_links_dict()
     omit = removed_tasks | replaced_tasks
-    for label, task in target_task_graph.jobs.items():
+    for label, task in target_job_graph.jobs.items():
         if label in omit:
             continue
         task.task_id = "TO-BE-REMOVED"
@@ -202,11 +202,11 @@ def get_subgraph(
         }
 
         docker_images = {
-            name: target_task_graph.jobs[dep_label].attributes[
+            name: target_job_graph.jobs[dep_label].attributes[
                 "docker_image_full_location"
             ]
             for name, dep_label in named_links_dict.get(label, {}).items()
-            if target_task_graph.jobs[dep_label].attributes.get(
+            if target_job_graph.jobs[dep_label].attributes.get(
                 "docker_image_full_location"
             )
         }
@@ -232,13 +232,13 @@ def get_subgraph(
     #   (note that this omits edges to replaced tasks, but they are still in task.dependnecies)
     remaining_edges = {
         (left, right, name)
-        for (left, right, name) in target_task_graph.graph.edges
+        for (left, right, name) in target_job_graph.graph.edges
         if left not in omit and right not in omit
     }
-    remaining_nodes = target_task_graph.graph.nodes - omit
+    remaining_nodes = target_job_graph.graph.nodes - omit
     remaining_tasks_by_label = {
         label: task
-        for label, task in target_task_graph.jobs.items()
+        for label, task in target_job_graph.jobs.items()
         if label not in omit
     }
 

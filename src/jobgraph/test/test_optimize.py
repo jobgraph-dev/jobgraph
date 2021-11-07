@@ -84,7 +84,7 @@ class TestOptimize(unittest.TestCase):
 
     def assert_remove_tasks(self, graph, exp_removed, do_not_optimize=set()):
         got_removed = optimize.remove_tasks(
-            target_task_graph=graph,
+            target_job_graph=graph,
             optimizations=optimize._get_optimizations(graph, self.strategies),
             params={},
             do_not_optimize=do_not_optimize,
@@ -131,7 +131,7 @@ class TestOptimize(unittest.TestCase):
         existing_tasks = existing_tasks or {}
 
         got_replaced = optimize.replace_tasks(
-            target_task_graph=graph,
+            target_job_graph=graph,
             optimizations=optimize._get_optimizations(graph, self.strategies),
             params={},
             do_not_optimize=do_not_optimize,

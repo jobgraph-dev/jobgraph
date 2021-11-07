@@ -52,19 +52,19 @@ def test_target_job_set(maketgg):
     assert set(tgg.target_job_set.jobs.keys()) == {"_fake-t-1"}
 
 
-def test_target_task_graph(maketgg):
-    "The target_task_graph property has the targeted tasks and deps"
+def test_target_job_graph(maketgg):
+    "The target_job_graph property has the targeted tasks and deps"
     tgg = maketgg(["_fake-t-1"])
-    assert tgg.target_task_graph.graph == graph.Graph(
+    assert tgg.target_job_graph.graph == graph.Graph(
         {"_fake-t-0", "_fake-t-1"}, {("_fake-t-1", "_fake-t-0", "prev")}
     )
-    assert sorted(tgg.target_task_graph.jobs.keys()) == sorted(
+    assert sorted(tgg.target_job_graph.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1"]
     )
 
 
 def test_always_target_tasks(maketgg):
-    "The target_task_graph includes tasks with 'always_target'"
+    "The target_job_graph includes tasks with 'always_target'"
     tgg_args = {
         "target_tasks": ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"],
         "kinds": [
@@ -85,7 +85,7 @@ def test_always_target_tasks(maketgg):
     assert sorted(tgg.target_job_set.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"]
     )
-    assert sorted(tgg.target_task_graph.jobs.keys()) == sorted(
+    assert sorted(tgg.target_job_graph.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1", "_ignore-t-2"]
     )
     assert sorted(t.label for t in tgg.optimized_task_graph.jobs.values()) == sorted(

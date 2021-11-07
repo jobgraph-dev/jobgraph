@@ -175,13 +175,13 @@ class JobGraphGenerator:
         return self._run_until("target_job_set")
 
     @property
-    def target_task_graph(self):
+    def target_job_graph(self):
         """
         The set of targetted tasks and all of their dependencies
 
         @type: JobGraph
         """
-        return self._run_until("target_task_graph")
+        return self._run_until("target_job_graph")
 
     @property
     def optimized_task_graph(self):
@@ -353,10 +353,10 @@ class JobGraphGenerator:
         target_graph = full_job_graph.graph.transitive_closure(
             target_tasks | docker_image_tasks | always_target_tasks
         )
-        target_task_graph = JobGraph(
+        target_job_graph = JobGraph(
             {l: all_tasks[l] for l in target_graph.nodes}, target_graph
         )
-        yield verifications("target_task_graph", target_task_graph, graph_config)
+        yield verifications("target_job_graph", target_job_graph, graph_config)
 
         logger.info("Generating optimized task graph")
         existing_tasks = parameters.get("existing_tasks")
@@ -364,7 +364,7 @@ class JobGraphGenerator:
         if not parameters.get("optimize_target_jobs", True):
             do_not_optimize = set(target_job_set.graph.nodes).union(do_not_optimize)
         optimized_task_graph = optimize_task_graph(
-            target_task_graph,
+            target_job_graph,
             parameters,
             do_not_optimize,
             existing_tasks=existing_tasks,
