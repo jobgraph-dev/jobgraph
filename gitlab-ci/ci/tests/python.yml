@@ -15,6 +15,11 @@ flake8:
     run:
         command: flake8
 
+isort:
+    description: "Run `isort` to ensure python import statements are well ordered"
+    run:
+        command: isort --check --diff .
+
 pyupgrade:
     description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
     run:
