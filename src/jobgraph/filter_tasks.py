@@ -5,9 +5,7 @@
 
 import logging
 
-from . import (
-    target_jobs,
-)
+from . import target_jobs
 
 logger = logging.getLogger(__name__)
 

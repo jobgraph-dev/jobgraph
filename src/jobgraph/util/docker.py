@@ -7,17 +7,16 @@ import hashlib
 import json
 import os
 import re
-import requests_unixsocket
 import sys
 import urllib.parse
-
-from dockerfile_parse import DockerfileParser
 from pathlib import Path
 
+import requests_unixsocket
+from dockerfile_parse import DockerfileParser
+
+from jobgraph.parameters import get_repo
 from jobgraph.util.archive import create_tar_gz_from_files
 from jobgraph.util.memoize import memoize
-from jobgraph.parameters import get_repo
-
 
 IMAGE_DIR = os.path.join(".", "gitlab-ci", "docker")
 

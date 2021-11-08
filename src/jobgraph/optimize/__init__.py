@@ -15,7 +15,6 @@ See ``taskcluster/docs/optimization.rst`` for more information.
 import importlib
 import logging
 import os
-
 from collections import defaultdict
 from pathlib import Path
 
@@ -23,7 +22,6 @@ from ..graph import Graph
 from ..jobgraph import JobGraph
 from ..parameters import get_repo
 from ..util.parameterization import resolve_task_references
-
 
 logger = logging.getLogger(__name__)
 

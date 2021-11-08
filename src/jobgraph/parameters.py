@@ -12,15 +12,12 @@ from pprint import pformat
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
+from voluptuous import ALLOW_EXTRA, Required, Schema
+
 from jobgraph.util.memoize import memoize
 from jobgraph.util.readonlydict import ReadOnlyDict
 from jobgraph.util.schema import validate_schema
-from jobgraph.util.vcs import get_repository, NULL_GIT_COMMIT
-from voluptuous import (
-    ALLOW_EXTRA,
-    Required,
-    Schema,
-)
+from jobgraph.util.vcs import NULL_GIT_COMMIT, get_repository
 
 logger = logging.getLogger(__name__)
 
@@ -256,8 +253,8 @@ def load_parameters_file(spec, strict=True, overrides=None, trust_domain=None):
     Examples:
         task-id=fdtgsD5DQUmAQZEaGMvQ4Q
     """
-    from jobgraph.util.taskcluster import get_artifact_url
     from jobgraph.util import yaml
+    from jobgraph.util.taskcluster import get_artifact_url
 
     if overrides is None:
         overrides = {}

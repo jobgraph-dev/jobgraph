@@ -7,11 +7,7 @@ import unittest
 
 import pytest
 
-from jobgraph.parameters import (
-    Parameters,
-    ParameterMismatch,
-    load_parameters_file,
-)
+from jobgraph.parameters import ParameterMismatch, Parameters, load_parameters_file
 
 from .mockedopen import MockedOpen
 

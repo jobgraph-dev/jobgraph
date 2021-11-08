@@ -7,20 +7,16 @@ import logging
 import os
 import re
 
+from voluptuous import Optional, Required
+
 import jobgraph
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.docker import generate_context_hash
-from jobgraph.util.schema import (
-    Schema,
-)
 from jobgraph.util.gitlab import (
     extract_gitlab_instance_and_namespace_and_name,
     get_image_full_location,
 )
-from voluptuous import (
-    Optional,
-    Required,
-)
+from jobgraph.util.schema import Schema
 
 logger = logging.getLogger(__name__)
 

@@ -11,27 +11,18 @@ run-using handlers in `gitlab-ci/jobgraph/transforms/job`.
 
 
 import copy
-import logging
 import json
+import logging
 import os
-
 from collections import deque
 
+from voluptuous import Any, Exclusive, Extra, Optional, Required
+
 from jobgraph.transforms.base import TransformSequence
-from jobgraph.util.schema import (
-    validate_schema,
-    Schema,
-)
+from jobgraph.transforms.task import task_description_schema
+from jobgraph.util.schema import Schema, validate_schema
 from jobgraph.util.taskcluster import get_artifact_prefix
 from jobgraph.util.workertypes import worker_type_implementation
-from jobgraph.transforms.task import task_description_schema
-from voluptuous import (
-    Extra,
-    Any,
-    Optional,
-    Required,
-    Exclusive,
-)
 
 logger = logging.getLogger(__name__)
 

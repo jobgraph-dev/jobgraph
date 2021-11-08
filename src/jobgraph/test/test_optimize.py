@@ -8,10 +8,9 @@ from functools import partial
 
 from slugid import nice as slugid
 
-from jobgraph import optimize
-from jobgraph.jobgraph import JobGraph
-from jobgraph import graph
+from jobgraph import graph, optimize
 from jobgraph.job import Job
+from jobgraph.jobgraph import JobGraph
 
 
 class Remove(optimize.OptimizationStrategy):

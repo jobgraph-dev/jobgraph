@@ -5,8 +5,8 @@
 
 import re
 
-from jobgraph.util.time import json_time_from_now
 from jobgraph.util.taskcluster import get_artifact_url
+from jobgraph.util.time import json_time_from_now
 
 TASK_REFERENCE_PATTERN = re.compile("<([^>]+)>")
 ARTIFACT_REFERENCE_PATTERN = re.compile("<([^/]+)/([^>]+)>")

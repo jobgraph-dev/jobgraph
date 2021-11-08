@@ -27,17 +27,15 @@ import errno
 import io
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 import signal
 import socket
 import stat
 import subprocess
-
 import urllib.error
 import urllib.request
-
+from pathlib import Path
 from threading import Thread
 
 SECRET_BASEURL_TPL = 'http://taskcluster/secrets/v1/secret/{}'

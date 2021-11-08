@@ -10,15 +10,14 @@ import sys
 import tarfile
 import tempfile
 import unittest
-
 from unittest import mock
+
 import pytest
 import taskcluster_urls as liburls
 
 from jobgraph.util import docker
 
 from .mockedopen import MockedOpen
-
 
 MODE_STANDARD = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
 

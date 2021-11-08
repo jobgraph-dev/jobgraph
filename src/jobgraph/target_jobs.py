@@ -4,8 +4,8 @@
 
 
 from jobgraph.util.attributes import (
-    match_run_on_pipeline_sources,
     match_run_on_git_branches,
+    match_run_on_pipeline_sources,
 )
 
 _target_task_methods = {}

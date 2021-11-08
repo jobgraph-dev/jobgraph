@@ -5,8 +5,8 @@
 import hashlib
 from pathlib import Path
 
-from jobgraph.util.memoize import memoize
 from jobgraph.util import path as mozpath
+from jobgraph.util.memoize import memoize
 
 
 @memoize

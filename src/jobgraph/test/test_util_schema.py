@@ -5,11 +5,7 @@
 
 import unittest
 
-from jobgraph.util.schema import (
-    validate_schema,
-    resolve_keyed_by,
-    Schema,
-)
+from jobgraph.util.schema import Schema, resolve_keyed_by, validate_schema
 
 schema = Schema(
     {

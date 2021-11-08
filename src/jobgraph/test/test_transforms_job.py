@@ -14,8 +14,8 @@ import pytest
 
 from jobgraph.config import load_graph_config
 from jobgraph.transforms import job
-from jobgraph.transforms.job import run_task  # noqa: F401
 from jobgraph.transforms.base import TransformConfig
+from jobgraph.transforms.job import run_task  # noqa: F401
 
 from .conftest import FakeParameters
 

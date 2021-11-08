@@ -1,8 +1,8 @@
-from jobgraph.util.gitlab import (
-    get_container_registry_image_digest,
-    extract_gitlab_instance_and_namespace_and_name,
-)
 from jobgraph.optimize import OptimizationStrategy, register_strategy
+from jobgraph.util.gitlab import (
+    extract_gitlab_instance_and_namespace_and_name,
+    get_container_registry_image_digest,
+)
 
 
 @register_strategy("skip-if-on-gitlab-container-registry")

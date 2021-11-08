@@ -1,7 +1,7 @@
 import os
-import requests
-
 from urllib.parse import unquote, urlparse
+
+import requests
 
 from jobgraph.util.memoize import memoize
 

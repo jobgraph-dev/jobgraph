@@ -3,15 +3,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-import os
 import json
+import os
 import shutil
-import unittest
 import tempfile
+import unittest
 
 from jobgraph import decision
 from jobgraph.util.yaml import load_yaml
-
 
 FAKE_GRAPH_CONFIG = {"product-dir": "browser", "jobgraph": {}}
 

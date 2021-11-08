@@ -1,7 +1,6 @@
 import os
 
-from setuptools import setup, find_packages
-
+from setuptools import find_packages, setup
 
 root_dir = os.path.dirname(os.path.realpath(__file__))
 

@@ -1,9 +1,7 @@
 import pytest
 
-from jobgraph import (
-    generator,
-    target_jobs as target_jobs_mod,
-)
+from jobgraph import generator
+from jobgraph import target_jobs as target_jobs_mod
 from jobgraph.config import GraphConfig
 from jobgraph.generator import JobGraphGenerator, Kind
 from jobgraph.optimize import OptimizationStrategy

@@ -13,17 +13,14 @@ import hashlib
 import os
 
 import attr
+from voluptuous import All, Any, Extra, NotIn, Optional, Required
 
+from jobgraph import MAX_DEPENDENCIES
+from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.hash import hash_path
 from jobgraph.util.memoize import memoize
-from jobgraph.transforms.base import TransformSequence
-from jobgraph.util.schema import (
-    validate_schema,
-    Schema,
-    taskref_or_string,
-)
-from voluptuous import Any, Required, Optional, Extra, All, NotIn
-from jobgraph import MAX_DEPENDENCIES
+from jobgraph.util.schema import Schema, taskref_or_string, validate_schema
+
 from ..util import docker as dockerutil
 from ..util.workertypes import get_worker_type
 

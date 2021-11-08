@@ -6,10 +6,11 @@ Support for running jobs that are invoked via the `run-task` script.
 """
 
 
-from jobgraph.transforms.task import taskref_or_string
+from voluptuous import Any, Optional, Required
+
 from jobgraph.transforms.job import run_job_using
+from jobgraph.transforms.task import taskref_or_string
 from jobgraph.util.schema import Schema
-from voluptuous import Required, Any, Optional
 
 run_task_schema = Schema(
     {

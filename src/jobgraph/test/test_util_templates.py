@@ -4,7 +4,8 @@
 
 
 import unittest
-from jobgraph.util.templates import merge_to, merge
+
+from jobgraph.util.templates import merge, merge_to
 
 
 class MergeTest(unittest.TestCase):

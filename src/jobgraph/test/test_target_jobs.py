@@ -7,8 +7,8 @@ import unittest
 
 from jobgraph import target_jobs
 from jobgraph.graph import Graph
-from jobgraph.jobgraph import JobGraph
 from jobgraph.job import Job
+from jobgraph.jobgraph import JobGraph
 
 
 class TestTargetTasks(unittest.TestCase):

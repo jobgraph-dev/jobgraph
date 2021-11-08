@@ -3,13 +3,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-import unittest
 import datetime
+import unittest
 
-from jobgraph.util.parameterization import (
-    resolve_timestamps,
-    resolve_task_references,
-)
+from jobgraph.util.parameterization import resolve_task_references, resolve_timestamps
 
 
 class TestTimestamps(unittest.TestCase):

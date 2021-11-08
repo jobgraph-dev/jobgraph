@@ -6,20 +6,13 @@ Support for running toolchain-building jobs via dedicated scripts
 """
 
 
-from jobgraph.util.schema import Schema
 from voluptuous import Optional, Required
 
-from jobgraph.transforms.job import (
-    configure_taskdesc_for_run,
-    run_job_using,
-)
-from jobgraph.transforms.job.common import (
-    docker_worker_add_artifacts,
-    get_vcsdir_name,
-)
-from jobgraph.util.hash import hash_paths
 import jobgraph
-
+from jobgraph.transforms.job import configure_taskdesc_for_run, run_job_using
+from jobgraph.transforms.job.common import docker_worker_add_artifacts, get_vcsdir_name
+from jobgraph.util.hash import hash_paths
+from jobgraph.util.schema import Schema
 
 CACHE_TYPE = "toolchains.v3"
 

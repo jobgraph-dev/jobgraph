@@ -4,6 +4,7 @@
 
 
 import unittest
+
 from jobgraph.transforms.base import TransformSequence
 
 transforms = TransformSequence()

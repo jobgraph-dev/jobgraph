@@ -3,23 +3,22 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-import os
 import json
 import logging
-
-
+import os
 import time
-import yaml
 
-from .generator import JobGraphGenerator
-from .parameters import Parameters
-from .jobgraph import JobGraph
-from jobgraph.util.python_path import find_object
-from jobgraph.util.vcs import get_repository
-from .util.schema import validate_schema, Schema
-from jobgraph.util.yaml import load_yaml
+import yaml
 from voluptuous import Optional
 
+from jobgraph.util.python_path import find_object
+from jobgraph.util.vcs import get_repository
+from jobgraph.util.yaml import load_yaml
+
+from .generator import JobGraphGenerator
+from .jobgraph import JobGraph
+from .parameters import Parameters
+from .util.schema import Schema, validate_schema
 
 logger = logging.getLogger(__name__)
 

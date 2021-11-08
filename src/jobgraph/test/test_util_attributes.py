@@ -5,10 +5,7 @@
 
 import unittest
 
-from jobgraph.util.attributes import (
-    attrmatch,
-    match_run_on_git_branches,
-)
+from jobgraph.util.attributes import attrmatch, match_run_on_git_branches
 
 
 class Attrmatch(unittest.TestCase):

@@ -6,10 +6,9 @@
 import os
 import re
 import subprocess
-
-from abc import ABC, abstractproperty, abstractmethod
-from shutil import which
+from abc import ABC, abstractmethod, abstractproperty
 from pathlib import Path
+from shutil import which
 
 
 class Repository(ABC):
