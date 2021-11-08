@@ -9,6 +9,10 @@ transforms:
     - jobgraph.transforms.job:transforms
     - jobgraph.transforms.task:transforms
 
+jobs-from:
+    - python.yml
+    - yaml.yml
+
 job-defaults:
     attributes:
         retrigger: true
@@ -19,46 +23,3 @@ job-defaults:
     run:
         using: run-task
         cwd: '{checkout}'
-
-jobs:
-    black:
-        description: "Run `black` to validate the latest changes"
-        optimization:
-            skip-unless-changed:
-                - "**/*.py"
-        run:
-            command: black --check .
-
-    flake8:
-        description: "Run `flake8` on Python 3 to validate the latest changes"
-        optimization:
-            skip-unless-changed:
-                - "**/*.py"
-        run:
-            command: flake8
-
-    pyupgrade:
-        description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
-        optimization:
-            skip-unless-changed:
-                - "**/*.py"
-        run:
-            command: pyupgrade --py310-plus $(find . -name '*.py')
-
-    unit:
-        description: "Run `unit tests` to validate the latest changes"
-        optimization:
-            skip-unless-changed:
-                - "**/*.py"
-        run:
-            command: >-
-                pip install --prefix "/runner/.local" --no-deps --editable . &&
-                pytest --pyargs jobgraph
-
-    yamllint:
-        description: "Run `yamllint` to validate the latest changes"
-        optimization:
-            skip-unless-changed:
-                - "**/*.yml"
-        run:
-            command: yamllint .

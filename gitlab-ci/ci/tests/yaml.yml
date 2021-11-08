@@ -1,0 +1,11 @@
+---
+job-defaults:
+    optimization:
+        skip-unless-changed:
+            - "**/*.yml"
+
+
+yamllint:
+    description: "Run `yamllint` to validate the latest changes"
+    run:
+        command: yamllint .

@@ -1,0 +1,28 @@
+---
+job-defaults:
+    optimization:
+        skip-unless-changed:
+            - "**/*.py"
+
+
+black:
+    description: "Run `black` to validate the latest changes"
+    run:
+        command: black --check .
+
+flake8:
+    description: "Run `flake8` on Python 3 to validate the latest changes"
+    run:
+        command: flake8
+
+pyupgrade:
+    description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
+    run:
+        command: pyupgrade --py310-plus $(find . -name '*.py')
+
+unit:
+    description: "Run `unit tests` to validate the latest changes"
+    run:
+        command: >-
+            pip install --prefix "/runner/.local" --no-deps --editable . &&
+            pytest --pyargs jobgraph
