@@ -6,12 +6,12 @@ job-defaults:
 
 
 black:
-    description: "Run `black` to validate the latest changes"
+    description: "Run `black` to ensure strict code style"
     run:
         command: black --check .
 
 flake8:
-    description: "Run `flake8` on Python 3 to validate the latest changes"
+    description: "Run `flake8` to ensure code validates PEP8"
     run:
         command: flake8
 
