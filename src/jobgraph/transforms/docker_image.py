@@ -96,12 +96,9 @@ def fill_template(config, jobs):
         name = job.label.replace("packages-", "")
         available_packages.add(name)
 
-    jobs = list(jobs)
-
     for job in jobs:
         image_name = job["name"]
         packages = job.get("packages", [])
-        parent = job.pop("parent", None)
 
         for p in packages:
             if p not in available_packages:
@@ -141,6 +138,7 @@ def fill_template(config, jobs):
             },
             "name": image_name,
             "optimization": job.get("optimization", None),
+            "parent": job.get("parent", None),
             "worker-type": "images",
             "worker": worker,
         }
@@ -149,15 +147,6 @@ def fill_template(config, jobs):
             deps = jobdesc.setdefault("dependencies", {})
             for p in sorted(packages):
                 deps[p] = f"packages-{p}"
-
-        if parent:
-            deps = jobdesc.setdefault("dependencies", {})
-            deps["parent"] = f"build-docker-image-{parent}"
-            worker["env"]["DOCKER_IMAGE_PARENT"] = {
-                "docker-image-reference": "<parent>"
-            }
-            args = jobdesc.setdefault("args", {})
-            args |= {"DOCKER_IMAGE_PARENT": "$DOCKER_IMAGE_PARENT"}
 
         yield jobdesc
 
@@ -193,10 +182,30 @@ def define_docker_commands(config, jobs):
 
 @transforms.add
 def fill_context_hash(config, jobs):
-    for job in jobs:
+    jobs_list = list(jobs)
+
+    for job in jobs_list:
         image_name = job["attributes"]["image_name"]
         definition = job.pop("definition", image_name)
+        parent = job.pop("parent", None)
         args = job.pop("args", {})
+        worker = job.setdefault("worker", {})
+
+        if parent:
+            parent_label = f"build-docker-image-{parent}"
+            deps = job.setdefault("dependencies", {})
+            deps["parent"] = parent_label
+            worker["env"]["DOCKER_IMAGE_PARENT"] = {
+                "docker-image-reference": "<parent>"
+            }
+            # If 2 parent jobs have the same name, then JobGraph will complain later
+            parent_job = [j for j in jobs_list if j["label"] == parent_label][0]
+
+            args |= {
+                "DOCKER_IMAGE_PARENT": parent_job["attributes"][
+                    "docker_image_full_location"
+                ]
+            }
 
         if not jobgraph.fast:
             context_path = os.path.join("gitlab-ci", "docker", definition)
@@ -207,7 +216,6 @@ def fill_context_hash(config, jobs):
                 raise Exception("Can't write artifacts if `jobgraph.fast` is set.")
             context_hash = "0" * 40
 
-        worker = job.setdefault("worker", {})
         (
             gitlab_domain_name,
             repo_namespace,
@@ -215,29 +223,24 @@ def fill_context_hash(config, jobs):
         ) = extract_gitlab_instance_and_namespace_and_name(
             config.params["head_repository"]
         )
+
+        docker_image_full_location = get_image_full_location(
+            gitlab_domain_name,
+            repo_namespace,
+            repo_name,
+            image_name,
+            image_tag=context_hash,
+            resolve_digest=False,
+        )
         job["attributes"] |= {
             "context_hash": context_hash,
-            "docker_image_full_location": get_image_full_location(
-                gitlab_domain_name,
-                repo_namespace,
-                repo_name,
-                image_name,
-                image_tag=context_hash,
-                resolve_digest=True,
-            ),
+            "docker_image_full_location": docker_image_full_location,
         }
         worker["env"] |= {
             # We use hashes as tags to reduce potential collisions of regular tags
             "DOCKER_IMAGE_TAG": context_hash,
             # We shouldn't resolve digest if we build and push image in this job
-            "DOCKER_IMAGE_FULL_LOCATION": get_image_full_location(
-                gitlab_domain_name,
-                repo_namespace,
-                repo_name,
-                image_name,
-                image_tag=context_hash,
-                resolve_digest=False,
-            ),
+            "DOCKER_IMAGE_FULL_LOCATION": docker_image_full_location,
         }
 
         yield job
