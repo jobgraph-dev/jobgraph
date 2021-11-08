@@ -152,35 +152,6 @@ def fill_template(config, jobs):
 
 
 @transforms.add
-def define_docker_commands(config, jobs):
-    for job in jobs:
-        packages = job.pop("packages", [])
-        arguments = job.get("args", {})
-        worker = job.setdefault("worker", {})
-
-        if packages:
-            arguments["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
-
-        image_name = job.pop("name")
-        definition = job.get("definition", image_name)
-        docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
-        build_args = " ".join(
-            f'--build-arg "{argument_name}={argument_value}"'
-            for argument_name, argument_value in arguments.items()
-        )
-        worker["command"] = " && ".join(
-            (
-                worker.get("command", ""),
-                f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
-                f'"$CI_PROJECT_DIR/{docker_file}" {build_args} .',
-                'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
-            )
-        )
-
-        yield job
-
-
-@transforms.add
 def fill_context_hash(config, jobs):
     jobs_list = list(jobs)
 
@@ -188,7 +159,7 @@ def fill_context_hash(config, jobs):
         image_name = job["attributes"]["image_name"]
         definition = job.pop("definition", image_name)
         parent = job.pop("parent", None)
-        args = job.pop("args", {})
+        args = job.setdefault("args", {})
         worker = job.setdefault("worker", {})
 
         if parent:
@@ -242,5 +213,34 @@ def fill_context_hash(config, jobs):
             # We shouldn't resolve digest if we build and push image in this job
             "DOCKER_IMAGE_FULL_LOCATION": docker_image_full_location,
         }
+
+        yield job
+
+
+@transforms.add
+def define_docker_commands(config, jobs):
+    for job in jobs:
+        packages = job.pop("packages", [])
+        arguments = job.pop("args", {})
+        worker = job.setdefault("worker", {})
+
+        if packages:
+            arguments["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
+
+        image_name = job.pop("name")
+        definition = job.get("definition", image_name)
+        docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
+        build_args = " ".join(
+            f'--build-arg "{argument_name}={argument_value}"'
+            for argument_name, argument_value in arguments.items()
+        )
+        worker["command"] = " && ".join(
+            (
+                worker.get("command", ""),
+                f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
+                f'"$CI_PROJECT_DIR/{docker_file}" {build_args} .',
+                'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
+            )
+        )
 
         yield job
