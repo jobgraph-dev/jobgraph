@@ -4,7 +4,6 @@
 
 
 import hashlib
-import itertools
 import json
 import os
 import re
@@ -162,42 +161,53 @@ class VoidWriter:
 
 
 def generate_context_hash(topsrcdir, image_path, args=None):
-    copied_files = _get_copied_files_to_docker_image(image_path, args)
+    copied_files = _get_tracked_copied_files_to_docker_image(image_path, args)
     return stream_context_tar(
         topsrcdir, image_path, VoidWriter(), copied_files=copied_files, args=args
     )
 
 
-def _get_copied_files_to_docker_image(image_path, args):
+def _get_tracked_copied_files_to_docker_image(image_path, args):
+    all_copied_files = _get_all_copied_files_to_docker_image(image_path, args)
+    tracked_files = get_repo().tracked_files
+    return sorted([str(file) for file in all_copied_files if file in tracked_files])
+
+
+def _get_all_copied_files_to_docker_image(image_path, args):
     docker_file = DockerfileParser(
         path=image_path, env_replace=True, build_args=args, cache_content=True
     )
-    tracked_files = get_repo().tracked_files
 
-    files_instructions = (
-        instruction["value"]
-        for instruction in docker_file.structure
-        if instruction.get("instruction") in ("ADD", "COPY")
-    )
-    # We will consume the following list twice so it can't be a generator
-    copied_files_or_dirs = [
-        Path(file_argument)
-        for file_instruction in files_instructions
-        for file_argument in file_instruction.split(" ")
-        if not file_argument.startswith("--chown")
-        and file_argument != file_instruction.split(" ")[-1]
-    ]
-    copied_dirs = (dir for dir in copied_files_or_dirs if dir.is_dir())
-    copied_files_in_dirs = (
-        str(file_in_dir)
-        for dir in copied_dirs
-        for file_in_dir in dir.glob("**/*")
-        if file_in_dir.is_file() and file_in_dir in tracked_files
-    )
-    copied_files = (str(file) for file in copied_files_or_dirs if file.is_file())
-    all_copied_files = itertools.chain(copied_files_in_dirs, copied_files)
+    all_copied_files = set()
+    for instruction in docker_file.structure:
+        if instruction.get("instruction") not in ("ADD", "COPY"):
+            continue
 
-    return sorted(list(all_copied_files))
+        file_arguments = instruction["value"].split(" ")
+        # The last file argument is always the destination in the docker
+        # image. We just want the source files/dirs.
+        for file_argument in file_arguments[:-1]:
+            if file_argument.startswith("--chown"):
+                continue
+
+            path = Path(file_argument)
+            if not path.exists():
+                raise ValueError("path does not exist")
+
+            if path.is_file():
+                all_copied_files.add(path)
+                continue
+
+            if path.is_dir():
+                for file_in_dir in path.glob("**/*"):
+                    if file_in_dir.is_file():
+                        all_copied_files.add(path)
+                        continue
+                continue
+
+            raise ValueError(f"Unsupported path: {path}")
+
+    return all_copied_files
 
 
 class HashingWriter:
