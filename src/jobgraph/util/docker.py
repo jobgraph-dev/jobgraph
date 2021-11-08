@@ -170,7 +170,7 @@ def generate_context_hash(topsrcdir, image_path, args=None):
 def _get_tracked_copied_files_to_docker_image(image_path, args):
     all_copied_files = _get_all_copied_files_to_docker_image(image_path, args)
     tracked_files = get_repo().tracked_files
-    return sorted([str(file) for file in all_copied_files if file in tracked_files])
+    return sorted(str(file) for file in all_copied_files if file in tracked_files)
 
 
 def _get_all_copied_files_to_docker_image(image_path, args):
@@ -294,7 +294,7 @@ def stream_context_tar(
     create_tar_gz_from_files(writer, archive_files, image_name)
 
     for arg_name, arg_value in args.items():
-        writer.write(f"ARG {arg_name}={arg_value}".encode("utf-8"))
+        writer.write(f"ARG {arg_name}={arg_value}".encode())
 
     return writer.hexdigest()
 
