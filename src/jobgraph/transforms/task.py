@@ -5,7 +5,7 @@
 These transformations take a job description and turn it into a Gitlab CI
 job definition (along with attributes, label, etc.).  The input to these
 transformations is generic to any kind of job, but abstracts away some of the
-complexities of worker implementations.
+complexities of runner implementations.
 """
 
 
@@ -73,8 +73,8 @@ task_description_schema = Schema(
         # be substituted in this string:
         #  {level} -- the scm level of this push
         "runner-alias": str,
-        # information specific to the worker implementation that will run this task
-        Optional("worker"): {
+        # information specific to the runner implementation that will run this task
+        Optional("runner"): {
             Required("implementation"): str,
             Extra: object,
         },
@@ -86,7 +86,7 @@ def get_branch_rev(config):
     return config.params["head_rev"]
 
 
-# define a collection of payload builders, depending on the worker implementation
+# define a collection of payload builders, depending on the runner implementation
 payload_builders = {}
 
 
@@ -122,7 +122,7 @@ def payload_builder(name, schema):
             # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
             {"in-tree": str},
         ),
-        # worker features that should be enabled
+        # runner features that should be enabled
         Required("chain-of-trust"): bool,
         Required("docker-in-docker"): bool,  # (aka 'dind')
         # caches to set up for the task
@@ -164,15 +164,15 @@ def payload_builder(name, schema):
         # the exit status code(s) that indicates the caches used by the task
         # should be purged
         Optional("purge-caches-exit-status"): [int],
-        # Wether any artifacts are assigned to this worker
+        # Wether any artifacts are assigned to this runner
         Optional("skip-artifacts"): bool,
     },
 )
-def build_docker_worker_payload(config, task, task_def):
-    worker = task["worker"]
+def build_docker_runner_payload(config, task, task_def):
+    runner = task["runner"]
     level = int(config.params["level"])
 
-    image = worker["docker-image"]
+    image = runner["docker-image"]
     if isinstance(image, dict):
         if "in-tree" in image:
             name = image["in-tree"]
@@ -191,7 +191,7 @@ def build_docker_worker_payload(config, task, task_def):
 
     features = {}
 
-    if worker.get("docker-in-docker"):
+    if runner.get("docker-in-docker"):
         task_def["services"] = [
             config.graph_config["jobgraph"]["docker-in-docker-image"]
         ]
@@ -199,32 +199,32 @@ def build_docker_worker_payload(config, task, task_def):
     capabilities = {}
 
     task_def["image"] = image
-    task_def["variables"] = worker["env"]
+    task_def["variables"] = runner["env"]
 
-    if "command" in worker:
-        task_def["script"] = [worker["command"]]
+    if "command" in runner:
+        task_def["script"] = [runner["command"]]
 
-    if "max-run-time" in worker:
-        task_def["timeout"] = f'{worker["max-run-time"]} seconds'
+    if "max-run-time" in runner:
+        task_def["timeout"] = f'{runner["max-run-time"]} seconds'
 
     payload = {}
     run_task = payload.get("command", [""])[0].endswith("run-task")
 
-    if "artifacts" in worker:
+    if "artifacts" in runner:
         task_def["artifacts"] = {
             "expire_in": "3 months",  # TODO: Parametrize
-            "paths": [artifact["path"] for artifact in worker["artifacts"]],
+            "paths": [artifact["path"] for artifact in runner["artifacts"]],
             "public": False,  # TODO: Parametrize
             "reports": {},  # TODO: Support different types of reports
         }
 
-    if isinstance(worker.get("docker-image"), str):
-        out_of_tree_image = worker["docker-image"]
+    if isinstance(runner.get("docker-image"), str):
+        out_of_tree_image = runner["docker-image"]
     else:
         out_of_tree_image = None
-        image = worker.get("docker-image", {}).get("in-tree")
+        image = runner.get("docker-image", {}).get("in-tree")
 
-    if "caches" in worker:
+    if "caches" in runner:
         caches = {}
 
         # run-task knows how to validate caches.
@@ -266,7 +266,7 @@ def build_docker_worker_payload(config, task, task_def):
 
         skip_untrusted = config.params.is_try() or level == 1
 
-        for cache in worker["caches"]:
+        for cache in runner["caches"]:
             # Some caches aren't enabled in environments where we can't
             # guarantee certain behavior. Filter those out.
             if cache.get("skip-untrusted") and skip_untrusted:
@@ -312,13 +312,13 @@ def set_defaults(config, jobs):
         job.setdefault("always-target", False)
         job.setdefault("optimization", None)
 
-        worker = job["worker"]
-        if worker["implementation"] in ("kubernetes",):
-            worker.setdefault("chain-of-trust", False)
-            worker.setdefault("docker-in-docker", False)
-            worker.setdefault("env", {})
-            if "caches" in worker:
-                for c in worker["caches"]:
+        runner = job["runner"]
+        if runner["implementation"] in ("kubernetes",):
+            runner.setdefault("chain-of-trust", False)
+            runner.setdefault("docker-in-docker", False)
+            runner.setdefault("env", {})
+            if "caches" in runner:
+                for c in runner["caches"]:
                     c.setdefault("skip-untrusted", False)
 
         yield job
@@ -345,8 +345,8 @@ def validate(config, jobs):
             "In job {!r}:".format(job.get("label", "?no-label?")),
         )
         validate_schema(
-            payload_builders[job["worker"]["implementation"]].schema,
-            job["worker"],
+            payload_builders[job["runner"]["implementation"]].schema,
+            job["runner"],
             "In job.run {!r}:".format(job.get("label", "?no-label?")),
         )
         yield job
@@ -357,7 +357,7 @@ def build_job(config, jobs):
     for job in jobs:
         level = str(config.params["level"])
 
-        worker_type = get_runner_tag(
+        runner_tag = get_runner_tag(
             config.graph_config,
             job["runner-alias"],
             level,
@@ -373,12 +373,12 @@ def build_job(config, jobs):
                     "stuck_or_timeout_failure",
                 ],
             },
-            "tags": [worker_type],
-            "timeout": job["worker"]["max-run-time"],
+            "tags": [runner_tag],
+            "timeout": job["runner"]["max-run-time"],
         }
 
         # add the payload and adjust anything else as required.
-        payload_builders[job["worker"]["implementation"]].builder(config, job, job_def)
+        payload_builders[job["runner"]["implementation"]].builder(config, job, job_def)
 
         attributes = job.get("attributes", {})
         attributes["run_on_pipeline_sources"] = job.get(

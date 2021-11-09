@@ -17,7 +17,7 @@ run_task_schema = Schema(
         Required("using"): "run-task",
         # Whether or not to use caches.
         Optional("use-caches"): bool,
-        # if true (the default), perform a checkout on the worker
+        # if true (the default), perform a checkout on the runner
         Required("checkout"): Any(bool, {str: dict}),
         Optional(
             "cwd",
@@ -40,18 +40,18 @@ run_task_schema = Schema(
 )
 
 
-worker_defaults = {
+runner_defaults = {
     "checkout": True,
     "run-as-root": False,
 }
 
 
 @run_job_using(
-    "kubernetes", "run-task", schema=run_task_schema, defaults=worker_defaults
+    "kubernetes", "run-task", schema=run_task_schema, defaults=runner_defaults
 )
-def docker_worker_run_task(config, job, taskdesc):
+def docker_runner_run_task(config, job, taskdesc):
     run = job["run"]
-    worker = taskdesc["worker"] = job["worker"]
+    runner = taskdesc["runner"] = job["runner"]
     # TODO Reuse "/usr/local/bin/run-task" whenever possible
     run_command = run["command"]
 
@@ -59,4 +59,4 @@ def docker_worker_run_task(config, job, taskdesc):
     if command_context:
         run_command = run_command.format(**command_context)
 
-    worker["command"] = run_command
+    runner["command"] = run_command

@@ -79,7 +79,7 @@ def transform(monkeypatch, config):
 
 
 @pytest.mark.parametrize(
-    "workerfn", [fn for fn, *_ in job.registry["run-task"].values()]
+    "runnerfn", [fn for fn, *_ in job.registry["run-task"].values()]
 )
 @pytest.mark.parametrize(
     "task",
@@ -97,20 +97,20 @@ def transform(monkeypatch, config):
         },
     ),
 )
-def test_run_task_command_context(task, transform, workerfn):
+def test_run_task_command_context(task, transform, runnerfn):
     config, job_, taskdesc, _ = transform(task)
     job_ = deepcopy(job_)
 
     def assert_cmd(expected):
-        cmd = taskdesc["worker"]["command"]
+        cmd = taskdesc["runner"]["command"]
         while isinstance(cmd, list):
             cmd = cmd[-1]
         assert cmd == expected
 
-    workerfn(config, job_, taskdesc)
+    runnerfn(config, job_, taskdesc)
     assert_cmd("echo 'hello'")
 
     job_copy = job_.copy()
     del job_copy["run"]["command-context"]
-    workerfn(config, job_copy, taskdesc)
+    runnerfn(config, job_copy, taskdesc)
     assert_cmd("echo '{output}'")

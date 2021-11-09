@@ -60,8 +60,8 @@ def add_registry_specific_config(config, jobs):
         registry_type = job.pop("container-registry-type")
         # TODO Use decorators instead
         if registry_type == "gitlab":
-            worker = job.setdefault("worker", {})
-            env = worker.setdefault("env", {})
+            runner = job.setdefault("runner", {})
+            env = runner.setdefault("env", {})
 
             # See
             # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
@@ -70,7 +70,7 @@ def add_registry_specific_config(config, jobs):
             env["DOCKER_TLS_VERIFY"] = "1"
             env["DOCKER_CERT_PATH"] = "$DOCKER_TLS_CERTDIR/client"
 
-            worker["command"] = (
+            runner["command"] = (
                 'docker login --username "$CI_REGISTRY_USER" --password '
                 '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
             )
@@ -110,15 +110,15 @@ def fill_template(config, jobs):
 
         dind_image = config.graph_config["jobgraph"]["docker-in-docker-image"]
 
-        worker = job.setdefault("worker", {})
-        worker |= {
+        runner = job.setdefault("runner", {})
+        runner |= {
             "implementation": "kubernetes",
             "os": "linux",
             "docker-image": dind_image,
             "docker-in-docker": True,
             "max-run-time": 7200,
         }
-        worker["env"] |= {
+        runner["env"] |= {
             # We use hashes as tags to reduce potential collisions of regular tags
             "DOCKER_IMAGE_NAME": image_name,
         }
@@ -136,7 +136,7 @@ def fill_template(config, jobs):
             "optimization": job.get("optimization", None),
             "parent": job.get("parent", None),
             "runner-alias": "images",
-            "worker": worker,
+            "runner": runner,
         }
 
         if packages:
@@ -156,13 +156,13 @@ def fill_context_hash(config, jobs):
         definition = job.pop("definition", image_name)
         parent = job.pop("parent", None)
         args = job.setdefault("args", {})
-        worker = job.setdefault("worker", {})
+        runner = job.setdefault("runner", {})
 
         if parent:
             parent_label = f"build-docker-image-{parent}"
             deps = job.setdefault("dependencies", {})
             deps["parent"] = parent_label
-            worker["env"]["DOCKER_IMAGE_PARENT"] = {
+            runner["env"]["DOCKER_IMAGE_PARENT"] = {
                 "docker-image-reference": "<parent>"
             }
             # If 2 parent jobs have the same name, then JobGraph will complain later
@@ -203,7 +203,7 @@ def fill_context_hash(config, jobs):
             "context_hash": context_hash,
             "docker_image_full_location": docker_image_full_location,
         }
-        worker["env"] |= {
+        runner["env"] |= {
             # We use hashes as tags to reduce potential collisions of regular tags
             "DOCKER_IMAGE_TAG": context_hash,
             # We shouldn't resolve digest if we build and push image in this job
@@ -218,7 +218,7 @@ def define_docker_commands(config, jobs):
     for job in jobs:
         packages = job.pop("packages", [])
         arguments = job.pop("args", {})
-        worker = job.setdefault("worker", {})
+        runner = job.setdefault("runner", {})
 
         if packages:
             arguments["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
@@ -230,9 +230,9 @@ def define_docker_commands(config, jobs):
             f'--build-arg "{argument_name}={argument_value}"'
             for argument_name, argument_value in arguments.items()
         )
-        worker["command"] = " && ".join(
+        runner["command"] = " && ".join(
             (
-                worker.get("command", ""),
+                runner.get("command", ""),
                 f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
                 f'"$CI_PROJECT_DIR/{docker_file}" {build_args} .',
                 'docker push "$DOCKER_IMAGE_FULL_LOCATION"',

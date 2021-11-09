@@ -17,7 +17,7 @@ job-defaults:
     attributes:
         retrigger: true
     runner-alias: t-linux
-    worker:
+    runner:
         docker-image: {in-tree: python-test}
         max-run-time: 180
     run:

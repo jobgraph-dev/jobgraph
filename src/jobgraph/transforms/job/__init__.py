@@ -84,7 +84,7 @@ job_description_schema = Schema(
         Required("runner-alias"): task_description_schema["runner-alias"],
         # This object will be passed through to the task description, with additions
         # provided by the job's run-using function
-        Optional("worker"): dict,
+        Optional("runner"): dict,
     }
 )
 
@@ -118,11 +118,11 @@ def set_implementation(config, jobs):
         impl, os = get_runner_alias_implementation(
             config.graph_config, job["runner-alias"]
         )
-        worker = job.setdefault("worker", {})
-        assert "implementation" not in worker
-        worker["implementation"] = impl
+        runner = job.setdefault("runner", {})
+        assert "implementation" not in runner
+        runner["implementation"] = impl
         if os:
-            worker["os"] = os
+            runner["os"] = os
         yield job
 
 
@@ -142,25 +142,25 @@ def set_label(config, jobs):
 def add_resource_monitor(config, jobs):
     for job in jobs:
         if job.get("attributes", {}).get("resource-monitor"):
-            worker_implementation, worker_os = get_runner_alias_implementation(
+            runner_implementation, runner_os = get_runner_alias_implementation(
                 config.graph_config, job["runner-alias"]
             )
-            # Normalise worker os so that linux-bitbar and similar use linux tools.
-            worker_os = worker_os.split("-")[0]
+            # Normalise runner os so that linux-bitbar and similar use linux tools.
+            runner_os = runner_os.split("-")[0]
             if "win7" in job["runner-alias"]:
                 arch = "32"
             else:
                 arch = "64"
             job.setdefault("fetches", {})
             job["fetches"].setdefault("toolchain", [])
-            job["fetches"]["toolchain"].append(f"{worker_os}{arch}-resource-monitor")
+            job["fetches"]["toolchain"].append(f"{runner_os}{arch}-resource-monitor")
 
-            if worker_implementation == "kubernetes":
-                artifact_source = "/builds/worker/monitoring/resource-monitor.json"
+            if runner_implementation == "kubernetes":
+                artifact_source = "/builds/runner/monitoring/resource-monitor.json"
             else:
                 artifact_source = "monitoring/resource-monitor.json"
-            job["worker"].setdefault("artifacts", [])
-            job["worker"]["artifacts"].append(
+            job["runner"].setdefault("artifacts", [])
+            job["runner"]["artifacts"].append(
                 {
                     "name": "public/monitoring/resource-monitor.json",
                     "type": "file",
@@ -168,8 +168,8 @@ def add_resource_monitor(config, jobs):
                 }
             )
             # Set env for output file
-            job["worker"].setdefault("env", {})
-            job["worker"]["env"]["RESOURCE_MONITOR_OUTPUT"] = artifact_source
+            job["runner"].setdefault("env", {})
+            job["runner"]["env"]["RESOURCE_MONITOR_OUTPUT"] = artifact_source
 
         yield job
 
@@ -221,7 +221,7 @@ def use_fetches(config, jobs):
         job_fetches = []
         name = job.get("name", job.get("label"))
         dependencies = job.setdefault("dependencies", {})
-        worker = job.setdefault("worker", {})
+        runner = job.setdefault("runner", {})
         prefix = get_artifact_prefix(job)
         for kind, artifacts in fetches.items():
             if kind in ("fetch", "toolchain"):
@@ -294,7 +294,7 @@ def use_fetches(config, jobs):
                         fetch["dest"] = dest
                     job_fetches.append(fetch)
 
-        env = worker.setdefault("env", {})
+        env = runner.setdefault("env", {})
         env["MOZ_FETCHES"] = {"task-reference": json.dumps(job_fetches, sort_keys=True)}
 
         env.setdefault("MOZ_FETCHES_DIR", "fetches")
@@ -336,8 +336,8 @@ def make_task_description(config, jobs):
     import_all()
     for job in jobs:
         # always-optimized tasks never execute, so have no workdir
-        if job["worker"]["implementation"] in ("kubernetes"):
-            job["run"].setdefault("workdir", "/builds/worker")
+        if job["runner"]["implementation"] in ("kubernetes"):
+            job["run"].setdefault("workdir", "/builds/runner")
 
         taskdesc = copy.deepcopy(job)
 
@@ -345,10 +345,10 @@ def make_task_description(config, jobs):
         taskdesc.setdefault("attributes", {})
         taskdesc.setdefault("dependencies", {})
 
-        # give the function for job.run.using on this worker implementation a
+        # give the function for job.run.using on this runner implementation a
         # chance to set up the task description.
         configure_taskdesc_for_run(
-            config, job, taskdesc, job["worker"]["implementation"]
+            config, job, taskdesc, job["runner"]["implementation"]
         )
         del taskdesc["run"]
 
@@ -360,9 +360,9 @@ def make_task_description(config, jobs):
 registry = {}
 
 
-def run_job_using(worker_implementation, run_using, schema=None, defaults={}):
+def run_job_using(runner_implementation, run_using, schema=None, defaults={}):
     """Register the decorated function as able to set up a task description for
-    jobs with the given worker implementation and `run.using` property.  If
+    jobs with the given runner implementation and `run.using` property.  If
     `schema` is given, the job's run field will be verified to match it.
 
     The decorated function should have the signature `using_foo(config, job, taskdesc)`
@@ -371,13 +371,13 @@ def run_job_using(worker_implementation, run_using, schema=None, defaults={}):
 
     def wrap(func):
         for_run_using = registry.setdefault(run_using, {})
-        if worker_implementation in for_run_using:
+        if runner_implementation in for_run_using:
             raise Exception(
                 "run_job_using({!r}, {!r}) already exists: {!r}".format(
-                    run_using, worker_implementation, for_run_using[run_using]
+                    run_using, runner_implementation, for_run_using[run_using]
                 )
             )
-        for_run_using[worker_implementation] = (func, schema, defaults)
+        for_run_using[runner_implementation] = (func, schema, defaults)
         return func
 
     return wrap
@@ -390,7 +390,7 @@ def always_optimized(config, job, taskdesc):
     pass
 
 
-def configure_taskdesc_for_run(config, job, taskdesc, worker_implementation):
+def configure_taskdesc_for_run(config, job, taskdesc, runner_implementation):
     """
     Run the appropriate function for this job against the given task
     description.
@@ -402,14 +402,14 @@ def configure_taskdesc_for_run(config, job, taskdesc, worker_implementation):
     if run_using not in registry:
         raise Exception(f"no functions for run.using {run_using!r}")
 
-    if worker_implementation not in registry[run_using]:
+    if runner_implementation not in registry[run_using]:
         raise Exception(
             "no functions for run.using {!r} on {!r}".format(
-                run_using, worker_implementation
+                run_using, runner_implementation
             )
         )
 
-    func, schema, defaults = registry[run_using][worker_implementation]
+    func, schema, defaults = registry[run_using][runner_implementation]
     for k, v in defaults.items():
         job["run"].setdefault(k, v)
 
@@ -418,7 +418,7 @@ def configure_taskdesc_for_run(config, job, taskdesc, worker_implementation):
             schema,
             job["run"],
             "In job.run using {!r}/{!r} for job {!r}:".format(
-                job["run"]["using"], worker_implementation, job["label"]
+                job["run"]["using"], runner_implementation, job["label"]
             ),
         )
     func(config, job, taskdesc)
