@@ -47,7 +47,7 @@ def worker_type_implementation(graph_config, worker_type):
 
 
 @memoize
-def get_worker_type(graph_config, alias, level):
+def get_runner_tag(graph_config, alias, level):
     """
     Get the worker type based, evaluating aliases from the graph config.
     """

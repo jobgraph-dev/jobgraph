@@ -22,7 +22,7 @@ from jobgraph.util.memoize import memoize
 from jobgraph.util.schema import Schema, taskref_or_string, validate_schema
 
 from ..util import docker as dockerutil
-from ..util.workertypes import get_worker_type
+from ..util.workertypes import get_runner_tag
 
 RUN_TASK = os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "run-task", "run-task"
@@ -357,7 +357,7 @@ def build_job(config, jobs):
     for job in jobs:
         level = str(config.params["level"])
 
-        worker_type = get_worker_type(
+        worker_type = get_runner_tag(
             config.graph_config,
             job["runner-alias"],
             level,
