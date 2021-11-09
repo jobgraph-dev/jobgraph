@@ -11,12 +11,12 @@ runners:
         images:
             implementation: kubernetes
             os: linux
-            worker-type: gitlab-org-docker
+            runner-tag: gitlab-org-docker
         t-linux:
             implementation: kubernetes
             os: linux
-            worker-type: gitlab-org-docker
+            runner-tag: gitlab-org-docker
         misc:
             implementation: kubernetes
             os: linux
-            worker-type: gitlab-org-docker
+            runner-tag: gitlab-org-docker

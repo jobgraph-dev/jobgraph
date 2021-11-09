@@ -62,7 +62,7 @@ def get_worker_type(graph_config, alias, level):
         {"alias": alias},
     )
     worker_type = evaluate_keyed_by(
-        worker_config["worker-type"],
+        worker_config["runner-tag"],
         alias,
         {"level": level},
     ).format(level=level, alias=alias)

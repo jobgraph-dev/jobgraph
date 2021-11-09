@@ -27,7 +27,7 @@ graph_config_schema = Schema(
                 str: {
                     Required("implementation"): str,
                     Required("os"): str,
-                    Required("worker-type"): optionally_keyed_by("level", str),
+                    Required("runner-tag"): optionally_keyed_by("level", str),
                 }
             },
         },
