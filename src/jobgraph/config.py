@@ -22,7 +22,7 @@ graph_config_schema = Schema(
         # The trust-domain for this graph.
         # (See https://firefox-source-docs.mozilla.org/taskcluster/taskcluster/taskgraph.html#taskgraph-trust-domain)  # noqa
         Required("trust-domain"): str,
-        Required("workers"): {
+        Required("runners"): {
             Required("aliases"): {
                 str: {
                     Required("implementation"): str,

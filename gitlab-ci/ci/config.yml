@@ -6,7 +6,7 @@ jobgraph:
     container-registry:
         type: gitlab
 
-workers:
+runners:
     aliases:
         images:
             implementation: kubernetes

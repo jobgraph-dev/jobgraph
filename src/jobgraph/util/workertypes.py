@@ -39,7 +39,7 @@ def worker_type_implementation(graph_config, worker_type):
         # the worker-type.
         return _BUILTIN_TYPES[worker_type].implementation, None
     worker_config = evaluate_keyed_by(
-        {"by-worker-type": graph_config["workers"]["aliases"]},
+        {"by-worker-type": graph_config["runners"]["aliases"]},
         "worker-types.yml",
         {"worker-type": worker_type},
     )
@@ -57,8 +57,8 @@ def get_worker_type(graph_config, alias, level):
 
     level = str(level)
     worker_config = evaluate_keyed_by(
-        {"by-alias": graph_config["workers"]["aliases"]},
-        "graph_config.workers.aliases",
+        {"by-alias": graph_config["runners"]["aliases"]},
+        "graph_config.runners.aliases",
         {"alias": alias},
     )
     worker_type = evaluate_keyed_by(

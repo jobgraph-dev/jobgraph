@@ -128,7 +128,7 @@ def payload_builder(name, schema):
         # caches to set up for the task
         Optional("caches"): [
             {
-                # only one type is supported by any of the workers right now
+                # only one type is supported by any of the runners right now
                 "type": "persistent",
                 # name of the cache, allowing re-use by subsequent tasks naming the
                 # same cache
