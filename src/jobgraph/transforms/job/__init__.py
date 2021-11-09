@@ -22,7 +22,7 @@ from jobgraph.transforms.base import TransformSequence
 from jobgraph.transforms.task import task_description_schema
 from jobgraph.util.schema import Schema, validate_schema
 from jobgraph.util.taskcluster import get_artifact_prefix
-from jobgraph.util.workertypes import worker_type_implementation
+from jobgraph.util.runners import worker_type_implementation
 
 logger = logging.getLogger(__name__)
 
