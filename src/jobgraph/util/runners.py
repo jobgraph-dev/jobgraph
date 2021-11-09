@@ -30,7 +30,7 @@ _BUILTIN_TYPES = {
 
 
 @memoize
-def worker_type_implementation(graph_config, worker_type):
+def get_runner_alias_implementation(graph_config, worker_type):
     """Get the worker implementation and OS for the given workerType, where the
     OS represents the host system, not the target OS, in the case of
     cross-compiles."""

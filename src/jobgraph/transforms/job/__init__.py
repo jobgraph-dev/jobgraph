@@ -22,7 +22,7 @@ from jobgraph.transforms.base import TransformSequence
 from jobgraph.transforms.task import task_description_schema
 from jobgraph.util.schema import Schema, validate_schema
 from jobgraph.util.taskcluster import get_artifact_prefix
-from jobgraph.util.runners import worker_type_implementation
+from jobgraph.util.runners import get_runner_alias_implementation
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +115,9 @@ def rewrite_when_to_optimization(config, jobs):
 @transforms.add
 def set_implementation(config, jobs):
     for job in jobs:
-        impl, os = worker_type_implementation(config.graph_config, job["runner-alias"])
+        impl, os = get_runner_alias_implementation(
+            config.graph_config, job["runner-alias"]
+        )
         worker = job.setdefault("worker", {})
         assert "implementation" not in worker
         worker["implementation"] = impl
@@ -140,7 +142,7 @@ def set_label(config, jobs):
 def add_resource_monitor(config, jobs):
     for job in jobs:
         if job.get("attributes", {}).get("resource-monitor"):
-            worker_implementation, worker_os = worker_type_implementation(
+            worker_implementation, worker_os = get_runner_alias_implementation(
                 config.graph_config, job["runner-alias"]
             )
             # Normalise worker os so that linux-bitbar and similar use linux tools.
