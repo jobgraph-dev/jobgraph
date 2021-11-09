@@ -8,6 +8,16 @@ def update_dependencies(options):
     _update_jobgraph_python_requirements()
 
 
+_PIN_COMMANDS = " && ".join(
+    (
+        "pip install --upgrade pip",
+        "pip install pip-compile-multi",
+        "pip-compile-multi --generate-hashes base --generate-hashes test --generate-hashes dev",
+        "chmod 644 requirements/*.txt",
+    )
+)
+
+
 def _update_jobgraph_python_requirements():
     with open(PYTHON_VERSION_FILE) as f:
         python_version = f.read().strip()
@@ -23,7 +33,9 @@ def _update_jobgraph_python_requirements():
         "--pull",
         "always",
         f"python:{python_version}-alpine",
-        "maintenance/pin-helper.sh",
+        "ash",
+        "-c",
+        _PIN_COMMANDS,
     )
     subprocess.run(docker_command)
 
