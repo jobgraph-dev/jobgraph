@@ -122,7 +122,7 @@ def make_task(config, jobs):
                 "checkout": False,
                 "command": job["command"],
             },
-            "worker-type": "images",
+            "runner-alias": "images",
             "worker": {
                 "chain-of-trust": True,
                 "docker-image": job.get("docker-image", {"in-tree": "fetch"}),

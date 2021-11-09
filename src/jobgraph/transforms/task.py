@@ -69,10 +69,10 @@ task_description_schema = Schema(
         # Optimization to perform on this task during the optimization phase.
         # Optimizations are defined in gitlab-ci/jobgraph/optimize.py.
         Required("optimization"): Any(dict, None),
-        # the worker-type for the task.  The following parameters will
+        # the runner-alias for the task.  The following parameters will
         # be substituted in this string:
         #  {level} -- the scm level of this push
-        "worker-type": str,
+        "runner-alias": str,
         # information specific to the worker implementation that will run this task
         Optional("worker"): {
             Required("implementation"): str,
@@ -359,7 +359,7 @@ def build_job(config, jobs):
 
         worker_type = get_worker_type(
             config.graph_config,
-            job["worker-type"],
+            job["runner-alias"],
             level,
         )
 

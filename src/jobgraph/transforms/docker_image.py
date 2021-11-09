@@ -135,7 +135,7 @@ def fill_template(config, jobs):
             "name": image_name,
             "optimization": job.get("optimization", None),
             "parent": job.get("parent", None),
-            "worker-type": "images",
+            "runner-alias": "images",
             "worker": worker,
         }
 

@@ -85,7 +85,7 @@ def transform(monkeypatch, config):
     "task",
     (
         {
-            "worker-type": "t-linux",
+            "runner-alias": "t-linux",
             "run": {
                 "checkout": True,
                 "comm-checkout": False,

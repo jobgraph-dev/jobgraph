@@ -81,7 +81,7 @@ job_description_schema = Schema(
             # own schema.
             Extra: object,
         },
-        Required("worker-type"): task_description_schema["worker-type"],
+        Required("runner-alias"): task_description_schema["runner-alias"],
         # This object will be passed through to the task description, with additions
         # provided by the job's run-using function
         Optional("worker"): dict,
@@ -115,7 +115,7 @@ def rewrite_when_to_optimization(config, jobs):
 @transforms.add
 def set_implementation(config, jobs):
     for job in jobs:
-        impl, os = worker_type_implementation(config.graph_config, job["worker-type"])
+        impl, os = worker_type_implementation(config.graph_config, job["runner-alias"])
         worker = job.setdefault("worker", {})
         assert "implementation" not in worker
         worker["implementation"] = impl
@@ -141,11 +141,11 @@ def add_resource_monitor(config, jobs):
     for job in jobs:
         if job.get("attributes", {}).get("resource-monitor"):
             worker_implementation, worker_os = worker_type_implementation(
-                config.graph_config, job["worker-type"]
+                config.graph_config, job["runner-alias"]
             )
             # Normalise worker os so that linux-bitbar and similar use linux tools.
             worker_os = worker_os.split("-")[0]
-            if "win7" in job["worker-type"]:
+            if "win7" in job["runner-alias"]:
                 arch = "32"
             else:
                 arch = "64"

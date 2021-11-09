@@ -16,7 +16,7 @@ class _BuiltinWorkerType:
     @property
     def implementation(self):
         """
-        Since the list of built-in worker-types is small and fixed, we can get
+        Since the list of built-in runner-aliases is small and fixed, we can get
         away with punning the implementation name (in
         `jobgraph.transforms.task`) and the worker_type.
         """
@@ -35,13 +35,13 @@ def worker_type_implementation(graph_config, worker_type):
     OS represents the host system, not the target OS, in the case of
     cross-compiles."""
     if worker_type in _BUILTIN_TYPES:
-        # For the built-in worker-types, we use an `implementation that matches
-        # the worker-type.
+        # For the built-in runner-aliases, we use an `implementation that matches
+        # the runner-alias.
         return _BUILTIN_TYPES[worker_type].implementation, None
     worker_config = evaluate_keyed_by(
-        {"by-worker-type": graph_config["runners"]["aliases"]},
-        "worker-types.yml",
-        {"worker-type": worker_type},
+        {"by-runner-alias": graph_config["runners"]["aliases"]},
+        "runner-aliases.yml",
+        {"runner-alias": worker_type},
     )
     return worker_config["implementation"], worker_config.get("os")
 
