@@ -20,9 +20,9 @@ from voluptuous import Any, Exclusive, Extra, Optional, Required
 
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.transforms.task import task_description_schema
+from jobgraph.util.runners import get_runner_alias_implementation
 from jobgraph.util.schema import Schema, validate_schema
 from jobgraph.util.taskcluster import get_artifact_prefix
-from jobgraph.util.runners import get_runner_alias_implementation
 
 logger = logging.getLogger(__name__)
 
