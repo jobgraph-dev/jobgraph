@@ -568,12 +568,23 @@ def decision(options):
     jobgraph_decision(options)
 
 
+@command(
+    "update-dependencies",
+    help="Update all dependencies defined in jobgraph (Docker base images, python pacakges, etc.)",
+)
+def update_depdencies(options):
+    from jobgraph.update_dependencies import update_dependencies
+
+    update_dependencies(options)
+
+
 def create_parser():
     parser = argparse.ArgumentParser(description="Interact with jobgraph")
     subparsers = parser.add_subparsers()
     for _, (func, args, kwargs, defaults) in commands.items():
         subparser = subparsers.add_parser(*args, **kwargs)
-        for arg in func.args:
+        func_args = getattr(func, "args", [])
+        for arg in func_args:
             subparser.add_argument(*arg[0], **arg[1])
         subparser.set_defaults(command=func, **defaults)
     return parser
