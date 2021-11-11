@@ -7,7 +7,7 @@ RUN mkdir -p "$RUNNER_HOME" && \
     adduser --disabled-password --home "$RUNNER_HOME" "$RUNNER_USER"
 
 RUN apk update && \
-    apk add --no-cache --update git
+    apk add --no-cache --update git~=2.32
 
 USER "$RUNNER_USER"
 WORKDIR "$RUNNER_HOME"
