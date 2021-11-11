@@ -1,4 +1,10 @@
 ---
+job-defaults:
+    optimization:
+        skip-unless-changed:
+            - "**/Dockerfile"
+
+
 hadolint:
     description: "Run `hadolint` to validate dockerfiles"
     run:
