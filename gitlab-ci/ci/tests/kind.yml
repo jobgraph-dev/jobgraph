@@ -15,8 +15,6 @@ jobs-from:
     - yaml.yml
 
 job-defaults:
-    attributes:
-        retrigger: true
     runner-alias: t-linux
     runner:
         max-run-time: 180
