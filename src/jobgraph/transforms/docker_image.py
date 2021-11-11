@@ -7,11 +7,13 @@ import logging
 import os
 import re
 
+from dockerfile_parse import DockerfileParser
 from voluptuous import Optional, Required
 
 import jobgraph
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.docker import generate_context_hash
+from jobgraph.util.docker_registries import does_image_full_location_have_digest
 from jobgraph.util.docker_registries.gitlab import get_image_full_location
 from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 from jobgraph.util.schema import Schema
@@ -48,8 +50,39 @@ docker_image_schema = Schema(
     }
 )
 
+_RUN_UPDATE_DEPENDENCIES_MESSAGE = (
+    "Please run `jobgraph update-dependencies` to provide digest"
+)
+
 
 transforms.add_validate(docker_image_schema)
+
+
+@transforms.add
+def ensure_external_base_images_have_digests(config, jobs):
+    dind_image = config.graph_config["jobgraph"]["docker-in-docker-image"]
+    if not does_image_full_location_have_digest(dind_image):
+        raise ValueError(
+            f"{_RUN_UPDATE_DEPENDENCIES_MESSAGE} for docker-in-docker"
+            f'image on "{config.graph_config.config_yml}".'
+        )
+
+    for job in jobs:
+        image_name = job["name"]
+        definition = job.get("definition", image_name)
+        docker_file_path = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
+        docker_file = DockerfileParser(docker_file_path)
+
+        # baseimage is not defined if it's built within jobgraph
+        if docker_file.baseimage and not does_image_full_location_have_digest(
+            docker_file.baseimage
+        ):
+            raise ValueError(
+                f"{_RUN_UPDATE_DEPENDENCIES_MESSAGE} for base docker"
+                f'image on "{docker_file_path}".'
+            )
+
+        yield job
 
 
 @transforms.add

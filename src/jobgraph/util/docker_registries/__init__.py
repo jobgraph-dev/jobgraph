@@ -139,3 +139,8 @@ def build_image_full_location(image_data):
         string = f"{string}@{image_data['digest']}"
 
     return string
+
+
+def does_image_full_location_have_digest(image_full_location):
+    image_data = _parse_image_full_location(image_full_location)
+    return image_data["digest"] != ""
