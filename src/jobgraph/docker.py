@@ -51,8 +51,6 @@ def build_image(name, tag, args=None):
     if not os.path.isdir(image_dir):
         raise Exception("image directory does not exist: %s" % image_dir)
 
-    tag = tag or docker.docker_image(name, by_tag=True)
-
     buf = BytesIO()
     docker.stream_context_tar(".", image_dir, buf, "", args)
     docker.post_to_docker(buf.getvalue(), "/build", nocache=1, t=tag)

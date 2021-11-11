@@ -17,8 +17,6 @@ import taskcluster_urls as liburls
 
 from jobgraph.util import docker
 
-from .mockedopen import MockedOpen
-
 MODE_STANDARD = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
 
 
@@ -45,24 +43,6 @@ class TestDocker(unittest.TestCase):
             )
         finally:
             shutil.rmtree(tmpdir)
-
-    def test_docker_image_explicit_registry_by_tag(self):
-        files = {}
-        files[f"{docker.IMAGE_DIR}/myimage/REGISTRY"] = "myreg"
-        files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        with MockedOpen(files):
-            self.assertEqual(
-                docker.docker_image("myimage", by_tag=True), "myreg/myimage:1.2.3"
-            )
-
-    def test_docker_image_default_registry_by_tag(self):
-        files = {}
-        files[f"{docker.IMAGE_DIR}/REGISTRY"] = "mozilla"
-        files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        with MockedOpen(files):
-            self.assertEqual(
-                docker.docker_image("myimage", by_tag=True), "mozilla/myimage:1.2.3"
-            )
 
     @pytest.mark.xfail(sys.version_info >= (3, 8), reason="Hash is different")
     def test_create_context_tar_basic(self):

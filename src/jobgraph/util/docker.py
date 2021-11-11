@@ -124,26 +124,6 @@ def post_to_docker(tar, api_path, **kwargs):
         sys.stderr.flush()
 
 
-def docker_image(name, by_tag=False):
-    """
-    Resolve in-tree prebuilt docker image to ``<registry>/<repository>@sha256:<digest>``,
-    or ``<registry>/<repository>:<tag>`` if `by_tag` is `True`.
-    """
-    try:
-        with open(os.path.join(IMAGE_DIR, name, "REGISTRY")) as f:
-            registry = f.read().strip()
-    except OSError:
-        with open(os.path.join(IMAGE_DIR, "REGISTRY")) as f:
-            registry = f.read().strip()
-
-    try:
-        with open(os.path.join(IMAGE_DIR, name, "VERSION")) as f:
-            tag = f.read().strip()
-    except OSError:
-        tag = "latest"
-    return f"{registry}/{name}:{tag}"
-
-
 class VoidWriter:
     """A file object with write capabilities that does nothing with the written
     data."""
