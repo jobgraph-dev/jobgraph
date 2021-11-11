@@ -50,7 +50,6 @@ class TestDocker(unittest.TestCase):
         files = {}
         files[f"{docker.IMAGE_DIR}/myimage/REGISTRY"] = "cool-images"
         files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        files[f"{docker.IMAGE_DIR}/myimage/HASH"] = "sha256:434..."
         with MockedOpen(files):
             self.assertEqual(
                 docker.docker_image("myimage"), "cool-images/myimage@sha256:434..."
@@ -60,7 +59,6 @@ class TestDocker(unittest.TestCase):
         files = {}
         files[f"{docker.IMAGE_DIR}/myimage/REGISTRY"] = "myreg"
         files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        files[f"{docker.IMAGE_DIR}/myimage/HASH"] = "sha256:434..."
         with MockedOpen(files):
             self.assertEqual(
                 docker.docker_image("myimage", by_tag=True), "myreg/myimage:1.2.3"
@@ -70,7 +68,6 @@ class TestDocker(unittest.TestCase):
         files = {}
         files[f"{docker.IMAGE_DIR}/REGISTRY"] = "mozilla"
         files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        files[f"{docker.IMAGE_DIR}/myimage/HASH"] = "sha256:434..."
         with MockedOpen(files):
             self.assertEqual(
                 docker.docker_image("myimage"), "mozilla/myimage@sha256:434..."
@@ -80,7 +77,6 @@ class TestDocker(unittest.TestCase):
         files = {}
         files[f"{docker.IMAGE_DIR}/REGISTRY"] = "mozilla"
         files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        files[f"{docker.IMAGE_DIR}/myimage/HASH"] = "sha256:434..."
         with MockedOpen(files):
             self.assertEqual(
                 docker.docker_image("myimage", by_tag=True), "mozilla/myimage:1.2.3"

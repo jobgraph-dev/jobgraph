@@ -136,14 +136,6 @@ def docker_image(name, by_tag=False):
         with open(os.path.join(IMAGE_DIR, "REGISTRY")) as f:
             registry = f.read().strip()
 
-    if not by_tag:
-        hashfile = os.path.join(IMAGE_DIR, name, "HASH")
-        try:
-            with open(hashfile) as f:
-                return f"{registry}/{name}@{f.read().strip()}"
-        except OSError:
-            raise Exception(f"Failed to read HASH file {hashfile}")
-
     try:
         with open(os.path.join(IMAGE_DIR, name, "VERSION")) as f:
             tag = f.read().strip()
