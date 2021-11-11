@@ -160,10 +160,18 @@ class VoidWriter:
         pass
 
 
-def generate_context_hash(topsrcdir, image_path, args=None):
+def generate_context_hash(
+    topsrcdir, image_path, args=None, dind_image_full_location=None
+):
     copied_files = _get_tracked_copied_files_to_docker_image(image_path, args)
     return stream_context_tar(
-        topsrcdir, image_path, VoidWriter(), copied_files=copied_files, args=args
+        topsrcdir,
+        image_path,
+        VoidWriter(),
+        dind_image_full_location,
+        copied_files=copied_files,
+        args=args,
+        dind_image_full_location=dind_image_full_location,
     )
 
 
@@ -272,7 +280,13 @@ RUN_TASK_SNIPPET = [
 
 
 def stream_context_tar(
-    topsrcdir, context_dir, out_file, image_name=None, copied_files=None, args=None
+    topsrcdir,
+    context_dir,
+    out_file,
+    image_name=None,
+    copied_files=None,
+    args=None,
+    dind_image_full_location=None,
 ):
     """Like create_context_tar, but streams the tar file to the `out_file` file
     object."""
@@ -295,6 +309,9 @@ def stream_context_tar(
 
     for arg_name, arg_value in args.items():
         writer.write(f"ARG {arg_name}={arg_value}".encode())
+
+    if dind_image_full_location:
+        writer.write(f"DOCKER_IN_DOCKER {dind_image_full_location}".encode())
 
     return writer.hexdigest()
 
