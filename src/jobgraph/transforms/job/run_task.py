@@ -19,11 +19,6 @@ run_task_schema = Schema(
         Optional("use-caches"): bool,
         # if true (the default), perform a checkout on the runner
         Required("checkout"): Any(bool, {str: dict}),
-        Optional(
-            "cwd",
-            description="Path to run command in. If a checkout is present, the path "
-            "to the checkout will be interpolated with the key `checkout`",
-        ): str,
         # The command arguments to pass to the `run-task` script, after the
         # checkout arguments.  If a list, it will be passed directly; otherwise
         # it will be included in a single argument to `bash -cx`.

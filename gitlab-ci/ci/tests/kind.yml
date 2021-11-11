@@ -20,4 +20,3 @@ job-defaults:
         max-run-time: 180
     run:
         using: run-task
-        cwd: '{checkout}'
