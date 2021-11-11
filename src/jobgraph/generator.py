@@ -10,7 +10,7 @@ from typing import AnyStr
 import attr
 
 from . import filter_jobs
-from .config import GraphConfig, load_graph_config
+from .config import DEFAULT_ROOT_DIR, GraphConfig, load_graph_config
 from .graph import Graph
 from .job import Job
 from .jobgraph import JobGraph
@@ -127,7 +127,7 @@ class JobGraphGenerator:
         @type parameters: Union[Parameters, Callable[[GraphConfig], Parameters]]
         """
         if root_dir is None:
-            root_dir = "gitlab-ci/ci"
+            root_dir = DEFAULT_ROOT_DIR
         self.root_dir = root_dir
         self._parameters = parameters
         self._write_artifacts = write_artifacts

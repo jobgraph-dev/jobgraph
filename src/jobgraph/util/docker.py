@@ -14,6 +14,7 @@ from pathlib import Path
 import requests_unixsocket
 from dockerfile_parse import DockerfileParser
 
+from jobgraph.config import DEFAULT_ROOT_DIR
 from jobgraph.parameters import get_repo
 from jobgraph.util.archive import create_tar_gz_from_files
 from jobgraph.util.memoize import memoize
@@ -301,7 +302,7 @@ def stream_context_tar(
 @memoize
 def image_paths():
     """Return a map of image name to paths containing their Dockerfile."""
-    config = load_yaml("gitlab-ci", "ci", "docker-image", "kind.yml")
+    config = load_yaml(DEFAULT_ROOT_DIR, "docker-image", "kind.yml")
     return {
         k: os.path.join(IMAGE_DIR, v.get("definition", k))
         for k, v in config["jobs"].items()

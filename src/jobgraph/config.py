@@ -17,6 +17,8 @@ from .util.yaml import load_yaml
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_ROOT_DIR = os.path.join("gitlab-ci", "ci")
+
 graph_config_schema = Schema(
     {
         # The trust-domain for this graph.
@@ -81,7 +83,7 @@ class GraphConfig:
 
     @property
     def vcs_root(self):
-        if path.split(self.root_dir)[-2:] != ["gitlab-ci", "ci"]:
+        if path.split(self.root_dir)[-2:] != path.split(DEFAULT_ROOT_DIR):
             raise Exception(
                 "Not guessing path to vcs root. "
                 "Graph config in non-standard location."
@@ -90,7 +92,7 @@ class GraphConfig:
 
     @property
     def gitlab_ci_yml(self):
-        if path.split(self.root_dir)[-2:] != ["gitlab-ci", "ci"]:
+        if path.split(self.root_dir)[-2:] != path.split(DEFAULT_ROOT_DIR):
             raise Exception(
                 "Not guessing path to `.gitlab-ci.yml`. "
                 "Graph config in non-standard location."

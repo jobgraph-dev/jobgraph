@@ -12,7 +12,7 @@ from copy import deepcopy
 
 import pytest
 
-from jobgraph.config import load_graph_config
+from jobgraph.config import DEFAULT_ROOT_DIR, load_graph_config
 from jobgraph.transforms import job
 from jobgraph.transforms.base import TransformConfig
 from jobgraph.transforms.job import run_task  # noqa: F401
@@ -33,7 +33,7 @@ TASK_DEFAULTS = {
 
 @pytest.fixture(scope="module")
 def config():
-    graph_config = load_graph_config(os.path.join("gitlab-ci", "ci"))
+    graph_config = load_graph_config(DEFAULT_ROOT_DIR)
     params = FakeParameters(
         {
             "base_repository": "http://gitlab.example.com",

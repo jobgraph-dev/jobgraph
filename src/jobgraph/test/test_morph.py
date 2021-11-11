@@ -3,18 +3,16 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-import os
-
 import pytest
 
-from jobgraph.config import load_graph_config
+from jobgraph.config import DEFAULT_ROOT_DIR, load_graph_config
 from jobgraph.graph import Graph
 from jobgraph.jobgraph import JobGraph
 
 
 @pytest.fixture(scope="module")
 def graph_config():
-    return load_graph_config(os.path.join("gitlab-ci", "ci"))
+    return load_graph_config(DEFAULT_ROOT_DIR)
 
 
 @pytest.fixture
