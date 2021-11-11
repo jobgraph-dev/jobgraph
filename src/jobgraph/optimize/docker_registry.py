@@ -1,8 +1,7 @@
 from jobgraph.optimize import OptimizationStrategy, register_strategy
-from jobgraph.util.gitlab import (
-    extract_gitlab_instance_and_namespace_and_name,
-    get_container_registry_image_digest,
-)
+from jobgraph.util.docker_registries import fetch_image_digest_from_registry
+from jobgraph.util.docker_registries.gitlab import get_image_full_location
+from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 
 
 @register_strategy("skip-if-on-gitlab-container-registry")
@@ -15,15 +14,16 @@ class GitlabContainerRegistrySearch(OptimizationStrategy):
             project_namespace,
             project_name,
         ) = extract_gitlab_instance_and_namespace_and_name(params["head_repository"])
+        image_full_location = get_image_full_location(
+            gitlab_domain_name,
+            project_namespace,
+            project_name,
+            image_name,
+            image_tag,
+        )
 
         try:
-            get_container_registry_image_digest(
-                gitlab_domain_name,
-                project_namespace,
-                project_name,
-                image_name,
-                image_tag,
-            )
+            fetch_image_digest_from_registry(image_full_location)
             return True
         except ValueError:
             return False

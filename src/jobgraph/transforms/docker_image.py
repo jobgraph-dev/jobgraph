@@ -12,10 +12,8 @@ from voluptuous import Optional, Required
 import jobgraph
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.docker import generate_context_hash
-from jobgraph.util.gitlab import (
-    extract_gitlab_instance_and_namespace_and_name,
-    get_image_full_location,
-)
+from jobgraph.util.docker_registries.gitlab import get_image_full_location
+from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 from jobgraph.util.schema import Schema
 
 logger = logging.getLogger(__name__)
@@ -197,7 +195,6 @@ def fill_context_hash(config, jobs):
             repo_name,
             image_name,
             image_tag=context_hash,
-            resolve_digest=False,
         )
         job["attributes"] |= {
             "context_hash": context_hash,
