@@ -10,6 +10,7 @@ transforms:
     - jobgraph.transforms.task:transforms
 
 jobs-from:
+    - dockerfiles.yml
     - python.yml
     - yaml.yml
 

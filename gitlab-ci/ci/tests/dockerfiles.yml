@@ -1,0 +1,13 @@
+---
+job-defaults:
+    optimization:
+        skip-unless-changed:
+            - "**/Dockerfile"
+
+
+hadolint:
+    description: "Run `hadolint` to validate dockerfiles"
+    run:
+        command: hadolint $(find . -name 'Dockerfile')
+    runner:
+        docker-image: hadolint/hadolint@sha256:1b47f3192d2c69c622863b84d5cccbfa0c1fac9022bfc297aa931e6d44e51608
