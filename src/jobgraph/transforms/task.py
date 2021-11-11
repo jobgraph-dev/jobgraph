@@ -110,7 +110,7 @@ def payload_builder(name, schema):
 @payload_builder(
     "kubernetes",
     schema={
-        Required("os"): "linux",
+        Optional("os"): "linux",
         # For tasks that will run in kubernetes, this is the name of the docker
         # image or in-tree docker image to run the task in.  If in-tree, then a
         # dependency will be created automatically.  This is generally

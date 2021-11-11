@@ -9,27 +9,27 @@ job-defaults:
 
 black:
     description: "Run `black` to ensure strict code style"
-    run:
+    runner:
         command: black --check .
 
 flake8:
     description: "Run `flake8` to ensure code validates PEP8"
-    run:
+    runner:
         command: flake8
 
 isort:
     description: "Run `isort` to ensure python import statements are well ordered"
-    run:
+    runner:
         command: isort --check --diff .
 
 pyupgrade:
     description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
-    run:
+    runner:
         command: pyupgrade --py310-plus $(find . -name '*.py')
 
 unit:
     description: "Run `unit tests` to validate the latest changes"
-    run:
+    runner:
         command: >-
             pip install --prefix "/runner/.local" --no-deps --editable . &&
             pytest --pyargs jobgraph

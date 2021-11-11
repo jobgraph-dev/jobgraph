@@ -7,7 +7,6 @@ job-defaults:
 
 hadolint:
     description: "Run `hadolint` to validate dockerfiles"
-    run:
-        command: hadolint $(find . -name 'Dockerfile')
     runner:
+        command: hadolint $(find . -name 'Dockerfile')
         docker-image: {"docker-image-reference": "<hadolint>"}
