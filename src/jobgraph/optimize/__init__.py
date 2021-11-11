@@ -41,11 +41,7 @@ def register_strategy(name, args=()):
     return wrap
 
 
-def optimize_job_graph(
-    target_job_graph,
-    params,
-    do_not_optimize,
-):
+def optimize_job_graph(target_job_graph, params, do_not_optimize, graph_config):
     """
     Perform task optimization, returning a JobGraph.
     """
@@ -61,6 +57,7 @@ def optimize_job_graph(
     return get_subgraph(
         target_job_graph,
         removed_jobs,
+        graph_config,
     )
 
 
@@ -115,6 +112,7 @@ def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
 def get_subgraph(
     target_job_graph,
     removed_jobs,
+    graph_config=None,
 ):
     """
     Return the subgraph of target_job_graph consisting only of
@@ -134,28 +132,22 @@ def get_subgraph(
             if label not in omit
         }
 
-        docker_images = {
-            name: target_job_graph.jobs[dep_label].attributes[
-                "docker_image_full_location"
-            ]
-            for name, dep_label in named_links_dict.get(label, {}).items()
-            if target_job_graph.jobs[dep_label].attributes.get(
-                "docker_image_full_location"
-            )
-        }
-
         # Add remaining soft dependencies
         if task.soft_dependencies:
             named_task_dependencies.update(
                 {label: label for label in task.soft_dependencies if label not in omit}
             )
 
+        candidate_docker_images = _get_candidate_docker_images(
+            target_job_graph, named_links_dict, label, graph_config
+        )
+
         task.actual_gitlab_ci_job = resolve_task_references(
             task.label,
             task.actual_gitlab_ci_job,
             task_id=task.task_id,
             dependencies=named_task_dependencies,
-            docker_images=docker_images,
+            docker_images=candidate_docker_images,
         )
         deps = task.actual_gitlab_ci_job.setdefault("needs", [])
         deps.extend(sorted(named_task_dependencies.values()))
@@ -176,6 +168,31 @@ def get_subgraph(
     }
 
     return JobGraph(remaining_tasks_by_label, Graph(remaining_nodes, remaining_edges))
+
+
+def _get_candidate_docker_images(
+    target_job_graph, named_links_dict, label, graph_config=None
+):
+    # TODO Remove the following line which is a workaround
+    graph_config = {"jobgraph": {}} if graph_config is None else graph_config
+
+    docker_images = {
+        name: target_job_graph.jobs[dep_label].attributes["docker_image_full_location"]
+        for name, dep_label in named_links_dict.get(label, {}).items()
+        if target_job_graph.jobs[dep_label].attributes.get("docker_image_full_location")
+    }
+    external_docker_images = graph_config["jobgraph"].get("external-docker-images", {})
+    duplicate_image_references = set(docker_images.keys()).intersection(
+        set(external_docker_images.keys())
+    )
+    if duplicate_image_references:
+        raise ValueError(
+            "Found duplicate image references between in-tree "
+            f"and external ones: {duplicate_image_references}"
+        )
+    docker_images |= external_docker_images
+
+    return docker_images
 
 
 class OptimizationStrategy:

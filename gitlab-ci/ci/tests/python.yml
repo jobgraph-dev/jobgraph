@@ -3,6 +3,8 @@ job-defaults:
     optimization:
         skip-unless-changed:
             - "**/*.py"
+    runner:
+        docker-image: {in-tree: python-test}
 
 
 black:

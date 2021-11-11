@@ -365,6 +365,7 @@ class JobGraphGenerator:
             target_job_graph,
             parameters,
             do_not_optimize,
+            graph_config,
         )
 
         yield verifications("optimized_job_graph", optimized_job_graph, graph_config)

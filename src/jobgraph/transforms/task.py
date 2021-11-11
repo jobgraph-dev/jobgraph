@@ -9,7 +9,6 @@ complexities of runner implementations.
 """
 
 
-import hashlib
 import os
 
 import attr
@@ -117,10 +116,12 @@ def payload_builder(name, schema):
         # dependency will be created automatically.  This is generally
         # `desktop-test`, or an image that acts an awful lot like it.
         Required("docker-image"): Any(
-            # a raw Docker image path (repo/image:tag)
-            str,
+            # strings are now allowed because we want to keep track of external
+            # images in config.yml
+            #
             # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
             {"in-tree": str},
+            {"docker-image-reference": str},
         ),
         # runner features that should be enabled
         Required("chain-of-trust"): bool,
@@ -185,7 +186,9 @@ def build_docker_runner_payload(config, task, task_def):
             volumes = dockerutil.parse_volumes(name)
             if volumes:
                 raise Exception("volumes defined in Dockerfiles are not supported.")
-
+        elif "docker-image-reference" in image:
+            # Nothing to do, this will get resolved in the optimization phase
+            pass
         else:
             raise Exception("unknown docker image type")
 
@@ -193,7 +196,9 @@ def build_docker_runner_payload(config, task, task_def):
 
     if runner.get("docker-in-docker"):
         task_def["services"] = [
-            config.graph_config["jobgraph"]["external-docker-images"]["docker-in-docker"]
+            config.graph_config["jobgraph"]["external-docker-images"][
+                "docker-in-docker"
+            ]
         ]
 
     capabilities = {}
@@ -217,12 +222,6 @@ def build_docker_runner_payload(config, task, task_def):
             "public": False,  # TODO: Parametrize
             "reports": {},  # TODO: Support different types of reports
         }
-
-    if isinstance(runner.get("docker-image"), str):
-        out_of_tree_image = runner["docker-image"]
-    else:
-        out_of_tree_image = None
-        image = runner.get("docker-image", {}).get("in-tree")
 
     if "caches" in runner:
         caches = {}
@@ -256,11 +255,6 @@ def build_docker_runner_payload(config, task, task_def):
 
         if run_task:
             suffix = f"{cache_version}-{_run_task_suffix()}"
-
-            if out_of_tree_image:
-                name_hash = hashlib.sha256(out_of_tree_image).hexdigest()
-                suffix += name_hash[0:12]
-
         else:
             suffix = cache_version
 

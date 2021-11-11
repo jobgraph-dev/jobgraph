@@ -18,7 +18,6 @@ from .util.python_path import find_object
 from .util.schema import Schema, optionally_keyed_by, validate_schema
 from .util.yaml import load_yaml
 
-
 logger = logging.getLogger(__name__)
 
 DEFAULT_ROOT_DIR = os.path.join("gitlab-ci", "ci")

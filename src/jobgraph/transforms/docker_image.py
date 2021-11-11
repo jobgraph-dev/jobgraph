@@ -126,13 +126,11 @@ def fill_template(config, jobs):
             image_name
         )
 
-        dind_image = config.graph_config["jobgraph"]["external-docker-images"]["docker-in-docker"]
-
         runner = job.setdefault("runner", {})
         runner |= {
             "implementation": "kubernetes",
             "os": "linux",
-            "docker-image": dind_image,
+            "docker-image": {"docker-image-reference": "<docker-in-docker>"},
             "docker-in-docker": True,
             "max-run-time": 7200,
         }
@@ -195,7 +193,11 @@ def fill_context_hash(config, jobs):
         if not jobgraph.fast:
             context_path = os.path.join("gitlab-ci", "docker", definition)
             topsrcdir = os.path.dirname(config.graph_config.gitlab_ci_yml)
-            dind_image = config.graph_config["jobgraph"]["external-docker-images"]["docker-in-docker"]
+            # We need to use the real full location (not a reference to) here because
+            # the context hash depends on it.
+            dind_image = config.graph_config["jobgraph"]["external-docker-images"][
+                "docker-in-docker"
+            ]
             context_hash = generate_context_hash(
                 topsrcdir, context_path, args, dind_image_full_location=dind_image
             )
