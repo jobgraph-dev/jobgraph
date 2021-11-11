@@ -1,18 +1,11 @@
 ---
-trust-domain: jobgraph
-
 jobgraph:
-    docker-in-docker-image: docker:20.10.10-dind@sha256:4affae8ac27539b74e27ac4f2d6662902a328340c218336944bab7e482244cc4
     container-registry:
         type: gitlab
-
+    docker-in-docker-image: docker:20.10.10-dind@sha256:4affae8ac27539b74e27ac4f2d6662902a328340c218336944bab7e482244cc4
 runners:
     aliases:
         images:
-            implementation: kubernetes
-            os: linux
-            runner-tag: gitlab-org-docker
-        t-linux:
             implementation: kubernetes
             os: linux
             runner-tag: gitlab-org-docker
@@ -20,3 +13,8 @@ runners:
             implementation: kubernetes
             os: linux
             runner-tag: gitlab-org-docker
+        t-linux:
+            implementation: kubernetes
+            os: linux
+            runner-tag: gitlab-org-docker
+trust-domain: jobgraph
