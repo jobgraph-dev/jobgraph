@@ -74,9 +74,11 @@ def _update_dockerfiles():
 
 
 def _update_docker_in_docker_image(graph_config):
-    dind_image = graph_config["jobgraph"]["docker-in-docker-image"]
-    new_digest = fetch_image_digest_from_registry(dind_image)
-    graph_config["jobgraph"]["docker-in-docker-image"] = set_digest(
-        dind_image, new_digest
-    )
+    graph_config["jobgraph"]["external-docker-images"] = {
+        image_name: set_digest(
+            image_full_location,
+            fetch_image_digest_from_registry(image_full_location),
+        )
+        for image_name, image_full_location in graph_config["jobgraph"]["external-docker-images"].items()
+    }
     graph_config.write()

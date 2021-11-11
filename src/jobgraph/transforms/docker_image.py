@@ -11,6 +11,7 @@ from dockerfile_parse import DockerfileParser
 from voluptuous import Optional, Required
 
 import jobgraph
+from jobgraph.errors import MissingImageDigest
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.docker import generate_context_hash
 from jobgraph.util.docker_registries import does_image_full_location_have_digest
@@ -50,23 +51,12 @@ docker_image_schema = Schema(
     }
 )
 
-_RUN_UPDATE_DEPENDENCIES_MESSAGE = (
-    "Please run `jobgraph update-dependencies` to provide digest"
-)
-
 
 transforms.add_validate(docker_image_schema)
 
 
 @transforms.add
 def ensure_external_base_images_have_digests(config, jobs):
-    dind_image = config.graph_config["jobgraph"]["docker-in-docker-image"]
-    if not does_image_full_location_have_digest(dind_image):
-        raise ValueError(
-            f"{_RUN_UPDATE_DEPENDENCIES_MESSAGE} for docker-in-docker"
-            f'image on "{config.graph_config.config_yml}".'
-        )
-
     for job in jobs:
         image_name = job["name"]
         definition = job.get("definition", image_name)
@@ -77,10 +67,7 @@ def ensure_external_base_images_have_digests(config, jobs):
         if docker_file.baseimage and not does_image_full_location_have_digest(
             docker_file.baseimage
         ):
-            raise ValueError(
-                f"{_RUN_UPDATE_DEPENDENCIES_MESSAGE} for base docker"
-                f'image on "{docker_file_path}".'
-            )
+            raise MissingImageDigest("base docker image", docker_file_path)
 
         yield job
 
@@ -139,7 +126,7 @@ def fill_template(config, jobs):
             image_name
         )
 
-        dind_image = config.graph_config["jobgraph"]["docker-in-docker-image"]
+        dind_image = config.graph_config["jobgraph"]["external-docker-images"]["docker-in-docker"]
 
         runner = job.setdefault("runner", {})
         runner |= {
@@ -208,7 +195,7 @@ def fill_context_hash(config, jobs):
         if not jobgraph.fast:
             context_path = os.path.join("gitlab-ci", "docker", definition)
             topsrcdir = os.path.dirname(config.graph_config.gitlab_ci_yml)
-            dind_image = config.graph_config["jobgraph"]["docker-in-docker-image"]
+            dind_image = config.graph_config["jobgraph"]["external-docker-images"]["docker-in-docker"]
             context_hash = generate_context_hash(
                 topsrcdir, context_path, args, dind_image_full_location=dind_image
             )

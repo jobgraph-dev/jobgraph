@@ -193,7 +193,7 @@ def build_docker_runner_payload(config, task, task_def):
 
     if runner.get("docker-in-docker"):
         task_def["services"] = [
-            config.graph_config["jobgraph"]["docker-in-docker-image"]
+            config.graph_config["jobgraph"]["external-docker-images"]["docker-in-docker"]
         ]
 
     capabilities = {}

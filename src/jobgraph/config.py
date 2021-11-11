@@ -11,10 +11,13 @@ import attr
 import yaml
 from voluptuous import Extra, Optional, Required
 
+from .errors import MissingImageDigest
 from .util import path
+from .util.docker_registries import does_image_full_location_have_digest
 from .util.python_path import find_object
 from .util.schema import Schema, optionally_keyed_by, validate_schema
 from .util.yaml import load_yaml
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +40,7 @@ graph_config_schema = Schema(
                 description="Python function to call to register extensions.",
             ): str,
             Optional("decision-parameters"): str,
-            # TODO enforce hash
-            Required("docker-in-docker-image"): str,
+            Required("external-docker-images"): {str: str},
             # TODO enforce stricter dictionaries
             Required("container-registry"): dict,
         },
@@ -124,8 +126,12 @@ class GraphConfig:
             )
 
 
-def validate_graph_config(config):
+def validate_graph_config(config, config_yml):
     validate_schema(graph_config_schema, config, "Invalid graph configuration:")
+
+    for external_image in config["jobgraph"].get("external-docker-images", {}).values():
+        if not does_image_full_location_have_digest(external_image):
+            raise MissingImageDigest(external_image, config_yml)
 
 
 def load_graph_config(root_dir):
@@ -136,5 +142,5 @@ def load_graph_config(root_dir):
     logger.debug(f"loading config from `{config_yml}`")
     config = load_yaml(config_yml)
 
-    validate_graph_config(config)
+    validate_graph_config(config, config_yml)
     return GraphConfig(config=config, root_dir=root_dir)

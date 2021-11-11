@@ -2,7 +2,8 @@
 jobgraph:
     container-registry:
         type: gitlab
-    docker-in-docker-image: docker:dind@sha256:81e122bb407b639068f161ddb90dd0c0e894b1911b496d114aa83752db7a8a81
+    external-docker-images:
+        docker-in-docker: docker:dind@sha256:81e122bb407b639068f161ddb90dd0c0e894b1911b496d114aa83752db7a8a81
 runners:
     aliases:
         images:
