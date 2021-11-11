@@ -46,15 +46,6 @@ class TestDocker(unittest.TestCase):
         finally:
             shutil.rmtree(tmpdir)
 
-    def test_docker_image_explicit_registry(self):
-        files = {}
-        files[f"{docker.IMAGE_DIR}/myimage/REGISTRY"] = "cool-images"
-        files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        with MockedOpen(files):
-            self.assertEqual(
-                docker.docker_image("myimage"), "cool-images/myimage@sha256:434..."
-            )
-
     def test_docker_image_explicit_registry_by_tag(self):
         files = {}
         files[f"{docker.IMAGE_DIR}/myimage/REGISTRY"] = "myreg"
@@ -62,15 +53,6 @@ class TestDocker(unittest.TestCase):
         with MockedOpen(files):
             self.assertEqual(
                 docker.docker_image("myimage", by_tag=True), "myreg/myimage:1.2.3"
-            )
-
-    def test_docker_image_default_registry(self):
-        files = {}
-        files[f"{docker.IMAGE_DIR}/REGISTRY"] = "mozilla"
-        files[f"{docker.IMAGE_DIR}/myimage/VERSION"] = "1.2.3"
-        with MockedOpen(files):
-            self.assertEqual(
-                docker.docker_image("myimage"), "mozilla/myimage@sha256:434..."
             )
 
     def test_docker_image_default_registry_by_tag(self):
