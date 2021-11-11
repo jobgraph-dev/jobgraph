@@ -6,7 +6,7 @@
 loader: jobgraph.loader.transform:loader
 
 transforms:
-    - jobgraph.transforms.task:transforms
+    - jobgraph.transforms.job:transforms
 
 jobs-from:
     - dockerfiles.yml
