@@ -10,9 +10,10 @@ from jobgraph.util.docker_registries import fetch_image_digest_from_registry, se
 logger = logging.getLogger(__name__)
 
 
-def update_dependencies(options):
+def update_dependencies(graph_config):
     _update_jobgraph_python_requirements()
     _update_dockerfiles()
+    _update_docker_in_docker_image(graph_config)
 
 
 _PIN_COMMANDS = " && ".join(
@@ -70,3 +71,12 @@ def _update_dockerfiles():
                     f"Bumping base image in {docker_file_path} to: {new_base_image}"
                 )
                 docker_file.baseimage = new_base_image
+
+
+def _update_docker_in_docker_image(graph_config):
+    dind_image = graph_config["jobgraph"]["docker-in-docker-image"]
+    new_digest = fetch_image_digest_from_registry(dind_image)
+    graph_config["jobgraph"]["docker-in-docker-image"] = set_digest(
+        dind_image, new_digest
+    )
+    graph_config.write()

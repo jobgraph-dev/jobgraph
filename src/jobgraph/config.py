@@ -8,6 +8,7 @@ import os
 import sys
 
 import attr
+import yaml
 from voluptuous import Extra, Optional, Required
 
 from .util import path
@@ -101,6 +102,29 @@ class GraphConfig:
             os.path.dirname(os.path.dirname(self.root_dir)),
             ".gitlab-ci.yml",
         )
+
+    @property
+    def config_yml(self):
+        if path.split(self.root_dir)[-2:] != path.split(DEFAULT_ROOT_DIR):
+            raise Exception(
+                "Not guessing path to `config.yml`. "
+                "Graph config in non-standard location."
+            )
+        return os.path.join(
+            self.root_dir,
+            "config.yml",
+        )
+
+    def write(self):
+        with open(self.config_yml, "w") as f:
+            yaml.safe_dump(
+                self._config,
+                f,
+                allow_unicode=True,
+                default_flow_style=False,
+                explicit_start=True,
+                indent=4,
+            )
 
 
 def validate_graph_config(config):
