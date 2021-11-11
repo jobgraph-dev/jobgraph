@@ -272,8 +272,7 @@ def build_docker_runner_payload(config, task, task_def):
             if cache.get("skip-untrusted") and skip_untrusted:
                 continue
 
-            name = "{trust_domain}-level-{level}-{name}-{suffix}".format(
-                trust_domain=config.graph_config["trust-domain"],
+            name = "level-{level}-{name}-{suffix}".format(
                 level=config.params["level"],
                 name=cache["name"],
                 suffix=suffix,

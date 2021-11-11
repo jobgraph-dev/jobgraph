@@ -246,7 +246,7 @@ def _determine_base_rev(kwargs):
     return kwargs
 
 
-def load_parameters_file(spec, strict=True, overrides=None, trust_domain=None):
+def load_parameters_file(spec, strict=True, overrides=None):
     """
     Load parameters from a path, url, decision task-id.
 
@@ -292,7 +292,6 @@ def parameters_loader(spec, strict=True, overrides=None):
             spec,
             strict=strict,
             overrides=overrides,
-            trust_domain=graph_config["trust-domain"],
         )
         parameters.check()
         return parameters

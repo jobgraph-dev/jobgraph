@@ -17,4 +17,3 @@ runners:
             implementation: kubernetes
             os: linux
             runner-tag: gitlab-org-docker
-trust-domain: jobgraph

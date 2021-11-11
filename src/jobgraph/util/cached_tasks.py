@@ -35,7 +35,7 @@ def add_optimization(
     if "cached-task-prefix" in config.graph_config["jobgraph"]:
         cache_prefix = config.graph_config["jobgraph"]["cached-task-prefix"]
     else:
-        cache_prefix = config.graph_config["trust-domain"]
+        cache_prefix = ""
 
     subs = {
         "cache_prefix": cache_prefix,
