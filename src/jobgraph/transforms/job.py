@@ -8,6 +8,7 @@ transformations is generic to any kind of job, but abstracts away some of the
 complexities of runner implementations.
 """
 
+from copy import copy
 
 import attr
 from voluptuous import All, Any, Extra, NotIn, Optional, Required
@@ -58,6 +59,7 @@ job_description_schema = Schema(
             Required("implementation"): str,
             Extra: object,
         },
+        Optional("timeout"): str,
     }
 )
 
@@ -139,8 +141,7 @@ def payload_builder(name, schema):
         # the command to run; if not given, kubernetes will default to the
         # command in the docker image
         Optional("command"): taskref_or_string,
-        # the maximum time to run, in seconds
-        Required("max-run-time"): int,
+        Optional("timeout"): str,
         # the exit status code(s) that indicates the job should be retried
         Optional("retry-exit-status"): [int],
         # the exit status code(s) that indicates the caches used by the job
@@ -189,9 +190,6 @@ def build_docker_runner_payload(config, job, job_def):
 
     if "command" in runner:
         job_def["script"] = [runner["command"]]
-
-    if "max-run-time" in runner:
-        job_def["timeout"] = f'{runner["max-run-time"]} seconds'
 
     payload = {}
 
@@ -298,19 +296,11 @@ def build_job(config, jobs):
             level,
         )
 
-        job_def = {
-            "retry": {
-                "max": 2,
-                "when": [
-                    "unknown_failure",
-                    "stale_schedule",
-                    "runner_system_failure",
-                    "stuck_or_timeout_failure",
-                ],
-            },
-            "tags": [runner_tag],
-            "timeout": job["runner"]["max-run-time"],
-        }
+        job_def = copy(config.graph_config["job-defaults"])
+        job_def["tags"] = [runner_tag]
+        for key in ("retry", "timeout"):
+            if job.get(key):
+                job_def[key] = job[key]
 
         # add the payload and adjust anything else as required.
         payload_builders[job["runner"]["implementation"]].builder(config, job, job_def)

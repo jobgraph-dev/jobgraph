@@ -128,7 +128,6 @@ def fill_template(config, jobs):
             "os": "linux",
             "docker-image": {"docker-image-reference": "<docker-in-docker>"},
             "docker-in-docker": True,
-            "max-run-time": 7200,
         }
         runner["env"] |= {
             # We use hashes as tags to reduce potential collisions of regular tags

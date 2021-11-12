@@ -17,4 +17,4 @@ job-defaults:
     runner-alias: t-linux
     runner:
         implementation: kubernetes
-        max-run-time: 180
+    timeout: 3 minutes

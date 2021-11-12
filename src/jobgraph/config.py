@@ -43,6 +43,8 @@ graph_config_schema = Schema(
             # TODO enforce stricter dictionaries
             Required("container-registry"): dict,
         },
+        # TODO enforce stricter dictionaries
+        Required("job-defaults"): dict,
         Extra: object,
     }
 )
