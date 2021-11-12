@@ -40,6 +40,14 @@ job_description_schema = Schema(
                 ),
             ): object,
         },
+        Required("image"): Any(
+            # strings are now allowed because we want to keep track of external
+            # images in config.yml
+            #
+            # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
+            {"in-tree": str},
+            {"docker-image-reference": str},
+        ),
         Optional("run-on-pipeline-sources"): [str],
         Optional("run-on-git-branches"): [str],
         # The `always-target` attribute will cause the job to be included in the
@@ -98,14 +106,6 @@ def payload_builder(name, schema):
         # image or in-tree docker image to run the job on.  If in-tree, then a
         # dependency will be created automatically.  This is generally
         # `desktop-test`, or an image that acts an awful lot like it.
-        Required("docker-image"): Any(
-            # strings are now allowed because we want to keep track of external
-            # images in config.yml
-            #
-            # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
-            {"in-tree": str},
-            {"docker-image-reference": str},
-        ),
         # runner features that should be enabled
         Required("chain-of-trust"): bool,
         Required("docker-in-docker"): bool,  # (aka 'dind')
@@ -155,7 +155,7 @@ def build_docker_runner_payload(config, job, job_def):
     runner = job["runner"]
     level = int(config.params["level"])
 
-    image = runner["docker-image"]
+    image = job["image"]
     if isinstance(image, dict):
         if "in-tree" in image:
             name = image["in-tree"]
@@ -177,11 +177,7 @@ def build_docker_runner_payload(config, job, job_def):
     features = {}
 
     if runner.get("docker-in-docker"):
-        job_def["services"] = [
-            config.graph_config["jobgraph"]["external-docker-images"][
-                "docker-in-docker"
-            ]
-        ]
+        job_def["services"] = [{"docker-image-reference": "<docker-in-docker>"}]
 
     capabilities = {}
 

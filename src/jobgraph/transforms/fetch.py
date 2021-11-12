@@ -117,6 +117,7 @@ def make_task(config, jobs):
             "name": name,
             "description": job["description"],
             "label": f"fetch-{name}",
+            "image": job.get("docker-image", {"in-tree": "fetch"}),
             "runnner": {
                 "implementation": "kubernetes",
                 "command": job["command"],
@@ -124,7 +125,6 @@ def make_task(config, jobs):
             "runner-alias": "images",
             "worker": {
                 "chain-of-trust": True,
-                "docker-image": job.get("docker-image", {"in-tree": "fetch"}),
                 "env": env,
                 "max-run-time": 900,
                 "artifacts": [

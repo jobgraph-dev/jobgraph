@@ -126,7 +126,6 @@ def fill_template(config, jobs):
         runner |= {
             "implementation": "kubernetes",
             "os": "linux",
-            "docker-image": {"docker-image-reference": "<docker-in-docker>"},
             "docker-in-docker": True,
         }
         runner["env"] |= {
@@ -143,6 +142,7 @@ def fill_template(config, jobs):
                 "artifact_prefix": "public",
                 "image_name": image_name,
             },
+            "image": {"docker-image-reference": "<docker-in-docker>"},
             "name": image_name,
             "optimization": job.get("optimization", None),
             "parent": job.get("parent", None),
