@@ -113,7 +113,6 @@ def payload_builder(name, schema):
         # `desktop-test`, or an image that acts an awful lot like it.
         # runner features that should be enabled
         Required("chain-of-trust"): bool,
-        Required("docker-in-docker"): bool,  # (aka 'dind')
         # caches to set up for the job
         Optional("caches"): [
             {
@@ -175,10 +174,6 @@ def build_docker_runner_payload(config, job, job_def):
             raise Exception("unknown docker image type")
 
     features = {}
-
-    if runner.get("docker-in-docker"):
-        job_def["services"] = [{"docker-image-reference": "<docker-in-docker>"}]
-
     capabilities = {}
 
     job_def["image"] = image
@@ -239,7 +234,6 @@ def set_defaults(config, jobs):
         runner = job["runner"]
         if runner["implementation"] in ("kubernetes",):
             runner.setdefault("chain-of-trust", False)
-            runner.setdefault("docker-in-docker", False)
             if "caches" in runner:
                 for c in runner["caches"]:
                     c.setdefault("skip-untrusted", False)

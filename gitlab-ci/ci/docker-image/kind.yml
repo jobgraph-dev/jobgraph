@@ -6,6 +6,7 @@
 loader: jobgraph.loader.transform:loader
 
 transforms:
+    - jobgraph.transforms.docker_in_docker:transforms
     - jobgraph.transforms.docker_image:transforms
     - jobgraph.transforms.job:transforms
 

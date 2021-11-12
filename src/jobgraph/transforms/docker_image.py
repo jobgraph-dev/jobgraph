@@ -17,7 +17,7 @@ from jobgraph.util.docker import generate_context_hash
 from jobgraph.util.docker_registries import does_image_full_location_have_digest
 from jobgraph.util.docker_registries.gitlab import get_image_full_location
 from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
-from jobgraph.util.schema import Schema
+from jobgraph.util.schema import Schema, taskref_or_string
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,8 @@ docker_image_schema = Schema(
         Optional("definition"): str,
         # List of package jobs this docker image depends on.
         Optional("packages"): [str],
+        Optional("services"): [taskref_or_string],
+        Optional("variables"): dict,
         Optional(
             "cache",
             description="Whether this image should be cached based on inputs.",
@@ -78,17 +80,6 @@ def add_registry_specific_config(config, jobs):
         registry_type = job.pop("container-registry-type")
         # TODO Use decorators instead
         if registry_type == "gitlab":
-            variables = job.setdefault("variables", {})
-
-            # See
-            # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
-            variables |= {
-                "DOCKER_HOST": "tcp://docker:2376",
-                "DOCKER_TLS_CERTDIR": "/certs",
-                "DOCKER_TLS_VERIFY": "1",
-                "DOCKER_CERT_PATH": "$DOCKER_TLS_CERTDIR/client",
-            }
-
             # TODO Move the login in the `before_script` section
             job["script"] = [
                 'docker login --username "$CI_REGISTRY_USER" --password '
@@ -128,7 +119,6 @@ def fill_template(config, jobs):
         runner |= {
             "implementation": "kubernetes",
             "os": "linux",
-            "docker-in-docker": True,
         }
         variables = job.setdefault("variables", {})
         variables |= {
