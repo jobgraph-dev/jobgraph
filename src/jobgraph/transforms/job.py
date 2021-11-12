@@ -9,30 +9,15 @@ complexities of runner implementations.
 """
 
 
-import os
-
 import attr
 from voluptuous import All, Any, Extra, NotIn, Optional, Required
 
 from jobgraph import MAX_DEPENDENCIES
 from jobgraph.transforms.base import TransformSequence
-from jobgraph.util.hash import hash_path
-from jobgraph.util.memoize import memoize
 from jobgraph.util.schema import Schema, taskref_or_string, validate_schema
 
 from ..util import docker as dockerutil
 from ..util.runners import get_runner_tag
-
-RUN_TASK = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "run-task", "run-task"
-)
-
-
-@memoize
-def _run_task_suffix():
-    """String to append to cache names under control of run-task."""
-    return hash_path(RUN_TASK)[0:20]
-
 
 # A job description is a general description of a JobGrab job
 job_description_schema = Schema(
@@ -209,7 +194,6 @@ def build_docker_runner_payload(config, job, job_def):
         job_def["timeout"] = f'{runner["max-run-time"]} seconds'
 
     payload = {}
-    run_task = payload.get("command", [""])[0].endswith("run-task")
 
     if "artifacts" in runner:
         job_def["artifacts"] = {
@@ -221,38 +205,8 @@ def build_docker_runner_payload(config, job, job_def):
 
     if "caches" in runner:
         caches = {}
-
-        # run-task knows how to validate caches.
-        #
-        # To help ensure new run-task features and bug fixes don't interfere
-        # with existing caches, we seed the hash of run-task into cache names.
-        # So, any time run-task changes, we should get a fresh set of caches.
-        # This means run-task can make changes to cache interaction at any time
-        # without regards for backwards or future compatibility.
-        #
-        # But this mechanism only works for in-tree Docker images that are built
-        # with the current run-task! For out-of-tree Docker images, we have no
-        # way of knowing their content of run-task. So, in addition to varying
-        # cache names by the contents of run-task, we also take the Docker image
-        # name into consideration. This means that different Docker images will
-        # never share the same cache. This is a bit unfortunate. But it is the
-        # safest thing to do. Fortunately, most images are defined in-tree.
-        #
-        # For out-of-tree Docker images, we don't strictly need to incorporate
-        # the run-task content into the cache name. However, doing so preserves
-        # the mechanism whereby changing run-task results in new caches
-        # everywhere.
-
-        # As an additional mechanism to force the use of different caches, the
-        # string literal in the variable below can be changed. This is
-        # preferred to changing run-task because it doesn't require images
-        # to be rebuilt.
         cache_version = "v3"
-
-        if run_task:
-            suffix = f"{cache_version}-{_run_task_suffix()}"
-        else:
-            suffix = cache_version
+        suffix = cache_version
 
         skip_untrusted = config.params.is_try() or level == 1
 
@@ -268,10 +222,6 @@ def build_docker_runner_payload(config, job, job_def):
                 suffix=suffix,
             )
             caches[name] = cache["mount-point"]
-
-        # Assertion: only run-task is interested in this.
-        if run_task:
-            payload["env"]["TASKCLUSTER_CACHES"] = ";".join(sorted(caches.values()))
 
         payload["cache"] = caches
 

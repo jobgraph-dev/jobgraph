@@ -237,20 +237,6 @@ def create_context_tar(topsrcdir, context_dir, out_path, args=None):
         )
 
 
-RUN_TASK_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), "run-task")
-RUN_TASK_FILES = {
-    f"run-task/{path}": os.path.join(RUN_TASK_ROOT, path)
-    for path in [
-        "run-task",
-        "fetch-content",
-    ]
-}
-RUN_TASK_SNIPPET = [
-    "COPY run-task/run-task /usr/local/bin/run-task\n",
-    "COPY run-task/fetch-content /usr/local/bin/fetch-content\n",
-]
-
-
 def stream_context_tar(
     topsrcdir,
     context_dir,

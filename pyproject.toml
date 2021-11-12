@@ -1,9 +1,6 @@
 [tool.black]
 line-length = 88
 target-version = ["py39"]
-extend-exclude = """(\
-  src/jobgraph/run-task)\
-  """
 
 [tool.isort]
 multi_line_output = 3

@@ -117,9 +117,8 @@ def make_task(config, jobs):
             "name": name,
             "description": job["description"],
             "label": "fetch-%s" % name,
-            "run": {
-                "using": "run-task",
-                "checkout": False,
+            "runnner": {
+                "implementation": "kubernetes",
                 "command": job["command"],
             },
             "runner-alias": "images",

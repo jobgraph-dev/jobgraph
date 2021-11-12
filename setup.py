@@ -25,10 +25,4 @@ setup(
         f"Programming Language :: Python :: {python_version}",
     ],
     entry_points={"console_scripts": ["jobgraph = jobgraph.main:main"]},
-    package_data={
-        "jobgraph": [
-            "run-task/run-task",
-            "run-task/fetch-content",
-        ],
-    },
 )
