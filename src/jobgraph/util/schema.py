@@ -129,7 +129,7 @@ WHITELISTED_SCHEMA_IDENTIFIERS = [
 
 
 def check_schema(schema):
-    identifier_re = re.compile("^[a-z][a-z0-9-]*$")
+    identifier_re = re.compile("^[a-z][a-z0-9-_]*$")
 
     def whitelisted(path):
         return any(f(path) for f in WHITELISTED_SCHEMA_IDENTIFIERS)
@@ -143,7 +143,7 @@ def check_schema(schema):
             elif isinstance(k, str):
                 if not identifier_re.match(k) and not whitelisted(path):
                     raise RuntimeError(
-                        "YAML schemas should use dashed lower-case identifiers, "
+                        "YAML schemas should use dashed/underscored lower-case identifiers, "
                         f"not {k!r} @ {path}"
                     )
             elif isinstance(k, (voluptuous.Optional, voluptuous.Required)):

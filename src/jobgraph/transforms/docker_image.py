@@ -80,8 +80,7 @@ def add_registry_specific_config(config, jobs):
         registry_type = job.pop("container-registry-type")
         # TODO Use decorators instead
         if registry_type == "gitlab":
-            # TODO Move the login in the `before_script` section
-            job["script"] = [
+            job["before_script"] = [
                 'docker login --username "$CI_REGISTRY_USER" --password '
                 '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
             ]
@@ -135,6 +134,7 @@ def fill_template(config, jobs):
             "optimization": job.get("optimization", None),
             "parent": job.get("parent", None),
             "runner-alias": "images",
+            "before_script": job.get("before_script", []),
             "script": job.get("script", []),
             "variables": variables,
         }

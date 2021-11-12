@@ -61,6 +61,10 @@ job_description_schema = Schema(
         # the runner-alias for the job. Will be substituted into an actual Gitlab
         # CI tag.
         "runner-alias": str,
+        Optional("before_script"): Any(
+            taskref_or_string,
+            [taskref_or_string],
+        ),
         Required("script"): Any(
             taskref_or_string,
             [taskref_or_string],
@@ -149,7 +153,7 @@ def build_job(config, jobs):
         job_def = copy(config.graph_config["job-defaults"])
         job_def["tags"] = [runner_tag]
         job_def["script"] = job["script"]
-        for key in ("image", "retry", "timeout", "variables"):
+        for key in ("before_script", "image", "retry", "timeout", "variables"):
             if job.get(key):
                 job_def[key] = job[key]
 
