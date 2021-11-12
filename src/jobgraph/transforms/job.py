@@ -72,6 +72,7 @@ job_description_schema = Schema(
             [taskref_or_string],
         ),
         Optional("timeout"): str,
+        Optional("variables"): dict,
     }
 )
 
@@ -140,8 +141,6 @@ def payload_builder(name, schema):
                 "name": str,
             }
         ],
-        # environment variables
-        Required("env"): {str: taskref_or_string},
         Optional("timeout"): str,
         # the exit status code(s) that indicates the job should be retried
         Optional("retry-exit-status"): [int],
@@ -183,9 +182,6 @@ def build_docker_runner_payload(config, job, job_def):
     capabilities = {}
 
     job_def["image"] = image
-    if runner.get("env"):
-        job_def["variables"] = runner["env"]
-
     payload = {}
 
     if "artifacts" in runner:
@@ -244,7 +240,6 @@ def set_defaults(config, jobs):
         if runner["implementation"] in ("kubernetes",):
             runner.setdefault("chain-of-trust", False)
             runner.setdefault("docker-in-docker", False)
-            runner.setdefault("env", {})
             if "caches" in runner:
                 for c in runner["caches"]:
                     c.setdefault("skip-untrusted", False)
@@ -294,7 +289,7 @@ def build_job(config, jobs):
         job_def = copy(config.graph_config["job-defaults"])
         job_def["tags"] = [runner_tag]
         job_def["script"] = job["script"]
-        for key in ("retry", "timeout"):
+        for key in ("retry", "timeout", "variables"):
             if job.get(key):
                 job_def[key] = job[key]
 

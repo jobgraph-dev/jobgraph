@@ -78,15 +78,16 @@ def add_registry_specific_config(config, jobs):
         registry_type = job.pop("container-registry-type")
         # TODO Use decorators instead
         if registry_type == "gitlab":
-            runner = job.setdefault("runner", {})
-            env = runner.setdefault("env", {})
+            variables = job.setdefault("variables", {})
 
             # See
             # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#docker-in-docker-with-tls-enabled-in-kubernetes
-            env["DOCKER_HOST"] = "tcp://docker:2376"
-            env["DOCKER_TLS_CERTDIR"] = "/certs"
-            env["DOCKER_TLS_VERIFY"] = "1"
-            env["DOCKER_CERT_PATH"] = "$DOCKER_TLS_CERTDIR/client"
+            variables |= {
+                "DOCKER_HOST": "tcp://docker:2376",
+                "DOCKER_TLS_CERTDIR": "/certs",
+                "DOCKER_TLS_VERIFY": "1",
+                "DOCKER_CERT_PATH": "$DOCKER_TLS_CERTDIR/client",
+            }
 
             # TODO Move the login in the `before_script` section
             job["script"] = [
@@ -129,7 +130,8 @@ def fill_template(config, jobs):
             "os": "linux",
             "docker-in-docker": True,
         }
-        runner["env"] |= {
+        variables = job.setdefault("variables", {})
+        variables |= {
             # We use hashes as tags to reduce potential collisions of regular tags
             "DOCKER_IMAGE_NAME": image_name,
         }
@@ -150,6 +152,7 @@ def fill_template(config, jobs):
             "runner-alias": "images",
             "runner": runner,
             "script": job.get("script", []),
+            "variables": variables,
         }
 
         if packages:
@@ -169,15 +172,13 @@ def fill_context_hash(config, jobs):
         definition = job.pop("definition", image_name)
         parent = job.pop("parent", None)
         args = job.setdefault("args", {})
-        runner = job.setdefault("runner", {})
+        variables = job.setdefault("variables", {})
 
         if parent:
             parent_label = f"build-docker-image-{parent}"
             deps = job.setdefault("dependencies", {})
             deps["parent"] = parent_label
-            runner["env"]["DOCKER_IMAGE_PARENT"] = {
-                "docker-image-reference": "<parent>"
-            }
+            variables["DOCKER_IMAGE_PARENT"] = {"docker-image-reference": "<parent>"}
             # If 2 parent jobs have the same name, then JobGraph will complain later
             parent_job = [j for j in jobs_list if j["label"] == parent_label][0]
 
@@ -222,7 +223,7 @@ def fill_context_hash(config, jobs):
             "context_hash": context_hash,
             "docker_image_full_location": docker_image_full_location,
         }
-        runner["env"] |= {
+        variables |= {
             # We use hashes as tags to reduce potential collisions of regular tags
             "DOCKER_IMAGE_TAG": context_hash,
             # We shouldn't resolve digest if we build and push image in this job
