@@ -88,7 +88,7 @@ def build_docker_runner_payload(config, jobs):
                 docker_image_job = "build-docker-image-" + image["in-tree"]
                 job.setdefault("dependencies", {})["docker-image"] = docker_image_job
 
-                image = {"docker-image-reference": "<docker-image>"}
+                job["image"] = {"docker-image-reference": "<docker-image>"}
 
                 # Find VOLUME in Dockerfile.
                 volumes = dockerutil.parse_volumes(name)
@@ -149,7 +149,7 @@ def build_job(config, jobs):
         job_def = copy(config.graph_config["job-defaults"])
         job_def["tags"] = [runner_tag]
         job_def["script"] = job["script"]
-        for key in ("retry", "timeout", "variables"):
+        for key in ("image", "retry", "timeout", "variables"):
             if job.get(key):
                 job_def[key] = job[key]
 
