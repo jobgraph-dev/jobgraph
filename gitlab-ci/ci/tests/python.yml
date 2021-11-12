@@ -17,6 +17,11 @@ flake8:
     runner:
         command: flake8
 
+flynt:
+    description: "Run `flynt` to ensure f-strings are remain the only way to interpolate strings"
+    runner:
+        command: flynt --fail-on-change --dry-run .
+
 isort:
     description: "Run `isort` to ensure python import statements are well ordered"
     runner:
