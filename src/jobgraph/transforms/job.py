@@ -186,7 +186,8 @@ def build_docker_runner_payload(config, job, job_def):
     capabilities = {}
 
     job_def["image"] = image
-    job_def["variables"] = runner["env"]
+    if runner.get("env"):
+        job_def["variables"] = runner["env"]
 
     if "command" in runner:
         job_def["script"] = [runner["command"]]
