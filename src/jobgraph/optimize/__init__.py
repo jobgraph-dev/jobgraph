@@ -75,12 +75,11 @@ def _get_optimizations(target_job_graph, strategies):
 
 def _log_optimization(verb, opt_counts):
     if opt_counts:
-        logger.info(
-            "{} {} during optimization.".format(
-                verb.title(),
-                ", ".join(f"{c} tasks by {b}" for b, c in sorted(opt_counts.items())),
-            )
+        optimization_stats = ", ".join(
+            f"{count} tasks by {optimization_rule}"
+            for optimization_rule, count in sorted(opt_counts.items())
         )
+        logger.info(f"{verb.title()} {optimization_stats} during optimization.")
     else:
         logger.info(f"No tasks {verb} during optimization")
 

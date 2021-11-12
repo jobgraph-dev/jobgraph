@@ -216,11 +216,7 @@ def build_docker_runner_payload(config, job, job_def):
             if cache.get("skip-untrusted") and skip_untrusted:
                 continue
 
-            name = "level-{level}-{name}-{suffix}".format(
-                level=config.params["level"],
-                name=cache["name"],
-                suffix=suffix,
-            )
+            name = f"level-{config.params['level']}-{cache['name']}-{suffix}"
             caches[name] = cache["mount-point"]
 
         payload["cache"] = caches
@@ -269,7 +265,7 @@ def job_name_from_label(config, jobs):
         if "label" not in job:
             if "name" not in job:
                 raise Exception("job has neither a name nor a label")
-            job["label"] = "{}-{}".format(config.kind, job["name"])
+            job["label"] = f"{config.kind}-{job['name']}"
         if job.get("name"):
             del job["name"]
         yield job
@@ -281,12 +277,12 @@ def validate(config, jobs):
         validate_schema(
             job_description_schema,
             job,
-            "In job {!r}:".format(job.get("label", "?no-label?")),
+            f"In job {job.get('label', '?no-label?')!r}:",
         )
         validate_schema(
             payload_builders[job["runner"]["implementation"]].schema,
             job["runner"],
-            "In job.run {!r}:".format(job.get("label", "?no-label?")),
+            f"In job.run {job.get('label', '?no-label?')!r}:",
         )
         yield job
 
@@ -342,11 +338,7 @@ def check_job_dependencies(config, jobs):
     for job in jobs:
         if len(job["dependencies"]) > MAX_DEPENDENCIES:
             raise Exception(
-                "job {}/{} has too many dependencies ({} > {})".format(
-                    config.kind,
-                    job["label"],
-                    len(job["dependencies"]),
-                    MAX_DEPENDENCIES,
-                )
+                f"job {config.kind}/{job['label']} has too many dependencies "
+                f"({len(job['dependencies'])} > {MAX_DEPENDENCIES})"
             )
         yield job

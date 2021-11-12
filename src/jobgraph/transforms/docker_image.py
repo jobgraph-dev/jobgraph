@@ -117,14 +117,10 @@ def fill_template(config, jobs):
         for p in packages:
             if p not in available_packages:
                 raise Exception(
-                    "Missing package job for {}-{}: {}".format(
-                        config.kind, image_name, p
-                    )
+                    f"Missing package job for {config.kind}-{image_name}: {p}"
                 )
 
-        description = "Build the docker image {} for use by dependent jobs".format(
-            image_name
-        )
+        description = f"Build the docker image {image_name} for use by dependent jobs"
 
         runner = job.setdefault("runner", {})
         runner |= {

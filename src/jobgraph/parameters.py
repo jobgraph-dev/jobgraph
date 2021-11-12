@@ -186,8 +186,7 @@ class Parameters(ReadOnlyDict):
             )
         elif len(repo_providers) == 0:
             raise ParameterMismatch(
-                "Don't know how to determine file URL for non-github or non-gitlab"
-                "repo: {}".format(repo)
+                f"Don't know how to determine file URL for non-github or non-gitlabrepo: {repo}"
             )
 
         repo_provider = repo_providers[0]

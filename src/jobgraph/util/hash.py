@@ -42,12 +42,9 @@ def hash_paths(base_path, patterns):
         if matches:
             found.update(matches)
         else:
-            raise Exception("%s did not match anything" % pattern)
+            raise Exception(f"{pattern} did not match anything")
     for path in sorted(found):
-        h.update(
-            "{} {}\n".format(
-                hash_path(mozpath.abspath(mozpath.join(base_path, path))),
-                mozpath.normsep(path),
-            ).encode("utf-8")
-        )
+        hash = hash_path(mozpath.abspath(mozpath.join(base_path, path)))
+        path = mozpath.normsep(path)
+        h.update(f"{hash} {path}\n".encode())
     return h.hexdigest()

@@ -38,7 +38,7 @@ class TestTimestamps(unittest.TestCase):
 
 class TestTaskRefs(unittest.TestCase):
     def do(self, input, output):
-        taskid_for_edge_name = {"edge%d" % n: "tid%d" % n for n in range(1, 4)}
+        taskid_for_edge_name = {f"edge{n}": f"tid{n}" for n in range(1, 4)}
         self.assertEqual(
             resolve_task_references(
                 "subject",

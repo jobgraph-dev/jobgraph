@@ -116,7 +116,7 @@ def make_task(config, jobs):
             "attributes": attributes,
             "name": name,
             "description": job["description"],
-            "label": "fetch-%s" % name,
+            "label": f"fetch-{name}",
             "runnner": {
                 "implementation": "kubernetes",
                 "command": job["command"],
@@ -201,11 +201,11 @@ def create_fetch_url_task(config, name, fetch):
         "--sha256",
         fetch["sha256"],
         "--size",
-        "%d" % fetch["size"],
+        f'{fetch["size"]}',
     ]
 
     if fetch.get("strip-components"):
-        args.extend(["--strip-components", "%d" % fetch["strip-components"]])
+        args.extend(["--strip-components", f'{fetch["strip-components"]}'])
 
     if fetch.get("add-prefix"):
         args.extend(["--add-prefix", fetch["add-prefix"]])
@@ -234,7 +234,7 @@ def create_fetch_url_task(config, name, fetch):
     command.extend(
         [
             fetch["url"],
-            "/builds/worker/artifacts/%s" % artifact_name,
+            f"/builds/worker/artifacts/{artifact_name}",
         ]
     )
 
@@ -276,7 +276,7 @@ def create_git_fetch_task(config, name, fetch):
         path_prefix,
         fetch["repo"],
         fetch["revision"],
-        "/builds/worker/artifacts/%s" % artifact_name,
+        f"/builds/worker/artifacts/{artifact_name}",
     ]
 
     return {

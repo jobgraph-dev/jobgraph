@@ -167,7 +167,7 @@ def generate_jobgraph(options, parameters, logdir):
             return None
         return os.path.join(
             logdir,
-            "{}_{}.log".format(options["graph_attr"], Parameters.format_spec(spec)),
+            f"{options['graph_attr']}_{Parameters.format_spec(spec)}.log",
         )
 
     # Don't bother using futures if there's only one parameter. This can make

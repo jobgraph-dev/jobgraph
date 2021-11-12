@@ -38,9 +38,7 @@ def get_root_url():
         logger.debug("Using default TASKCLUSTER_ROOT_URL (Firefox CI production)")
         return PRODUCTION_TASKCLUSTER_ROOT_URL
     logger.debug(
-        "Running in Taskcluster instance {}".format(
-            os.environ["TASKCLUSTER_ROOT_URL"],
-        )
+        f"Running in Taskcluster instance {os.environ['TASKCLUSTER_ROOT_URL']}"
     )
     return os.environ["TASKCLUSTER_ROOT_URL"]
 

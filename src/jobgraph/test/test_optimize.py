@@ -123,7 +123,7 @@ class TestOptimize(unittest.TestCase):
         exp_subgraph,
     ):
         self.maxDiff = None
-        optimize.slugid = partial(next, ("tid%d" % i for i in range(1, 10)))
+        optimize.slugid = partial(next, (f"tid{i}" for i in range(1, 10)))
         try:
             got_subgraph = optimize.get_subgraph(
                 graph,

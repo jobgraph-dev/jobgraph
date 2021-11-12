@@ -85,16 +85,12 @@ def resolve_task_references(label, task_def, task_id, dependencies, docker_image
                     task_id = dependencies[dependency]
                 except KeyError:
                     raise KeyError(
-                        "task '{}' has no dependency named '{}'".format(
-                            label, dependency
-                        )
+                        f"task '{label}' has no dependency named '{dependency}'"
                     )
 
             assert artifact_name.startswith(
                 "public/"
-            ), "artifact-reference only supports public artifacts, not `{}`".format(
-                artifact_name
-            )
+            ), f"artifact-reference only supports public artifacts, not `{artifact_name}`"
             return get_artifact_url(task_id, artifact_name)
 
         return ARTIFACT_REFERENCE_PATTERN.sub(repl, val)

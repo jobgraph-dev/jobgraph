@@ -263,11 +263,7 @@ class JobGraphGenerator:
         # in post-order
         if parameters.get("target-kind"):
             target_kind = parameters["target-kind"]
-            logger.info(
-                "Limiting kinds to {target_kind} and dependencies".format(
-                    target_kind=target_kind
-                )
-            )
+            logger.info(f"Limiting kinds to {target_kind} and dependencies")
         kinds = {
             kind.name: kind
             for kind in self._load_kinds(graph_config, parameters.get("target-kind"))
@@ -312,8 +308,8 @@ class JobGraphGenerator:
 
         full_job_graph = JobGraph(all_jobs, Graph(full_job_set.graph.nodes, edges))
         logger.info(
-            "Full job graph contains %d jobs and %d dependencies"
-            % (len(full_job_set.graph.nodes), len(edges))
+            f"Full job graph contains {len(full_job_set.graph.nodes)} "
+            f"jobs and {len(edges)} dependencies"
         )
         yield verifications("full_job_graph", full_job_graph, graph_config)
 
@@ -325,9 +321,10 @@ class JobGraphGenerator:
             target_job_set = JobGraph(
                 {l: all_jobs[l] for l in target_jobs}, Graph(target_jobs, set())
             )
+            number_pruned_jobs = old_len - len(target_jobs)
             logger.info(
-                "Filter %s pruned %d jobs (%d remain)"
-                % (fltr.__name__, old_len - len(target_jobs), len(target_jobs))
+                f"Filter {fltr.__name__} pruned {number_pruned_jobs} "
+                f"jobs ({len(target_jobs)} remain)"
             )
 
         yield verifications("target_job_set", target_job_set, graph_config)
@@ -345,9 +342,11 @@ class JobGraphGenerator:
             for job in full_job_graph.jobs.values()
             if job.attributes.get("always_target")
         }
+        number_of_added_jobs = len(always_target_jobs) - len(
+            always_target_jobs & target_jobs
+        )
         logger.info(
-            "Adding %d jobs with `always_target` attribute"
-            % (len(always_target_jobs) - len(always_target_jobs & target_jobs))
+            f"Adding {number_of_added_jobs} jobs with `always_target` attribute"
         )
         target_graph = full_job_graph.graph.transitive_closure(
             target_jobs | docker_image_jobs | always_target_jobs

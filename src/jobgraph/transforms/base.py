@@ -114,15 +114,11 @@ class ValidateSchema:
     def __call__(self, config, jobs):
         for job in jobs:
             if "name" in job:
-                error = "In {kind} kind job {name!r}:".format(
-                    kind=config.kind, name=job["name"]
-                )
+                error = f"In {config.kind} kind job {job['name']!r}:"
             elif "label" in job:
-                error = "In job {label!r}:".format(label=job["label"])
+                error = f"In job {job['label']!r}:"
             elif "primary-dependency" in job:
-                error = "In {kind} kind job for {dependency!r}:".format(
-                    kind=config.kind, dependency=job["primary-dependency"].label
-                )
+                error = f"In {config.kind} kind job for {job['primary-dependency'].label!r}:"
             else:
                 error = "In unknown job:"
             validate_schema(self.schema, job, error)

@@ -87,9 +87,7 @@ def post_to_docker(tar, api_path, **kwargs):
                     # Clear line and move the cursor to the beginning of it.
                     sys.stderr.write("\033[2K\r")
                     sys.stderr.write(
-                        "{}: {} {}\n".format(
-                            data["id"], data["status"], data.get("progress", "")
-                        )
+                        f"{data['id']}: {data['status']} {data.get('progress', '')}\n"
                     )
                     if n > 1:
                         # Move the cursor down n - 1 lines, which, considering
@@ -100,17 +98,17 @@ def post_to_docker(tar, api_path, **kwargs):
                     status = status_line.get(data["id"])
                     # Only print status changes.
                     if status != data["status"]:
-                        sys.stderr.write("{}: {}\n".format(data["id"], data["status"]))
+                        sys.stderr.write(f"{data['id']}: {data['status']}\n")
                         status_line[data["id"]] = data["status"]
             else:
                 status_line = {}
-                sys.stderr.write("{}\n".format(data["status"]))
+                sys.stderr.write(f"{data['status']}\n")
         elif "stream" in data:
             sys.stderr.write(data["stream"])
         elif "aux" in data:
             sys.stderr.write(repr(data["aux"]))
         elif "error" in data:
-            sys.stderr.write("{}\n".format(data["error"]))
+            sys.stderr.write(f"{data['error']}\n")
             # Sadly, docker doesn't give more than a plain string for errors,
             # so the best we can do to propagate the error code from the command
             # that failed is to parse the error message...
