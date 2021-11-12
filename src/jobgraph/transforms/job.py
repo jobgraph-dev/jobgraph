@@ -34,19 +34,16 @@ def _run_task_suffix():
     return hash_path(RUN_TASK)[0:20]
 
 
-# A task description is a general description of a TaskCluster task
-task_description_schema = Schema(
+# A job description is a general description of a JobGrab job
+job_description_schema = Schema(
     {
-        # the label for this task
         Required("label"): str,
-        # description of the task (for metadata)
         Required("description"): str,
-        # attributes for this task
         Optional("attributes"): {str: object},
-        # relative path (from config.path) to the file task was defined in
+        # relative path (from config.path) to the file this job was defined in
         Optional("job-from"): str,
-        # dependencies of this task, keyed by name; these are passed through
-        # verbatim and subject to the interpretation of the Task's get_dependencies
+        # dependencies of this job, keyed by name; these are passed through
+        # verbatim and subject to the interpretation of the Job's get_dependencies
         # method.
         Optional("dependencies"): {
             All(
@@ -59,20 +56,19 @@ task_description_schema = Schema(
         },
         Optional("run-on-pipeline-sources"): [str],
         Optional("run-on-git-branches"): [str],
-        # The `always-target` attribute will cause the task to be included in the
-        # target_job_graph regardless of filtering. Tasks included in this manner
+        # The `always-target` attribute will cause the job to be included in the
+        # target_job_graph regardless of filtering. Jobs included in this manner
         # will be candidates for optimization even when `optimize_target_jobs` is
-        # False, unless the task was also explicitly chosen by the target_jobs
+        # False, unless the job was also explicitly chosen by the target_jobs
         # method.
         Required("always-target"): bool,
-        # Optimization to perform on this task during the optimization phase.
+        # Optimization to perform on this job during the optimization phase.
         # Optimizations are defined in gitlab-ci/jobgraph/optimize.py.
         Required("optimization"): Any(dict, None),
-        # the runner-alias for the task.  The following parameters will
-        # be substituted in this string:
-        #  {level} -- the scm level of this push
+        # the runner-alias for the job. Will be substituted into an actual Gitlab
+        # CI tag.
         "runner-alias": str,
-        # information specific to the runner implementation that will run this task
+        # information specific to the runner implementation that will run this job
         Optional("runner"): {
             Required("implementation"): str,
             Extra: object,
@@ -111,8 +107,8 @@ def payload_builder(name, schema):
     "kubernetes",
     schema={
         Optional("os"): "linux",
-        # For tasks that will run in kubernetes, this is the name of the docker
-        # image or in-tree docker image to run the task in.  If in-tree, then a
+        # For jobs that will run in kubernetes, this is the name of the docker
+        # image or in-tree docker image to run the job on.  If in-tree, then a
         # dependency will be created automatically.  This is generally
         # `desktop-test`, or an image that acts an awful lot like it.
         Required("docker-image"): Any(
@@ -126,27 +122,27 @@ def payload_builder(name, schema):
         # runner features that should be enabled
         Required("chain-of-trust"): bool,
         Required("docker-in-docker"): bool,  # (aka 'dind')
-        # caches to set up for the task
+        # caches to set up for the job
         Optional("caches"): [
             {
                 # only one type is supported by any of the runners right now
                 "type": "persistent",
-                # name of the cache, allowing re-use by subsequent tasks naming the
+                # name of the cache, allowing re-use by subsequent jobs naming the
                 # same cache
                 "name": str,
-                # location in the task image where the cache will be mounted
+                # location in the job image where the cache will be mounted
                 "mount-point": str,
                 # Whether the cache is not used in untrusted environments
                 # (like the Try repo).
                 Optional("skip-untrusted"): bool,
             }
         ],
-        # artifacts to extract from the task image after completion
+        # artifacts to extract from the job image after completion
         Optional("artifacts"): [
             {
                 # type of artifact -- simple file, or recursive directory
                 "type": Any("file", "directory"),
-                # task image path from which to read artifact
+                # job image path from which to read artifact
                 "path": str,
                 # name of the produced artifact (root of the names for
                 # type=directory)
@@ -160,25 +156,25 @@ def payload_builder(name, schema):
         Optional("command"): taskref_or_string,
         # the maximum time to run, in seconds
         Required("max-run-time"): int,
-        # the exit status code(s) that indicates the task should be retried
+        # the exit status code(s) that indicates the job should be retried
         Optional("retry-exit-status"): [int],
-        # the exit status code(s) that indicates the caches used by the task
+        # the exit status code(s) that indicates the caches used by the job
         # should be purged
         Optional("purge-caches-exit-status"): [int],
         # Wether any artifacts are assigned to this runner
         Optional("skip-artifacts"): bool,
     },
 )
-def build_docker_runner_payload(config, task, task_def):
-    runner = task["runner"]
+def build_docker_runner_payload(config, job, job_def):
+    runner = job["runner"]
     level = int(config.params["level"])
 
     image = runner["docker-image"]
     if isinstance(image, dict):
         if "in-tree" in image:
             name = image["in-tree"]
-            docker_image_task = "build-docker-image-" + image["in-tree"]
-            task.setdefault("dependencies", {})["docker-image"] = docker_image_task
+            docker_image_job = "build-docker-image-" + image["in-tree"]
+            job.setdefault("dependencies", {})["docker-image"] = docker_image_job
 
             image = {"docker-image-reference": "<docker-image>"}
 
@@ -195,7 +191,7 @@ def build_docker_runner_payload(config, task, task_def):
     features = {}
 
     if runner.get("docker-in-docker"):
-        task_def["services"] = [
+        job_def["services"] = [
             config.graph_config["jobgraph"]["external-docker-images"][
                 "docker-in-docker"
             ]
@@ -203,20 +199,20 @@ def build_docker_runner_payload(config, task, task_def):
 
     capabilities = {}
 
-    task_def["image"] = image
-    task_def["variables"] = runner["env"]
+    job_def["image"] = image
+    job_def["variables"] = runner["env"]
 
     if "command" in runner:
-        task_def["script"] = [runner["command"]]
+        job_def["script"] = [runner["command"]]
 
     if "max-run-time" in runner:
-        task_def["timeout"] = f'{runner["max-run-time"]} seconds'
+        job_def["timeout"] = f'{runner["max-run-time"]} seconds'
 
     payload = {}
     run_task = payload.get("command", [""])[0].endswith("run-task")
 
     if "artifacts" in runner:
-        task_def["artifacts"] = {
+        job_def["artifacts"] = {
             "expire_in": "3 months",  # TODO: Parametrize
             "paths": [artifact["path"] for artifact in runner["artifacts"]],
             "public": False,  # TODO: Parametrize
@@ -292,8 +288,8 @@ def build_docker_runner_payload(config, task, task_def):
     },
 )
 @payload_builder("succeed", schema={})
-def build_dummy_payload(config, task, task_def):
-    task_def["payload"] = {}
+def build_dummy_payload(config, job, job_def):
+    job_def["payload"] = {}
 
 
 transforms = TransformSequence()
@@ -333,7 +329,7 @@ def job_name_from_label(config, jobs):
 def validate(config, jobs):
     for job in jobs:
         validate_schema(
-            task_description_schema,
+            job_description_schema,
             job,
             "In job {!r}:".format(job.get("label", "?no-label?")),
         )
