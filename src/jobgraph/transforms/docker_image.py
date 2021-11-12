@@ -115,11 +115,6 @@ def fill_template(config, jobs):
 
         description = f"Build the docker image {image_name} for use by dependent jobs"
 
-        runner = job.setdefault("runner", {})
-        runner |= {
-            "implementation": "kubernetes",
-            "os": "linux",
-        }
         variables = job.setdefault("variables", {})
         variables |= {
             # We use hashes as tags to reduce potential collisions of regular tags
@@ -140,7 +135,6 @@ def fill_template(config, jobs):
             "optimization": job.get("optimization", None),
             "parent": job.get("parent", None),
             "runner-alias": "images",
-            "runner": runner,
             "script": job.get("script", []),
             "variables": variables,
         }

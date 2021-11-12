@@ -10,8 +10,7 @@ complexities of runner implementations.
 
 from copy import copy
 
-import attr
-from voluptuous import All, Any, Extra, NotIn, Optional, Required
+from voluptuous import All, Any, NotIn, Optional, Required
 
 from jobgraph import MAX_DEPENDENCIES
 from jobgraph.transforms.base import TransformSequence
@@ -62,11 +61,6 @@ job_description_schema = Schema(
         # the runner-alias for the job. Will be substituted into an actual Gitlab
         # CI tag.
         "runner-alias": str,
-        # information specific to the runner implementation that will run this job
-        Optional("runner"): {
-            Required("implementation"): str,
-            Extra: object,
-        },
         Required("script"): Any(
             taskref_or_string,
             [taskref_or_string],
@@ -81,148 +75,32 @@ def get_branch_rev(config):
     return config.params["head_rev"]
 
 
-# define a collection of payload builders, depending on the runner implementation
-payload_builders = {}
-
-
-@attr.s(frozen=True)
-class PayloadBuilder:
-    schema = attr.ib(type=Schema)
-    builder = attr.ib()
-
-
-def payload_builder(name, schema):
-    schema = Schema({Required("implementation"): name, Optional("os"): str}).extend(
-        schema
-    )
-
-    def wrap(func):
-        payload_builders[name] = PayloadBuilder(schema, func)
-        return func
-
-    return wrap
-
-
-@payload_builder(
-    "kubernetes",
-    schema={
-        Optional("os"): "linux",
-        # For jobs that will run in kubernetes, this is the name of the docker
-        # image or in-tree docker image to run the job on.  If in-tree, then a
-        # dependency will be created automatically.  This is generally
-        # `desktop-test`, or an image that acts an awful lot like it.
-        # runner features that should be enabled
-        Required("chain-of-trust"): bool,
-        # caches to set up for the job
-        Optional("caches"): [
-            {
-                # only one type is supported by any of the runners right now
-                "type": "persistent",
-                # name of the cache, allowing re-use by subsequent jobs naming the
-                # same cache
-                "name": str,
-                # location in the job image where the cache will be mounted
-                "mount-point": str,
-                # Whether the cache is not used in untrusted environments
-                # (like the Try repo).
-                Optional("skip-untrusted"): bool,
-            }
-        ],
-        # artifacts to extract from the job image after completion
-        Optional("artifacts"): [
-            {
-                # type of artifact -- simple file, or recursive directory
-                "type": Any("file", "directory"),
-                # job image path from which to read artifact
-                "path": str,
-                # name of the produced artifact (root of the names for
-                # type=directory)
-                "name": str,
-            }
-        ],
-        Optional("timeout"): str,
-        # the exit status code(s) that indicates the job should be retried
-        Optional("retry-exit-status"): [int],
-        # the exit status code(s) that indicates the caches used by the job
-        # should be purged
-        Optional("purge-caches-exit-status"): [int],
-        # Wether any artifacts are assigned to this runner
-        Optional("skip-artifacts"): bool,
-    },
-)
-def build_docker_runner_payload(config, job, job_def):
-    runner = job["runner"]
-    level = int(config.params["level"])
-
-    image = job["image"]
-    if isinstance(image, dict):
-        if "in-tree" in image:
-            name = image["in-tree"]
-            docker_image_job = "build-docker-image-" + image["in-tree"]
-            job.setdefault("dependencies", {})["docker-image"] = docker_image_job
-
-            image = {"docker-image-reference": "<docker-image>"}
-
-            # Find VOLUME in Dockerfile.
-            volumes = dockerutil.parse_volumes(name)
-            if volumes:
-                raise Exception("volumes defined in Dockerfiles are not supported.")
-        elif "docker-image-reference" in image:
-            # Nothing to do, this will get resolved in the optimization phase
-            pass
-        else:
-            raise Exception("unknown docker image type")
-
-    features = {}
-    capabilities = {}
-
-    job_def["image"] = image
-    payload = {}
-
-    if "artifacts" in runner:
-        job_def["artifacts"] = {
-            "expire_in": "3 months",  # TODO: Parametrize
-            "paths": [artifact["path"] for artifact in runner["artifacts"]],
-            "public": False,  # TODO: Parametrize
-            "reports": {},  # TODO: Support different types of reports
-        }
-
-    if "caches" in runner:
-        caches = {}
-        cache_version = "v3"
-        suffix = cache_version
-
-        skip_untrusted = config.params.is_try() or level == 1
-
-        for cache in runner["caches"]:
-            # Some caches aren't enabled in environments where we can't
-            # guarantee certain behavior. Filter those out.
-            if cache.get("skip-untrusted") and skip_untrusted:
-                continue
-
-            name = f"level-{config.params['level']}-{cache['name']}-{suffix}"
-            caches[name] = cache["mount-point"]
-
-        payload["cache"] = caches
-
-    if features:
-        payload["features"] = features
-    if capabilities:
-        payload["capabilities"] = capabilities
-
-
-@payload_builder(
-    "always-optimized",
-    schema={
-        Extra: object,
-    },
-)
-@payload_builder("succeed", schema={})
-def build_dummy_payload(config, job, job_def):
-    job_def["payload"] = {}
-
-
 transforms = TransformSequence()
+
+
+@transforms.add
+def build_docker_runner_payload(config, jobs):
+    for job in jobs:
+        image = job["image"]
+        if isinstance(image, dict):
+            if "in-tree" in image:
+                name = image["in-tree"]
+                docker_image_job = "build-docker-image-" + image["in-tree"]
+                job.setdefault("dependencies", {})["docker-image"] = docker_image_job
+
+                image = {"docker-image-reference": "<docker-image>"}
+
+                # Find VOLUME in Dockerfile.
+                volumes = dockerutil.parse_volumes(name)
+                if volumes:
+                    raise Exception("volumes defined in Dockerfiles are not supported.")
+            elif "docker-image-reference" in image:
+                # Nothing to do, this will get resolved in the optimization phase
+                pass
+            else:
+                raise Exception("unknown docker image type")
+
+        yield job
 
 
 @transforms.add
@@ -230,13 +108,6 @@ def set_defaults(config, jobs):
     for job in jobs:
         job.setdefault("always-target", False)
         job.setdefault("optimization", None)
-
-        runner = job["runner"]
-        if runner["implementation"] in ("kubernetes",):
-            runner.setdefault("chain-of-trust", False)
-            if "caches" in runner:
-                for c in runner["caches"]:
-                    c.setdefault("skip-untrusted", False)
 
         yield job
 
@@ -261,11 +132,6 @@ def validate(config, jobs):
             job,
             f"In job {job.get('label', '?no-label?')!r}:",
         )
-        validate_schema(
-            payload_builders[job["runner"]["implementation"]].schema,
-            job["runner"],
-            f"In job.run {job.get('label', '?no-label?')!r}:",
-        )
         yield job
 
 
@@ -286,9 +152,6 @@ def build_job(config, jobs):
         for key in ("retry", "timeout", "variables"):
             if job.get(key):
                 job_def[key] = job[key]
-
-        # add the payload and adjust anything else as required.
-        payload_builders[job["runner"]["implementation"]].builder(config, job, job_def)
 
         attributes = job.get("attributes", {})
         attributes["run_on_pipeline_sources"] = job.get(

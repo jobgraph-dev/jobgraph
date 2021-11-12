@@ -17,14 +17,11 @@ jobgraph:
 runners:
     aliases:
         images:
-            implementation: kubernetes
             os: linux
             runner-tag: gitlab-org-docker
         misc:
-            implementation: kubernetes
             os: linux
             runner-tag: gitlab-org-docker
         t-linux:
-            implementation: kubernetes
             os: linux
             runner-tag: gitlab-org-docker

@@ -27,7 +27,6 @@ graph_config_schema = Schema(
         Required("runners"): {
             Required("aliases"): {
                 str: {
-                    Required("implementation"): str,
                     Required("os"): str,
                     Required("runner-tag"): optionally_keyed_by("level", str),
                 }
