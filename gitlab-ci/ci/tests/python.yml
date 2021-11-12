@@ -8,32 +8,26 @@ job-defaults:
 
 black:
     description: "Run `black` to ensure strict code style"
-    runner:
-        command: black --check .
+    script: black --check .
 
 flake8:
     description: "Run `flake8` to ensure code validates PEP8"
-    runner:
-        command: flake8
+    script: flake8
 
 flynt:
     description: "Run `flynt` to ensure f-strings are remain the only way to interpolate strings"
-    runner:
-        command: flynt --fail-on-change --dry-run .
+    script: flynt --fail-on-change --dry-run .
 
 isort:
     description: "Run `isort` to ensure python import statements are well ordered"
-    runner:
-        command: isort --check --diff .
+    script: isort --check --diff .
 
 pyupgrade:
     description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
-    runner:
-        command: pyupgrade --py310-plus $(find . -name '*.py')
+    script: pyupgrade --py310-plus $(find . -name '*.py')
 
 unit:
     description: "Run `unit tests` to validate the latest changes"
-    runner:
-        command: >-
-            pip install --prefix "/runner/.local" --no-deps --editable . &&
-            pytest --pyargs jobgraph
+    script:
+        - pip install --prefix "/runner/.local" --no-deps --editable .
+        - pytest --pyargs jobgraph

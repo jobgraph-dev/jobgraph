@@ -8,5 +8,4 @@ job-defaults:
 
 yamllint:
     description: "Run `yamllint` to validate the latest changes"
-    runner:
-        command: yamllint .
+    script: yamllint .

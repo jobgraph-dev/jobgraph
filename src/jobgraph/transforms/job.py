@@ -67,6 +67,10 @@ job_description_schema = Schema(
             Required("implementation"): str,
             Extra: object,
         },
+        Required("script"): Any(
+            taskref_or_string,
+            [taskref_or_string],
+        ),
         Optional("timeout"): str,
     }
 )
@@ -138,9 +142,6 @@ def payload_builder(name, schema):
         ],
         # environment variables
         Required("env"): {str: taskref_or_string},
-        # the command to run; if not given, kubernetes will default to the
-        # command in the docker image
-        Optional("command"): taskref_or_string,
         Optional("timeout"): str,
         # the exit status code(s) that indicates the job should be retried
         Optional("retry-exit-status"): [int],
@@ -184,9 +185,6 @@ def build_docker_runner_payload(config, job, job_def):
     job_def["image"] = image
     if runner.get("env"):
         job_def["variables"] = runner["env"]
-
-    if "command" in runner:
-        job_def["script"] = [runner["command"]]
 
     payload = {}
 
@@ -295,6 +293,7 @@ def build_job(config, jobs):
 
         job_def = copy(config.graph_config["job-defaults"])
         job_def["tags"] = [runner_tag]
+        job_def["script"] = job["script"]
         for key in ("retry", "timeout"):
             if job.get(key):
                 job_def[key] = job[key]

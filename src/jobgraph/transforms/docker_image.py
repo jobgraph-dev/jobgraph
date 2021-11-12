@@ -88,10 +88,11 @@ def add_registry_specific_config(config, jobs):
             env["DOCKER_TLS_VERIFY"] = "1"
             env["DOCKER_CERT_PATH"] = "$DOCKER_TLS_CERTDIR/client"
 
-            runner["command"] = (
+            # TODO Move the login in the `before_script` section
+            job["script"] = [
                 'docker login --username "$CI_REGISTRY_USER" --password '
                 '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
-            )
+            ]
             job.setdefault("optimization", {}).setdefault(
                 "skip-if-on-gitlab-container-registry", True
             )
@@ -148,6 +149,7 @@ def fill_template(config, jobs):
             "parent": job.get("parent", None),
             "runner-alias": "images",
             "runner": runner,
+            "script": job.get("script", []),
         }
 
         if packages:
@@ -231,11 +233,10 @@ def fill_context_hash(config, jobs):
 
 
 @transforms.add
-def define_docker_commands(config, jobs):
+def define_docker_script_instructions(config, jobs):
     for job in jobs:
         packages = job.pop("packages", [])
         arguments = job.pop("args", {})
-        runner = job.setdefault("runner", {})
 
         if packages:
             arguments["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
@@ -247,13 +248,13 @@ def define_docker_commands(config, jobs):
             f'--build-arg "{argument_name}={argument_value}"'
             for argument_name, argument_value in arguments.items()
         )
-        runner["command"] = " && ".join(
-            (
-                runner.get("command", ""),
-                f'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
+        script = job.setdefault("script", [])
+        script.extend(
+            [
+                'docker build --tag "$DOCKER_IMAGE_FULL_LOCATION" --file '
                 f'"$CI_PROJECT_DIR/{docker_file}" {build_args} .',
                 'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
-            )
+            ]
         )
 
         yield job
