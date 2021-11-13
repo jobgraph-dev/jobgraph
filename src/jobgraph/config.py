@@ -39,8 +39,6 @@ graph_config_schema = Schema(
             ): str,
             Optional("decision-parameters"): str,
             Required("external-docker-images"): {str: str},
-            # TODO enforce stricter dictionaries
-            Required("container-registry"): dict,
         },
         # TODO enforce stricter dictionaries
         Required("job-defaults"): dict,
