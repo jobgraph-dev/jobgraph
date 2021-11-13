@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+# TODO: Make this script a Python one. The complexity is now too high.
+
 set -e
 
 GIT_REMOTE="${1:-origin}"
@@ -13,8 +15,8 @@ git config user.email ''
 git commit --all --message 'Run jobgraph update-dependencies' || (echo 'No updates found' && exit 0)
 
 GIT_REMOTE_URL="$(git remote get-url "$GIT_REMOTE")"
-URL_WITHOUT_HTTPS="${GIT_REMOTE_URL/https:\/\//git@}"
-URL_WITH_COLON="${URL_WITHOUT_HTTPS/\//:}"
+URL_WITHOUT_HTTPS_NOR_BASIC_AUTH="$(echo "$GIT_REMOTE_URL" | sed 's/^https:\/\/\([^@]*@\)\?/git@/')"
+URL_WITH_COLON="${URL_WITHOUT_HTTPS_NOR_BASIC_AUTH/\//:}"
 SSH_URL="${URL_WITH_COLON%/}"
 
 git remote set-url --push "$GIT_REMOTE" "$SSH_URL"
