@@ -170,7 +170,7 @@ def _get_all_copied_files_to_docker_image(image_path, args):
 
             path = Path(file_argument)
             if not path.exists():
-                raise ValueError("path does not exist")
+                raise ValueError(f"path does not exist: {path}")
 
             if path.is_file():
                 all_copied_files.add(path)
