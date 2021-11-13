@@ -84,9 +84,9 @@ def get_decision_parameters(graph_config, options):
             "head_repository",
             "head_rev",
             "head_ref",
+            "head_ref_protection",
             "head_tag",
             "owner",
-            "level",
             "target_jobs_method",
             "pipeline_source",
         ]

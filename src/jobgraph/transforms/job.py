@@ -152,12 +152,12 @@ def validate(config, jobs):
 @transforms.add
 def build_job(config, jobs):
     for job in jobs:
-        level = str(config.params["level"])
+        head_ref_protection = config.params["head_ref_protection"]
 
         runner_tag = get_runner_tag(
             config.graph_config,
             job["runner-alias"],
-            level,
+            head_ref_protection,
         )
 
         job_def = copy(config.graph_config["job-defaults"])

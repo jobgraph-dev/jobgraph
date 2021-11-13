@@ -21,6 +21,8 @@ from typing import Any
 import appdirs
 import yaml
 
+from jobgraph.util.strtobool import strtobool
+
 Command = namedtuple("Command", ["func", "args", "kwargs", "defaults"])
 commands = {}
 
@@ -516,7 +518,14 @@ def image_digest(args):
     help=argparse.SUPPRESS,
 )
 @argument("--owner", required=True, help="email address of who owns this graph")
-@argument("--level", required=True, help="SCM level of this repository")
+@argument(
+    "--is-head-ref-protected",
+    type=lambda x: "protected" if strtobool(x) else "unprotected",
+    choices=("protected", "unprotected"),
+    dest="head_ref_protection",
+    required=True,
+    help="boolean that expresses whether the current git ref is protected on Gitlab",
+)
 @argument(
     "--target-tasks-method", help="method for selecting the target tasks to generate"
 )

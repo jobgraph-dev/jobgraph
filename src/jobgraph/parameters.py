@@ -40,10 +40,10 @@ base_schema = Schema(
         Required("do_not_optimize"): [str],
         Required("filters"): [str],
         Required("head_ref"): str,
+        Required("head_ref_protection"): str,
         Required("head_repository"): str,
         Required("head_rev"): str,
         Required("head_tag"): str,
-        Required("level"): str,
         Required("optimize_target_jobs"): bool,
         Required("owner"): str,
         # target-stage is not included, since it should never be
@@ -124,10 +124,10 @@ class Parameters(ReadOnlyDict):
             "do_not_optimize": [],
             "filters": ["target_jobs_method"],
             "head_ref": get_repo().head_ref,
+            "head_ref_protection": "protected",  # main branch is protected by default
             "head_repository": get_repo().get_url(),
             "head_rev": get_repo().head_ref,
             "head_tag": "",
-            "level": "3",
             "optimize_target_jobs": True,
             "owner": "nobody@mozilla.com",
             "target_jobs_method": "default",

@@ -47,7 +47,7 @@ def get_runner_alias_implementation(graph_config, runner_alias):
 
 
 @memoize
-def get_runner_tag(graph_config, alias, level):
+def get_runner_tag(graph_config, alias, head_ref_protection):
     """
     Get the runner type based, evaluating aliases from the graph config.
     """
@@ -55,7 +55,7 @@ def get_runner_tag(graph_config, alias, level):
         builtin_type = _BUILTIN_TYPES[alias]
         return builtin_type.runner_tag
 
-    level = str(level)
+    head_ref_protection = str(head_ref_protection)
     runner_config = evaluate_keyed_by(
         {"by-alias": graph_config["runners"]["aliases"]},
         "graph_config.runners.aliases",
@@ -64,6 +64,6 @@ def get_runner_tag(graph_config, alias, level):
     runner_tag = evaluate_keyed_by(
         runner_config["runner-tag"],
         alias,
-        {"level": level},
-    ).format(level=level, alias=alias)
+        {"head_ref_protection": head_ref_protection},
+    ).format(alias=alias)
     return runner_tag

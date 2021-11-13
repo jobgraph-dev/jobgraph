@@ -41,7 +41,7 @@ def make_decision_task(params, root, context, head_rev=None):
         {
             "repository": {
                 "url": params["repository_url"],
-                "level": params["level"],
+                "head_ref_protection": params["head_ref_protection"],
             },
             "push": merge(
                 {

@@ -21,10 +21,10 @@ class TestParameters(unittest.TestCase):
         "do_not_optimize": [],
         "filters": ["target_jobs_method"],
         "head_ref": "ref",
+        "head_ref_protection": "protected",
         "head_repository": "repository",
         "head_rev": "rev",
         "head_tag": "",
-        "level": "3",
         "optimize_target_jobs": True,
         "owner": "nobody@mozilla.com",
         "target_jobs_method": "default",
@@ -49,7 +49,7 @@ class TestParameters(unittest.TestCase):
         self.assertRaises(ParameterMismatch, lambda: p.check())
 
     def test_Parameters_get(self):
-        p = Parameters(owner="nobody@example.test", level=20)
+        p = Parameters(owner="nobody@example.test")
         self.assertEqual(p["owner"], "nobody@example.test")
 
     def test_Parameters_check(self):

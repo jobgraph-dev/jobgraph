@@ -17,7 +17,7 @@ def get_image_context_hash(image_name):
     from jobgraph.parameters import Parameters
 
     params = Parameters(
-        level=os.environ.get("MOZ_SCM_LEVEL", "3"),
+        head_ref_protection="protected",
         strict=False,
     )
     tasks = load_jobs_for_stage(params, "docker-image")

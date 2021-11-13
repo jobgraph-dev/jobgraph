@@ -43,7 +43,9 @@ graph_config_schema = Schema(
             Required("aliases"): {
                 str: {
                     Required("os"): str,
-                    Required("runner-tag"): optionally_keyed_by("level", str),
+                    Required("runner-tag"): optionally_keyed_by(
+                        "head-ref-protection", str
+                    ),
                 }
             },
         },

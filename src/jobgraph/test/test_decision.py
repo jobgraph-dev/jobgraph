@@ -50,10 +50,10 @@ class TestGetDecisionParameters(unittest.TestCase):
             "head_repository": "https://gitlab.com/some-other-user/some-project",
             "head_rev": "abcd",
             "head_ref": "ef01",
+            "head_ref_protection": "protected",
             "head_tag": "v0.0.1",
             "owner": "nobody@mozilla.com",
             "pipeline_source": "push",
-            "level": "3",
         }
 
     def test_simple_options(self):

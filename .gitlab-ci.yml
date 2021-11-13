@@ -43,7 +43,7 @@ decision:
         --head-repository="$CI_PROJECT_URL"
         --head-rev="$CI_COMMIT_SHA"
         --head-tag="$CI_COMMIT_TAG"
-        --level='1'
+        --is-head-ref-protected="$CI_COMMIT_REF_PROTECTED"
         --message="$CI_COMMIT_MESSAGE"
         --owner="$CI_COMMIT_AUTHOR"
         --pipeline-source="$CI_PIPELINE_SOURCE"
