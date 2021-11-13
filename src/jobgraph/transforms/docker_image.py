@@ -46,10 +46,6 @@ docker_image_schema = Schema(
         Optional("packages"): [str],
         Optional("services"): [taskref_or_string],
         Optional("variables"): dict,
-        Optional(
-            "cache",
-            description="Whether this image should be cached based on inputs.",
-        ): bool,
     }
 )
 

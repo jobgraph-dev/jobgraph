@@ -156,18 +156,6 @@ def rerun_task(task_id):
     _do_request(get_task_url(task_id) + "/rerun", json={})
 
 
-def get_purge_cache_url(worker_type):
-    url_tmpl = liburls.api(get_root_url(), "purge-cache", "v1", "purge-cache/{}/{}")
-    return url_tmpl.format(worker_type)
-
-
-def purge_cache(worker_type, cache_name):
-    """Requests a cache purge from the purge-caches service."""
-    logger.info(f"Purging {worker_type}/{cache_name}.")
-    purge_cache_url = get_purge_cache_url(worker_type)
-    _do_request(purge_cache_url, json={"cacheName": cache_name})
-
-
 def send_email(address, subject, content, link):
     """Sends an email using the notify service"""
     logger.info(f"Sending email to {address}.")
