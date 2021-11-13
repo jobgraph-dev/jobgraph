@@ -2,7 +2,7 @@
 
 # TODO: Make this script a Python one. The complexity is now too high.
 
-set -e
+set -ex
 
 GIT_REMOTE="${1:-origin}"
 GIT_BRANCH="${2:-update-jobgraph-dependencies}"
