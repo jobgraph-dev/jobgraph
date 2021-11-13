@@ -9,7 +9,7 @@ def add_before_script(config, jobs):
         if job.pop("reinstall-jobgraph", False):
             before_script = job.setdefault("before_script", [])
             before_script.append(
-                "pip install --prefix '/runner/.local' --no-deps --editable ."
+                'pip install --prefix \'/runner/.local\' --no-deps --editable "$CI_PROJECT_DIR"'
             )
 
         yield job
