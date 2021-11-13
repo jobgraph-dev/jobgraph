@@ -11,7 +11,7 @@ from ..util.yaml import load_yaml
 logger = logging.getLogger(__name__)
 
 
-def loader(kind, path, config, params, loaded_jobs):
+def loader(stage, path, config, params, loaded_jobs):
     """
     Get the input elements that will be transformed into tasks in a generic
     way.  The elements themselves are free-form, and become the input to the
@@ -22,12 +22,12 @@ def loader(kind, path, config, params, loaded_jobs):
     keys to those mappings are added in the `name` key of each entity.
 
     If there is a `job-defaults` config, then every job is merged with it.
-    This provides a simple way to set default values for all jobs of a kind.
+    This provides a simple way to set default values for all jobs of a stage.
     The `job-defaults` key can also be specified in a yaml file pointed to by
     `jobs-from`. In this case it will only apply to tasks defined in the same
     file.
 
-    Other kind implementations can use a different loader function to
+    Other stage implementations can use a different loader function to
     produce inputs and hand them to `transform_inputs`.
     """
 
@@ -36,7 +36,7 @@ def loader(kind, path, config, params, loaded_jobs):
         for name, job in config.get("jobs", {}).items():
             if defaults:
                 job = merge(defaults, job)
-            job["job-from"] = "kind.yml"
+            job["job-from"] = "stage.yml"
             yield name, job
 
         for filename in config.get("jobs-from", []):
@@ -54,5 +54,5 @@ def loader(kind, path, config, params, loaded_jobs):
 
     for name, job in jobs():
         job["name"] = name
-        logger.debug(f"Generating tasks for {kind} {name}")
+        logger.debug(f"Generating tasks for {stage} {name}")
         yield job

@@ -96,8 +96,8 @@ def add_registry_specific_config(config, jobs):
 @transforms.add
 def fill_template(config, jobs):
     available_packages = set()
-    for job in config.kind_dependencies_tasks:
-        if job.kind != "packages":
+    for job in config.stage_dependencies_tasks:
+        if job.stage != "packages":
             continue
         name = job.label.replace("packages-", "")
         available_packages.add(name)
@@ -109,7 +109,7 @@ def fill_template(config, jobs):
         for p in packages:
             if p not in available_packages:
                 raise Exception(
-                    f"Missing package job for {config.kind}-{image_name}: {p}"
+                    f"Missing package job for {config.stage}-{image_name}: {p}"
                 )
 
         description = f"Build the docker image {image_name} for use by dependent jobs"

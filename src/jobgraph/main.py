@@ -124,7 +124,7 @@ def format_jobgraph(options, parameters, logfile=None):
     if isinstance(parameters, str):
         parameters = parameters_loader(
             parameters,
-            overrides={"target-kind": options.get("target_kind")},
+            overrides={"target-stage": options.get("target_stage")},
             strict=False,
         )
 
@@ -292,9 +292,9 @@ def generate_jobgraph(options, parameters, logdir):
     help="only return tasks with labels matching this regular " "expression.",
 )
 @argument(
-    "--target-kind",
+    "--target-stage",
     default=None,
-    help="only return tasks that are of the given kind, or their dependencies.",
+    help="only return tasks that are of the given stage, or their dependencies.",
 )
 @argument(
     "-F",
@@ -355,7 +355,7 @@ def show_jobgraph(options):
     parameters: list[Any[str, Parameters]] = options.pop("parameters")
     if not parameters:
         kwargs = {
-            "target-kind": options.get("target_kind"),
+            "target-stage": options.get("target_stage"),
         }
         parameters = [Parameters(strict=False, **kwargs)]  # will use default values
 

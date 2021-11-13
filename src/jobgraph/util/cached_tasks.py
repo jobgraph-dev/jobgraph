@@ -15,7 +15,7 @@ def add_optimization(
     cached artifacts can be found. Exactly one of `digest` and `digest_data`
     must be passed.
 
-    :param TransformConfig config: The configuration for the kind being transformed.
+    :param TransformConfig config: The configuration for the stage being transformed.
     :param dict taskdesc: The description of the current task.
     :param str cache_type: The type of task result being cached.
     :param str cache_name: The name of the object being cached.

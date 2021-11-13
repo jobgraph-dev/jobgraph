@@ -11,7 +11,7 @@ class Job:
     """
     Representation of a job in a JobGraph.  Each Job has, at creation:
 
-    - kind: the name of the task kind
+    - stage: the name of the task stage
     - label; the label for this task
     - attributes: a dictionary of attributes for this task (used for filtering)
     - actual_gitlab_ci_job: the job definition (JSON-able dictionary) which
@@ -30,7 +30,7 @@ class Job:
     display, comparison, serialization, etc. It has no functionality of its own.
     """
 
-    kind = attr.ib()
+    stage = attr.ib()
     label = attr.ib()
     description = attr.ib()
     attributes = attr.ib()
@@ -41,11 +41,11 @@ class Job:
     soft_dependencies = attr.ib(factory=list)
 
     def __attrs_post_init__(self):
-        self.attributes["kind"] = self.kind
+        self.attributes["stage"] = self.stage
 
     def to_json(self):
         rv = {
-            "kind": self.kind,
+            "stage": self.stage,
             "label": self.label,
             "description": self.description,
             "attributes": self.attributes,
@@ -66,7 +66,7 @@ class Job:
         generation process, for example in Action tasks.
         """
         rv = cls(
-            kind=job_dict["kind"],
+            stage=job_dict["stage"],
             label=job_dict["label"],
             description=job_dict["description"],
             attributes=job_dict["attributes"],

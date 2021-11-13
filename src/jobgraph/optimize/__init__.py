@@ -150,7 +150,7 @@ def get_subgraph(
         )
         deps = task.actual_gitlab_ci_job.setdefault("needs", [])
         deps.extend(sorted(named_task_dependencies.values()))
-        task.actual_gitlab_ci_job.setdefault("stage", task.kind)
+        task.actual_gitlab_ci_job.setdefault("stage", task.stage)
 
     #  drop edges that are no longer entirely in the task graph
     #   (note that this omits edges to replaced tasks, but they are still in task.dependnecies)

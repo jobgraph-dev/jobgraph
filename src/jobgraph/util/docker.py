@@ -275,7 +275,7 @@ def stream_context_tar(
 @memoize
 def image_paths():
     """Return a map of image name to paths containing their Dockerfile."""
-    config = load_yaml(DEFAULT_ROOT_DIR, "docker-image", "kind.yml")
+    config = load_yaml(DEFAULT_ROOT_DIR, "docker-image", "stage.yml")
     return {
         k: os.path.join(IMAGE_DIR, v.get("definition", k))
         for k, v in config["jobs"].items()

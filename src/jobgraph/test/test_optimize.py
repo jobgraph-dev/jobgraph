@@ -42,7 +42,7 @@ class TestOptimize(unittest.TestCase):
     ):
         task_def = task_def or {"sample": "task-def"}
         task = Job(
-            kind="test",
+            stage="test",
             label=label,
             description="some test description",
             attributes={},

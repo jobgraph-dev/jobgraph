@@ -7,17 +7,17 @@ from jobgraph import graph
 from .conftest import FakeKind
 
 
-def test_kind_ordering(maketgg):
-    "When task kinds depend on each other, they are loaded in postorder"
+def test_stage_ordering(maketgg):
+    "When task stages depend on each other, they are loaded in postorder"
     tgg = maketgg(
-        kinds=[
-            ("_fake3", {"kind-dependencies": ["_fake2", "_fake1"]}),
-            ("_fake2", {"kind-dependencies": ["_fake1"]}),
-            ("_fake1", {"kind-dependencies": []}),
+        stages=[
+            ("_fake3", {"stage-dependencies": ["_fake2", "_fake1"]}),
+            ("_fake2", {"stage-dependencies": ["_fake1"]}),
+            ("_fake1", {"stage-dependencies": []}),
         ]
     )
     tgg._run_until("full_job_set")
-    assert FakeKind.loaded_kinds == ["_fake1", "_fake2", "_fake3"]
+    assert FakeKind.loaded_stages == ["_fake1", "_fake2", "_fake3"]
 
 
 def test_full_job_set(maketgg):
@@ -68,7 +68,7 @@ def test_always_target_jobs(maketgg):
     "The target_job_graph includes tasks with 'always_target'"
     tgg_args = {
         "target_jobs": ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"],
-        "kinds": [
+        "stages": [
             ("_fake", {"job-defaults": {"optimization": {"odd": None}}}),
             (
                 "_ignore",

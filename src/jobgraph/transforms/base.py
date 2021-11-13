@@ -34,21 +34,21 @@ class TransformConfig:
     to transforms is an instance of this class.
     """
 
-    # the name of the current kind
-    kind = attr.ib()
+    # the name of the current stage
+    stage = attr.ib()
 
-    # the path to the kind configuration directory
+    # the path to the stage configuration directory
     path = attr.ib(type=AnyStr)
 
-    # the parsed contents of kind.yml
+    # the parsed contents of stage.yml
     config = attr.ib(type=dict)
 
     # the parameters for this task-graph generation run
     params = attr.ib(type=Parameters)
 
-    # a list of all the tasks associated with the kind dependencies of the
-    # current kind
-    kind_dependencies_tasks = attr.ib()
+    # a list of all the tasks associated with the stage dependencies of the
+    # current stage
+    stage_dependencies_tasks = attr.ib()
 
     # Global configuration of the jobgraph
     graph_config = attr.ib(type=GraphConfig)
@@ -114,11 +114,11 @@ class ValidateSchema:
     def __call__(self, config, jobs):
         for job in jobs:
             if "name" in job:
-                error = f"In {config.kind} kind job {job['name']!r}:"
+                error = f"In {config.stage} stage job {job['name']!r}:"
             elif "label" in job:
                 error = f"In job {job['label']!r}:"
             elif "primary-dependency" in job:
-                error = f"In {config.kind} kind job for {job['primary-dependency'].label!r}:"
+                error = f"In {config.stage} stage job for {job['primary-dependency'].label!r}:"
             else:
                 error = "In unknown job:"
             validate_schema(self.schema, job, error)

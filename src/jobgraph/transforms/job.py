@@ -122,7 +122,7 @@ def job_name_from_label(config, jobs):
         if "label" not in job:
             if "name" not in job:
                 raise Exception("job has neither a name nor a label")
-            job["label"] = f"{config.kind}-{job['name']}"
+            job["label"] = f"{config.stage}-{job['name']}"
         if job.get("name"):
             del job["name"]
         yield job
@@ -180,7 +180,7 @@ def check_job_dependencies(config, jobs):
     for job in jobs:
         if len(job["dependencies"]) > MAX_DEPENDENCIES:
             raise Exception(
-                f"job {config.kind}/{job['label']} has too many dependencies "
+                f"job {config.stage}/{job['label']} has too many dependencies "
                 f"({len(job['dependencies'])} > {MAX_DEPENDENCIES})"
             )
         yield job

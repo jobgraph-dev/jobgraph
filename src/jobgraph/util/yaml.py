@@ -30,7 +30,7 @@ def load_stream(stream):
 
 def load_yaml(*parts):
     """Convenience function to load a YAML file in the given path.  This is
-    useful for loading kind configuration files from the kind path."""
+    useful for loading stage configuration files from the stage path."""
     filename = os.path.join(*parts)
     with open(filename, "rb") as f:
         return load_stream(f)

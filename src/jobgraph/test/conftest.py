@@ -3,21 +3,21 @@ import pytest
 from jobgraph import generator
 from jobgraph import target_jobs as target_jobs_mod
 from jobgraph.config import GraphConfig
-from jobgraph.generator import JobGraphGenerator, Kind
+from jobgraph.generator import JobGraphGenerator, Stage
 from jobgraph.optimize import OptimizationStrategy
 from jobgraph.util.templates import merge
 
 
-def fake_loader(kind, path, config, parameters, loaded_jobs):
+def fake_loader(stage, path, config, parameters, loaded_jobs):
     for i in range(3):
         dependencies = {}
         if i >= 1:
-            dependencies["prev"] = f"{kind}-t-{i - 1}"
+            dependencies["prev"] = f"{stage}-t-{i - 1}"
 
         task = {
-            "kind": kind,
-            "label": f"{kind}-t-{i}",
-            "description": f"{kind} task {i}",
+            "stage": stage,
+            "label": f"{stage}-t-{i}",
+            "description": f"{stage} task {i}",
             "attributes": {"_tasknum": str(i)},
             "actual_gitlab_ci_job": {
                 "i": i,
@@ -31,24 +31,24 @@ def fake_loader(kind, path, config, parameters, loaded_jobs):
         yield task
 
 
-class FakeKind(Kind):
+class FakeKind(Stage):
     def _get_loader(self):
         return fake_loader
 
     def load_jobs(self, parameters, loaded_jobs, write_artifacts):
-        FakeKind.loaded_kinds.append(self.name)
+        FakeKind.loaded_stages.append(self.name)
         return super().load_jobs(parameters, loaded_jobs, write_artifacts)
 
 
 class WithFakeKind(JobGraphGenerator):
-    def _load_kinds(self, graph_config, target_kind=None):
-        for kind_name, cfg in self.parameters["_kinds"]:
+    def _load_stages(self, graph_config, target_stage=None):
+        for stage_name, cfg in self.parameters["_stages"]:
             config = {
                 "transforms": [],
             }
             if cfg:
                 config.update(cfg)
-            yield FakeKind(kind_name, "/fake", config, graph_config)
+            yield FakeKind(stage_name, "/fake", config, graph_config)
 
 
 def fake_load_graph_config(root_dir):
@@ -78,9 +78,9 @@ class FakeOptimization(OptimizationStrategy):
 
 @pytest.fixture
 def maketgg(monkeypatch):
-    def inner(target_jobs=None, kinds=[("_fake", [])], params=None):
+    def inner(target_jobs=None, stages=[("_fake", [])], params=None):
         params = params or {}
-        FakeKind.loaded_kinds = []
+        FakeKind.loaded_stages = []
         target_jobs = target_jobs or []
 
         def target_jobs_method(full_job_graph, parameters, graph_config):
@@ -90,7 +90,7 @@ def maketgg(monkeypatch):
 
         parameters = FakeParameters(
             {
-                "_kinds": kinds,
+                "_stages": stages,
                 "target_jobs_method": "test_method",
                 "try_mode": None,
                 "pipeline_source": "push",

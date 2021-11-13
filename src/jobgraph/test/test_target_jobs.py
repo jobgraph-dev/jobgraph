@@ -49,7 +49,7 @@ class TestTargetTasks(unittest.TestCase):
         graph = JobGraph(
             jobs={
                 "a": Job(
-                    kind="build",
+                    stage="build",
                     label="a",
                     description="some build",
                     attributes=attributes,
@@ -295,9 +295,9 @@ class TestTargetTasks(unittest.TestCase):
 
     def make_task_graph(self):
         tasks = {
-            "a": Job(kind=None, label="a", attributes={}, actual_gitlab_ci_job={}),
+            "a": Job(stage=None, label="a", attributes={}, actual_gitlab_ci_job={}),
             "b": Job(
-                kind=None,
+                stage=None,
                 label="b",
                 attributes={"at-at": "yep"},
                 actual_gitlab_ci_job={},

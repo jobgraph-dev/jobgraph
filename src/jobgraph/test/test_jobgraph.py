@@ -17,14 +17,14 @@ class TestJobGraph(unittest.TestCase):
     def test_jobgraph_to_json(self):
         tasks = {
             "a": Job(
-                kind="test",
+                stage="test",
                 label="a",
                 description="some test a",
                 attributes={"attr": "a-task"},
                 actual_gitlab_ci_job={"taskdef": True},
             ),
             "b": Job(
-                kind="test",
+                stage="test",
                 label="b",
                 description="some test b",
                 attributes={},
@@ -44,20 +44,20 @@ class TestJobGraph(unittest.TestCase):
             res,
             {
                 "a": {
-                    "kind": "test",
+                    "stage": "test",
                     "label": "a",
                     "description": "some test a",
-                    "attributes": {"attr": "a-task", "kind": "test"},
+                    "attributes": {"attr": "a-task", "stage": "test"},
                     "actual_gitlab_ci_job": {"taskdef": True},
                     "dependencies": {"edgelabel": "b"},
                     "soft_dependencies": [],
                     "optimization": None,
                 },
                 "b": {
-                    "kind": "test",
+                    "stage": "test",
                     "label": "b",
                     "description": "some test b",
-                    "attributes": {"kind": "test"},
+                    "attributes": {"stage": "test"},
                     "actual_gitlab_ci_job": {"task": "def"},
                     "dependencies": {},
                     "soft_dependencies": [],
@@ -70,7 +70,7 @@ class TestJobGraph(unittest.TestCase):
         graph = JobGraph(
             jobs={
                 "a": Job(
-                    kind="fancy",
+                    stage="fancy",
                     label="a",
                     description="some fancy a",
                     attributes={},
@@ -79,7 +79,7 @@ class TestJobGraph(unittest.TestCase):
                     actual_gitlab_ci_job={"task": "def"},
                 ),
                 "b": Job(
-                    kind="pre",
+                    stage="pre",
                     label="b",
                     description="some pre b",
                     attributes={},
@@ -97,7 +97,7 @@ class TestJobGraph(unittest.TestCase):
     simple_graph = JobGraph(
         jobs={
             "a": Job(
-                kind="fancy",
+                stage="fancy",
                 label="a",
                 description="some fancy a",
                 attributes={},
@@ -106,7 +106,7 @@ class TestJobGraph(unittest.TestCase):
                 actual_gitlab_ci_job={"task": "def"},
             ),
             "b": Job(
-                kind="pre",
+                stage="pre",
                 label="b",
                 description="some pre b",
                 attributes={},
