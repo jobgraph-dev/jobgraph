@@ -99,7 +99,7 @@ def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
         # call the optimization strategy
         task = target_job_graph.jobs[label]
         opt_by, opt, arg = optimizations(label)
-        if opt.should_remove_task(task, params, arg):
+        if opt.should_remove_job(task, params, arg):
             removed.add(label)
             opt_counts[opt_by] += 1
             continue
@@ -195,7 +195,7 @@ def _get_candidate_docker_images(
 
 
 class OptimizationStrategy:
-    def should_remove_task(self, task, params, arg):
+    def should_remove_job(self, task, params, arg):
         """Determine whether to optimize this task by removing it.  Returns
         True to remove."""
         return False
@@ -228,9 +228,9 @@ class Either(OptimizationStrategy):
                 return rv
         return False
 
-    def should_remove_task(self, task, params, arg):
+    def should_remove_job(self, task, params, arg):
         return self._for_substrategies(
-            arg, lambda sub, arg: sub.should_remove_task(task, params, arg)
+            arg, lambda sub, arg: sub.should_remove_job(task, params, arg)
         )
 
     def should_replace_task(self, task, params, arg):
@@ -241,19 +241,19 @@ class Either(OptimizationStrategy):
 
 @register_strategy("always")
 class Always(OptimizationStrategy):
-    def should_remove_task(self, task, params, file_patterns):
+    def should_remove_job(self, task, params, file_patterns):
         return True
 
 
 @register_strategy("never")
 class Never(OptimizationStrategy):
-    def should_remove_task(self, task, params, file_patterns):
+    def should_remove_job(self, task, params, file_patterns):
         return False
 
 
 @register_strategy("skip-unless-changed")
 class SkipUnlessChanged(OptimizationStrategy):
-    def should_remove_task(self, task, params, file_patterns):
+    def should_remove_job(self, task, params, file_patterns):
         repo = get_repo()
         repo_root = Path(repo.path)
 

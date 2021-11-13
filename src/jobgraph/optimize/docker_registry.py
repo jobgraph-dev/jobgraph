@@ -6,7 +6,7 @@ from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 
 @register_strategy("skip-if-on-gitlab-container-registry")
 class GitlabContainerRegistrySearch(OptimizationStrategy):
-    def should_remove_task(self, task, params, arg):
+    def should_remove_job(self, task, params, arg):
         image_name = task.attributes["image_name"]
         image_tag = task.attributes["context_hash"]
         (
