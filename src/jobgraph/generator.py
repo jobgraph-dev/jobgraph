@@ -394,8 +394,4 @@ def load_jobs_for_stage(parameters, stage, root_dir=None):
     parameters["target-stage"] = stage
     parameters = Parameters(strict=False, **parameters)
     jgg = JobGraphGenerator(root_dir=root_dir, parameters=parameters)
-    return {
-        job.actual_gitlab_ci_job["metadata"]["name"]: job
-        for job in jgg.full_job_set
-        if job.stage == stage
-    }
+    return {job.label: job for job in jgg.full_job_set if job.stage == stage}

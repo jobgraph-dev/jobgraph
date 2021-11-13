@@ -488,17 +488,20 @@ def build_image(args):
         build_context(args["image_name"], args["context_only"], os.environ)
 
 
-@command("image-digest", help="Print the digest of a docker image.")
+@command(
+    "image-context-hash",
+    help="Print the context hash of a docker image. This hash used as the tag.",
+)
 @argument(
     "image_name",
-    help="Print the digest of the image of this name based on the current "
+    help="Print the context hash of the image of this name based on the current "
     "contents of the tree.",
 )
 def image_digest(args):
-    from jobgraph.docker import get_image_digest
+    from jobgraph.docker import get_image_context_hash
 
     try:
-        digest = get_image_digest(args["image_name"])
+        digest = get_image_context_hash(args["image_name"])
         print(digest)
     except Exception:
         traceback.print_exc()

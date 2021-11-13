@@ -12,7 +12,7 @@ from jobgraph.util import docker
 from jobgraph.util.taskcluster import get_session
 
 
-def get_image_digest(image_name):
+def get_image_context_hash(image_name):
     from jobgraph.generator import load_jobs_for_stage
     from jobgraph.parameters import Parameters
 
@@ -22,7 +22,7 @@ def get_image_digest(image_name):
     )
     tasks = load_jobs_for_stage(params, "docker-image")
     task = tasks[f"build-docker-image-{image_name}"]
-    return task.attributes["cached_task"]["digest"]
+    return task.attributes["context_hash"]
 
 
 def build_context(name, outputFile, args=None):
