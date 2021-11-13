@@ -76,10 +76,11 @@ def add_registry_specific_config(config, jobs):
         registry_type = job.pop("container-registry-type")
         # TODO Use decorators instead
         if registry_type == "gitlab":
-            job["before_script"] = [
+            script = job.setdefault("script", [])
+            script.append(
                 'docker login --username "$CI_REGISTRY_USER" --password '
                 '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
-            ]
+            )
             job.setdefault("optimization", {}).setdefault(
                 "skip-if-on-gitlab-container-registry", True
             )
@@ -130,7 +131,6 @@ def fill_template(config, jobs):
             "optimization": job.get("optimization", None),
             "parent": job.get("parent", None),
             "runner-alias": "images",
-            "before_script": job.get("before_script", []),
             "script": job.get("script", []),
             "variables": variables,
         }
