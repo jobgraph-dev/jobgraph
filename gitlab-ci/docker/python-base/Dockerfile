@@ -1,4 +1,4 @@
-FROM python:3.10-alpine@sha256:b2264d27b94d35e76f4a9cf54c803733e626aabb3dc54a5a62e8491b7202d044
+FROM python:3.10-alpine@sha256:1aac9b1e6201c1a224742e2f9ab0ca37689e6c9754b94380b05c520749fb8668
 
 ENV RUNNER_USER='runner' \
     RUNNER_HOME='/runner'
