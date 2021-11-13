@@ -132,6 +132,7 @@ def fill_template(config, jobs):
             "runner-alias": "images",
             "before_script": job.get("before_script", []),
             "script": job.get("script", []),
+            "services": job.get("services", []),
             "variables": variables,
         }
 

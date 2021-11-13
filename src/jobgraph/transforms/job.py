@@ -69,6 +69,16 @@ job_description_schema = Schema(
             taskref_or_string,
             [taskref_or_string],
         ),
+        Optional("services"): [
+            Any(
+                # strings are now allowed because we want to keep track of external
+                # images in config.yml
+                #
+                # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
+                {"in-tree": str},
+                {"docker-image-reference": str},
+            )
+        ],
         Optional("timeout"): str,
         Optional("variables"): dict,
     }
@@ -153,7 +163,14 @@ def build_job(config, jobs):
         job_def = copy(config.graph_config["job-defaults"])
         job_def["tags"] = [runner_tag]
         job_def["script"] = job["script"]
-        for key in ("before_script", "image", "retry", "timeout", "variables"):
+        for key in (
+            "before_script",
+            "image",
+            "retry",
+            "services",
+            "timeout",
+            "variables",
+        ):
             if job.get(key):
                 job_def[key] = job[key]
 
