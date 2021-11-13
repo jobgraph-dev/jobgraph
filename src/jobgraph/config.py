@@ -135,7 +135,8 @@ def validate_graph_config(config, config_yml):
 
 
 def load_graph_config(root_dir):
-    config_yml = os.path.join(root_dir, "config.yml")
+    # TODO set root_dir to be the one containing config.yml
+    config_yml = os.path.abspath(os.path.join(root_dir, "..", "config.yml"))
     if not os.path.exists(config_yml):
         raise Exception(f"Couldn't find jobgraph configuration: {config_yml}")
 
