@@ -173,14 +173,14 @@ def _get_candidate_docker_images(
     target_job_graph, named_links_dict, label, graph_config=None
 ):
     # TODO Remove the following line which is a workaround
-    graph_config = {"jobgraph": {}} if graph_config is None else graph_config
+    graph_config = {"docker": {}} if graph_config is None else graph_config
 
     docker_images = {
         name: target_job_graph.jobs[dep_label].attributes["docker_image_full_location"]
         for name, dep_label in named_links_dict.get(label, {}).items()
         if target_job_graph.jobs[dep_label].attributes.get("docker_image_full_location")
     }
-    external_docker_images = graph_config["jobgraph"].get("external-docker-images", {})
+    external_docker_images = graph_config["docker"].get("external-images", {})
     duplicate_image_references = set(docker_images.keys()).intersection(
         set(external_docker_images.keys())
     )

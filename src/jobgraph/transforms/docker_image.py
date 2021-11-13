@@ -173,7 +173,7 @@ def fill_context_hash(config, jobs):
             topsrcdir = os.path.dirname(config.graph_config.gitlab_ci_yml)
             # We need to use the real full location (not a reference to) here because
             # the context hash depends on it.
-            dind_image = config.graph_config["jobgraph"]["external-docker-images"][
+            dind_image = config.graph_config["docker"]["external-images"][
                 "docker-in-docker"
             ]
             context_hash = generate_context_hash(

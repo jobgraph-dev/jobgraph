@@ -52,7 +52,10 @@ class WithFakeKind(JobGraphGenerator):
 
 
 def fake_load_graph_config(root_dir):
-    graph_config = GraphConfig({"jobgraph": {}}, root_dir)
+    graph_config = GraphConfig(
+        {"docker": {"docker-in-docker": "some:dind@sha256:deadbeef"}, "jobgraph": {}},
+        root_dir,
+    )
     graph_config.__dict__["register"] = lambda: None
     return graph_config
 
