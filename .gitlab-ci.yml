@@ -1,52 +1,52 @@
 ---
 stages:
-    - decision
-    - generated-pipeline
+- decision
+- generated-pipeline
 
 
 decision:
     artifacts:
         expire_in: 1 year
         paths:
-            - artifacts/*
+        - artifacts/*
     image: registry.gitlab.com/johanlorenzo/jobgraph/decision@sha256:92dbab416ab1538e2df8daf6880f2383bb1719d7e73d1954c0d19d4054d687b9
     retry:
         max: 2
         when:
-            - unknown_failure
-            - stale_schedule
-            - runner_system_failure
-            - stuck_or_timeout_failure
+        - unknown_failure
+        - stale_schedule
+        - runner_system_failure
+        - stuck_or_timeout_failure
     script:
-        # We reinstall jobgraph to use the cloned version instead of the version in the docker image
-        - pip install --prefix "/runner/.local" --no-deps --editable "$CI_PROJECT_DIR"
-        - >-
-            if [ -n "$CI_MERGE_REQUEST_SOURCE_PROJECT_URL" ] && [ "$CI_MERGE_REQUEST_SOURCE_PROJECT_URL" != '' ]; then
-                export BASE_REPOSITORY="$CI_MERGE_REQUEST_SOURCE_PROJECT_URL"
-            else
-                export BASE_REPOSITORY="$CI_PROJECT_URL"
-            fi
+    # We reinstall jobgraph to use the cloned version instead of the version in the docker image
+    - pip install --prefix "/runner/.local" --no-deps --editable "$CI_PROJECT_DIR"
+    - >-
+        if [ -n "$CI_MERGE_REQUEST_SOURCE_PROJECT_URL" ] && [ "$CI_MERGE_REQUEST_SOURCE_PROJECT_URL" != '' ]; then
+            export BASE_REPOSITORY="$CI_MERGE_REQUEST_SOURCE_PROJECT_URL"
+        else
+            export BASE_REPOSITORY="$CI_PROJECT_URL"
+        fi
 
-        # We fetch the main branch of the repository so that jobgraph can determine
-        # the actual base revision in case $CI_COMMIT_BEFORE_SHA equals
-        # "0000000000000000000000000000000000000000".
-        #
-        # See https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
-        - export DEFAULT_BRANCH_SHORT_NAME="$(git ls-remote --symref origin HEAD | awk '/^ref:/ {sub(/refs\/heads\//, "", $2); print $2}')"
-        - git fetch "$GIT_REMOTE_NAME" "$DEFAULT_BRANCH_SHORT_NAME"
+    # We fetch the main branch of the repository so that jobgraph can determine
+    # the actual base revision in case $CI_COMMIT_BEFORE_SHA equals
+    # "0000000000000000000000000000000000000000".
+    #
+    # See https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+    - export DEFAULT_BRANCH_SHORT_NAME="$(git ls-remote --symref origin HEAD | awk '/^ref:/ {sub(/refs\/heads\//, "", $2); print $2}')"
+    - git fetch "$GIT_REMOTE_NAME" "$DEFAULT_BRANCH_SHORT_NAME"
 
-        - >-
-            jobgraph decision
-            --base-repository="$BASE_REPOSITORY"
-            --base-rev="$CI_COMMIT_BEFORE_SHA"
-            --head-ref="$CI_COMMIT_BRANCH"
-            --head-repository="$CI_PROJECT_URL"
-            --head-rev="$CI_COMMIT_SHA"
-            --head-tag="$CI_COMMIT_TAG"
-            --level='1'
-            --message="$CI_COMMIT_MESSAGE"
-            --owner="$CI_COMMIT_AUTHOR"
-            --pipeline-source="$CI_PIPELINE_SOURCE"
+    - >-
+        jobgraph decision
+        --base-repository="$BASE_REPOSITORY"
+        --base-rev="$CI_COMMIT_BEFORE_SHA"
+        --head-ref="$CI_COMMIT_BRANCH"
+        --head-repository="$CI_PROJECT_URL"
+        --head-rev="$CI_COMMIT_SHA"
+        --head-tag="$CI_COMMIT_TAG"
+        --level='1'
+        --message="$CI_COMMIT_MESSAGE"
+        --owner="$CI_COMMIT_AUTHOR"
+        --pipeline-source="$CI_PIPELINE_SOURCE"
     stage: decision
     variables:
         # We need the full history to ensure jobgraph makes the right decisions
@@ -59,6 +59,6 @@ generated-pipeline:
     stage: generated-pipeline
     trigger:
         include:
-            - artifact: artifacts/generated-gitlab-ci.yml
-              job: decision
+        - artifact: artifacts/generated-gitlab-ci.yml
+          job: decision
         strategy: depend

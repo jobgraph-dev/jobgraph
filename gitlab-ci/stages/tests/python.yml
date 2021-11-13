@@ -3,7 +3,7 @@ job-defaults:
     image: {in-tree: python-test}
     optimization:
         skip-unless-changed:
-            - "**/*.py"
+        - "**/*.py"
 
 
 black:
@@ -29,5 +29,5 @@ pyupgrade:
 unit:
     description: "Run `unit tests` to validate the latest changes"
     script:
-        - pip install --prefix "/runner/.local" --no-deps --editable .
-        - pytest --pyargs jobgraph
+    - pip install --prefix "/runner/.local" --no-deps --editable .
+    - pytest --pyargs jobgraph

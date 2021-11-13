@@ -2,7 +2,7 @@
 job-defaults:
     optimization:
         skip-unless-changed:
-            - "**/Dockerfile"
+        - "**/Dockerfile"
 
 
 hadolint:
