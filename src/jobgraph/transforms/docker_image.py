@@ -17,7 +17,12 @@ from jobgraph.util.docker import generate_context_hash
 from jobgraph.util.docker_registries import does_image_full_location_have_digest
 from jobgraph.util.docker_registries.gitlab import get_image_full_location
 from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
-from jobgraph.util.schema import Schema, taskref_or_string
+from jobgraph.util.schema import (
+    Schema,
+    optionally_keyed_by,
+    resolve_keyed_by,
+    taskref_or_string,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +38,9 @@ docker_image_schema = Schema(
         Required("name"): str,
         # Name of the parent docker image.
         Optional("parent"): str,
+        Optional("image-name-template"): optionally_keyed_by(
+            "head-ref-protection", str
+        ),
         # relative path (from config.path) to the file the docker image was defined
         # in.
         Optional("job-from"): str,
@@ -90,6 +98,27 @@ def add_registry_specific_config(config, jobs):
 
 
 @transforms.add
+def define_image_name(config, jobs):
+    for job in jobs:
+        job_name = job["name"]
+        resolve_keyed_by(
+            job,
+            "image-name-template",
+            item_name=job_name,
+            **{
+                "head-ref-protection": config.params["head_ref_protection"],
+            },
+        )
+        image_name_template = job.pop("image-name-template", job_name)
+        image_name = image_name_template.format(job_name=job_name)
+
+        attributes = job.setdefault("attributes", {})
+        attributes["image_name"] = image_name
+
+        yield job
+
+
+@transforms.add
 def fill_template(config, jobs):
     available_packages = set()
     for job in config.stage_dependencies_tasks:
@@ -99,34 +128,33 @@ def fill_template(config, jobs):
         available_packages.add(name)
 
     for job in jobs:
-        image_name = job["name"]
+        image_base_name = job["name"]
         packages = job.get("packages", [])
 
         for p in packages:
             if p not in available_packages:
                 raise Exception(
-                    f"Missing package job for {config.stage}-{image_name}: {p}"
+                    f"Missing package job for {config.stage}-{image_base_name}: {p}"
                 )
 
-        description = f"Build the docker image {image_name} for use by dependent jobs"
+        description = (
+            f"Build the docker image {image_base_name} for use by dependent jobs"
+        )
 
         variables = job.setdefault("variables", {})
         variables |= {
             # We use hashes as tags to reduce potential collisions of regular tags
-            "DOCKER_IMAGE_NAME": image_name,
+            "DOCKER_IMAGE_NAME": job["attributes"]["image_name"],
         }
 
         # include some information that is useful in reconstructing this job
         # from JSON
         jobdesc = {
-            "label": f"build-docker-image-{image_name}",
+            "label": f"build-docker-image-{image_base_name}",
             "description": description,
-            "attributes": {
-                "artifact_prefix": "public",
-                "image_name": image_name,
-            },
+            "attributes": job["attributes"],
             "image": {"docker-image-reference": "<docker-in-docker>"},
-            "name": image_name,
+            "name": image_base_name,
             "optimization": job.get("optimization", None),
             "parent": job.get("parent", None),
             "runner-alias": "images",
@@ -149,8 +177,8 @@ def fill_context_hash(config, jobs):
     jobs_list = list(jobs)
 
     for job in jobs_list:
-        image_name = job["attributes"]["image_name"]
-        definition = job.pop("definition", image_name)
+        image_base_name = job["name"]
+        definition = job.pop("definition", image_base_name)
         parent = job.pop("parent", None)
         args = job.setdefault("args", {})
         variables = job.setdefault("variables", {})
@@ -197,7 +225,7 @@ def fill_context_hash(config, jobs):
             gitlab_domain_name,
             repo_namespace,
             repo_name,
-            image_name,
+            job["attributes"]["image_name"],
             image_tag=context_hash,
         )
         job["attributes"] |= {

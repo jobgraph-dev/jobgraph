@@ -13,6 +13,10 @@ transforms:
 
 job-defaults:
     container-registry-type: gitlab
+    image-name-template:
+        by-head-ref-protection:
+            protected: "{job_name}"
+            unprotected: "unprotected/{job_name}"
 
 
 jobs:
