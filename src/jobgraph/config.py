@@ -20,7 +20,7 @@ from .util.yaml import load_yaml
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_ROOT_DIR = os.path.join("gitlab-ci", "ci")
+DEFAULT_ROOT_DIR = os.path.join("gitlab-ci", "stages")
 
 graph_config_schema = Schema(
     {
