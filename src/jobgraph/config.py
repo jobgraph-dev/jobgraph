@@ -115,10 +115,7 @@ class GraphConfig:
                 "Not guessing path to `config.yml`. "
                 "Graph config in non-standard location."
             )
-        return os.path.join(
-            self.root_dir,
-            "config.yml",
-        )
+        return _get_config_yml_path(self.root_dir)
 
     def write(self):
         with open(self.config_yml, "w") as f:
@@ -142,7 +139,7 @@ def validate_graph_config(config, config_yml):
 
 def load_graph_config(root_dir):
     # TODO set root_dir to be the one containing config.yml
-    config_yml = os.path.abspath(os.path.join(root_dir, "..", "config.yml"))
+    config_yml = _get_config_yml_path(root_dir)
     if not os.path.exists(config_yml):
         raise Exception(f"Couldn't find jobgraph configuration: {config_yml}")
 
@@ -151,3 +148,7 @@ def load_graph_config(root_dir):
 
     validate_graph_config(config, config_yml)
     return GraphConfig(config=config, root_dir=root_dir)
+
+
+def _get_config_yml_path(root_dir):
+    return os.path.abspath(os.path.join(root_dir, "..", "config.yml"))
