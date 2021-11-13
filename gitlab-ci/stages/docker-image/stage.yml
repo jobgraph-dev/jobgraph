@@ -21,3 +21,5 @@ jobs:
         parent: python-base
     python-test:
         parent: python-base
+    jobgraph-update:
+        parent: decision

@@ -26,16 +26,9 @@ def get_method(method):
     return _target_task_methods[method]
 
 
-def filter_out_cron(task, parameters):
-    """
-    Filter out tasks that run via cron.
-    """
-    return not task.attributes.get("cron")
-
-
 def filter_for_pipeline_source(task, parameters):
     run_on_pipeline_sources = set(
-        task.attributes.get("run_on_pipeline_source", ["push"])
+        task.attributes.get("run_on_pipeline_sources", ["push"])
     )
     return match_run_on_pipeline_sources(
         parameters["pipeline_source"], run_on_pipeline_sources
@@ -61,7 +54,6 @@ def standard_filter(task, parameters):
     return all(
         filter_func(task, parameters)
         for filter_func in (
-            filter_out_cron,
             filter_for_pipeline_source,
             filter_for_git_branch,
         )

@@ -159,7 +159,7 @@ def build_job(config, jobs):
 
         attributes = job.get("attributes", {})
         attributes["run_on_pipeline_sources"] = job.get(
-            "run-on-pipeline-sources", ["all"]
+            "run-on-pipeline-sources", ["push"]
         )
         attributes["run_on_git_branches"] = job.get("run-on-git-branches", ["all"])
         attributes["always_target"] = job["always-target"]

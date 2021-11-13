@@ -12,10 +12,10 @@ from jobgraph.jobgraph import JobGraph
 
 
 class TestTargetTasks(unittest.TestCase):
-    def default_matches_pipeline_source(self, run_on_pipeline_source, pipeline_source):
+    def default_matches_pipeline_source(self, run_on_pipeline_sources, pipeline_source):
         attributes = {}
-        if run_on_pipeline_source is not None:
-            attributes["run_on_pipeline_source"] = run_on_pipeline_source
+        if run_on_pipeline_sources is not None:
+            attributes["run_on_pipeline_sources"] = run_on_pipeline_sources
 
         return self.default_matches(
             attributes=attributes,
@@ -32,7 +32,7 @@ class TestTargetTasks(unittest.TestCase):
             "run_git_branches": ["all"],
         }
         if run_on_pipeline_sources is not None:
-            attributes["run_on_pipeline_source"] = run_on_pipeline_sources
+            attributes["run_on_pipeline_sources"] = run_on_pipeline_sources
         if run_on_git_branches is not None:
             attributes["run_on_git_branches"] = run_on_git_branches
 

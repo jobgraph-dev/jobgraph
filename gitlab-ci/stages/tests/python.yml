@@ -28,6 +28,5 @@ pyupgrade:
 
 unit:
     description: "Run `unit tests` to validate the latest changes"
-    script:
-    - pip install --prefix "/runner/.local" --no-deps --editable .
-    - pytest --pyargs jobgraph
+    reinstall-jobgraph: true
+    script: pytest --pyargs jobgraph
