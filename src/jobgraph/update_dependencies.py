@@ -22,6 +22,7 @@ _PIN_COMMANDS = " && ".join(
         "pip install pip-compile-multi",
         "pip-compile-multi --generate-hashes base --generate-hashes test --generate-hashes dev",
         "chmod 644 requirements/*.txt",
+        f"chown {os.getuid()}:{os.getgid()} requirements/*.txt",
     )
 )
 
@@ -46,12 +47,6 @@ def _update_jobgraph_python_requirements():
         _PIN_COMMANDS,
     )
     subprocess.run(docker_command)
-
-    requirement_files = ROOT_DIR.glob("requirements/**/*")
-    current_user = os.getuid()
-    current_group = os.getgid()
-    for file in requirement_files:
-        os.chown(file, current_user, current_group)
 
 
 def _update_dockerfiles():
