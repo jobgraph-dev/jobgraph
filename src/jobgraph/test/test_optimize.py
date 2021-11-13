@@ -18,17 +18,11 @@ class Remove(optimize.OptimizationStrategy):
         return True
 
 
-class Replace(optimize.OptimizationStrategy):
-    def should_replace_task(self, task, params, taskid):
-        return taskid
-
-
 class TestOptimize(unittest.TestCase):
 
     strategies = {
         "never": optimize.OptimizationStrategy(),
         "remove": Remove(),
-        "replace": Replace(),
     }
 
     def make_task(

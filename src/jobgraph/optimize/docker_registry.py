@@ -27,6 +27,3 @@ class GitlabContainerRegistrySearch(OptimizationStrategy):
             return True
         except ValueError:
             return False
-
-    def should_replace_task(self, *args):
-        return False

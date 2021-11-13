@@ -200,12 +200,6 @@ class OptimizationStrategy:
         True to remove."""
         return False
 
-    def should_replace_task(self, task, params, arg):
-        """Determine whether to optimize this task by replacing it.  Returns a
-        taskId to replace this task, True to replace with nothing, or False to
-        keep the task."""
-        return False
-
 
 class Either(OptimizationStrategy):
     """Given one or more optimization strategies, remove a task if any of them
@@ -231,11 +225,6 @@ class Either(OptimizationStrategy):
     def should_remove_job(self, task, params, arg):
         return self._for_substrategies(
             arg, lambda sub, arg: sub.should_remove_job(task, params, arg)
-        )
-
-    def should_replace_task(self, task, params, arg):
-        return self._for_substrategies(
-            arg, lambda sub, arg: sub.should_replace_task(task, params, arg)
         )
 
 
