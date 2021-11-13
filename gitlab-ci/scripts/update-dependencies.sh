@@ -28,8 +28,10 @@ GIT_MAIN_BRANCH="$(git ls-remote --symref "$GIT_REMOTE" HEAD | awk '/^ref:/ {sub
 git push "$GIT_REMOTE" "$GIT_BRANCH" \
     --force \
     --push-option='merge_request.create' \
-    --push-option='merge_request.label="cron"' \
+    --push-option="merge_request.description=This merge request was automatically created by jobgraph in \`$CI_JOB_NAME\` ([#$CI_JOB_ID]($CI_JOB_URL))." \
+    --push-option='merge_request.label=scheduled' \
+    --push-option='merge_request.label=update-dependencies' \
     --push-option='merge_request.merge_when_pipeline_succeeds' \
     --push-option='merge_request.remove_source_branch' \
     --push-option="merge_request.target=$GIT_MAIN_BRANCH" \
-    --push-option='merge_request.title="Update jobgraph dependencies"'
+    --push-option='merge_request.title=Update jobgraph dependencies'
