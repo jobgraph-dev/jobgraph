@@ -520,11 +520,19 @@ def image_digest(args):
 @argument("--owner", required=True, help="email address of who owns this graph")
 @argument(
     "--is-head-ref-protected",
+    # This argument is written in an usual way for 2 reasons:
+    #   1. It's not a flag (as in we define it with `store_true`) because it's just easier
+    #      to keep this argument around no matter the value of $CI_COMMIT_REF_PROTECTED.
+    #   2. It doesn't store a boolean (which was originally the case) because functions
+    #      like resolve_keyed_by() only work with strings.
+    #
+    # This is why we convert a string which conveys boolean information into another
+    # string that stores 2 states.
     type=lambda x: "protected" if strtobool(x) else "unprotected",
-    choices=("protected", "unprotected"),
     dest="head_ref_protection",
     required=True,
-    help="boolean that expresses whether the current git ref is protected on Gitlab",
+    help="boolean that expresses whether the current git ref is protected on Gitlab. "
+    "You usually want to pass $CI_COMMIT_REF_PROTECTED to this argument",
 )
 @argument(
     "--target-tasks-method", help="method for selecting the target tasks to generate"

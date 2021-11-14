@@ -12,7 +12,7 @@ from pprint import pformat
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-from voluptuous import ALLOW_EXTRA, Required, Schema
+from voluptuous import ALLOW_EXTRA, Any, Required, Schema
 
 from jobgraph.util.memoize import memoize
 from jobgraph.util.readonlydict import ReadOnlyDict
@@ -40,7 +40,7 @@ base_schema = Schema(
         Required("do_not_optimize"): [str],
         Required("filters"): [str],
         Required("head_ref"): str,
-        Required("head_ref_protection"): str,
+        Required("head_ref_protection"): Any("protected", "unprotected"),
         Required("head_repository"): str,
         Required("head_rev"): str,
         Required("head_tag"): str,
