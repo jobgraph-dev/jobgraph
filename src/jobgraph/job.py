@@ -19,8 +19,6 @@ class Job:
     - optimization: optimization to apply to the task (see jobgraph.optimize)
     - dependencies: tasks this one depends on, in the form {name: label}, for example
       {'build': 'build-linux64/opt', 'docker-image': 'build-docker-image-desktop-test'}
-    - soft_dependencies: tasks this one may depend on if they are available post
-      optimisation. They are set as a list of tasks label.
 
     And later, as the task-graph processing proceeds:
 
@@ -38,7 +36,6 @@ class Job:
     task_id = attr.ib(default=None, init=False)
     optimization = attr.ib(default=None)
     dependencies = attr.ib(factory=dict)
-    soft_dependencies = attr.ib(factory=list)
 
     def __attrs_post_init__(self):
         self.attributes["stage"] = self.stage
@@ -50,7 +47,6 @@ class Job:
             "description": self.description,
             "attributes": self.attributes,
             "dependencies": self.dependencies,
-            "soft_dependencies": self.soft_dependencies,
             "optimization": self.optimization,
             "actual_gitlab_ci_job": self.actual_gitlab_ci_job,
         }
@@ -73,7 +69,6 @@ class Job:
             actual_gitlab_ci_job=job_dict["actual_gitlab_ci_job"],
             optimization=job_dict["optimization"],
             dependencies=job_dict.get("dependencies"),
-            soft_dependencies=job_dict.get("soft_dependencies"),
         )
         if "task_id" in job_dict:
             rv.task_id = job_dict["task_id"]

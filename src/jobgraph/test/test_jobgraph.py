@@ -50,7 +50,6 @@ class TestJobGraph(unittest.TestCase):
                     "attributes": {"attr": "a-task", "stage": "test"},
                     "actual_gitlab_ci_job": {"taskdef": True},
                     "dependencies": {"edgelabel": "b"},
-                    "soft_dependencies": [],
                     "optimization": None,
                 },
                 "b": {
@@ -60,7 +59,6 @@ class TestJobGraph(unittest.TestCase):
                     "attributes": {"stage": "test"},
                     "actual_gitlab_ci_job": {"task": "def"},
                     "dependencies": {},
-                    "soft_dependencies": [],
                     "optimization": {"seta": None},
                 },
             },

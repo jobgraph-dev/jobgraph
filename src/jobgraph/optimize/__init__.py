@@ -131,12 +131,6 @@ def get_subgraph(
             if label not in omit
         }
 
-        # Add remaining soft dependencies
-        if task.soft_dependencies:
-            named_task_dependencies.update(
-                {label: label for label in task.soft_dependencies if label not in omit}
-            )
-
         candidate_docker_images = _get_candidate_docker_images(
             target_job_graph, named_links_dict, label, graph_config
         )
