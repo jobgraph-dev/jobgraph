@@ -124,7 +124,6 @@ def get_subgraph(
     for label, task in target_job_graph.jobs.items():
         if label in omit:
             continue
-        task.task_id = "TO-BE-REMOVED"
         named_task_dependencies = {
             name: label
             for name, label in named_links_dict.get(label, {}).items()
@@ -138,7 +137,6 @@ def get_subgraph(
         task.actual_gitlab_ci_job = resolve_task_references(
             task.label,
             task.actual_gitlab_ci_job,
-            task_id=task.task_id,
             dependencies=named_task_dependencies,
             docker_images=candidate_docker_images,
         )

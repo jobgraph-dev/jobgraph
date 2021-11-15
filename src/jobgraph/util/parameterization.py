@@ -5,11 +5,9 @@
 
 import re
 
-from jobgraph.util.taskcluster import get_artifact_url
 from jobgraph.util.time import json_time_from_now
 
-TASK_REFERENCE_PATTERN = re.compile("<([^>]+)>")
-ARTIFACT_REFERENCE_PATTERN = re.compile("<([^/]+)/([^>]+)>")
+DOCKER_IMAGE_REFERENCE_PATTERN = re.compile("<([^>]+)>")
 
 
 def _recurse(val, param_fns):
@@ -38,27 +36,10 @@ def resolve_timestamps(now, task_def):
     )
 
 
-def resolve_task_references(label, task_def, task_id, dependencies, docker_images):
+def resolve_task_references(label, task_def, dependencies, docker_images):
     """Resolve all instances of
-      {'task-reference': '..<..>..'}
-    and
-      {'artifact-reference`: '..<dependency/artifact/path>..'}
+      {'docker-image-reference': '..<..>..'}
     in the given task definition, using the given dependencies"""
-
-    def task_reference(val):
-        def repl(match):
-            key = match.group(1)
-            if key == "self":
-                return task_id
-            try:
-                return dependencies[key]
-            except KeyError:
-                # handle escaping '<'
-                if key == "<":
-                    return key
-                raise KeyError(f"task '{label}' has no dependency named '{key}'")
-
-        return TASK_REFERENCE_PATTERN.sub(repl, val)
 
     def docker_image_reference(val):
         def repl(match):
@@ -72,34 +53,11 @@ def resolve_task_references(label, task_def, task_id, dependencies, docker_image
                     return key
                 raise KeyError(f"task '{label}' has no dependency named '{key}'")
 
-        return TASK_REFERENCE_PATTERN.sub(repl, val)
-
-    def artifact_reference(val):
-        def repl(match):
-            dependency, artifact_name = match.group(1, 2)
-
-            if dependency == "self":
-                raise KeyError(f"task '{label}' can't reference artifacts of self")
-            else:
-                try:
-                    task_id = dependencies[dependency]
-                except KeyError:
-                    raise KeyError(
-                        f"task '{label}' has no dependency named '{dependency}'"
-                    )
-
-            assert artifact_name.startswith(
-                "public/"
-            ), f"artifact-reference only supports public artifacts, not `{artifact_name}`"
-            return get_artifact_url(task_id, artifact_name)
-
-        return ARTIFACT_REFERENCE_PATTERN.sub(repl, val)
+        return DOCKER_IMAGE_REFERENCE_PATTERN.sub(repl, val)
 
     return _recurse(
         task_def,
         {
-            "artifact-reference": artifact_reference,
             "docker-image-reference": docker_image_reference,
-            "task-reference": task_reference,
         },
     )

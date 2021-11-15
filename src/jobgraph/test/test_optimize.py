@@ -31,7 +31,6 @@ class TestOptimize(unittest.TestCase):
         optimization=None,
         task_def=None,
         optimized=None,
-        task_id=None,
         dependencies=None,
     ):
         task_def = task_def or {"sample": "task-def"}
@@ -43,7 +42,6 @@ class TestOptimize(unittest.TestCase):
             actual_gitlab_ci_job=task_def,
         )
         task.optimization = optimization
-        task.task_id = task_id
         if dependencies is not None:
             task.actual_gitlab_ci_job["needs"] = sorted(dependencies)
             task.actual_gitlab_ci_job["stage"] = "test"
@@ -135,10 +133,10 @@ class TestOptimize(unittest.TestCase):
             graph,
             set(),
             self.make_opt_graph(
-                self.make_task("t1", task_id="TO-BE-REMOVED", dependencies={}),
-                self.make_task("t2", task_id="TO-BE-REMOVED", dependencies={"t1"}),
+                self.make_task("t1", dependencies={}),
+                self.make_task("t2", dependencies={"t1"}),
                 self.make_task(
-                    "t3", task_id="TO-BE-REMOVED", dependencies={"t1", "t2"}
+                    "t3", dependencies={"t1", "t2"}
                 ),
                 ("t3", "t2", "dep"),
                 ("t3", "t1", "dep2"),
@@ -153,6 +151,6 @@ class TestOptimize(unittest.TestCase):
             graph,
             {"t2", "t3"},
             self.make_opt_graph(
-                self.make_task("t1", task_id="TO-BE-REMOVED", dependencies={})
+                self.make_task("t1", dependencies={})
             ),
         )

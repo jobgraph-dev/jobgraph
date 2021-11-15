@@ -22,8 +22,6 @@ class Job:
 
     And later, as the task-graph processing proceeds:
 
-    - task_id -- TaskCluster taskId under which this task will be created
-
     This class is just a convenience wrapper for the data type and managing
     display, comparison, serialization, etc. It has no functionality of its own.
     """
@@ -33,7 +31,6 @@ class Job:
     description = attr.ib()
     attributes = attr.ib()
     actual_gitlab_ci_job = attr.ib()
-    task_id = attr.ib(default=None, init=False)
     optimization = attr.ib(default=None)
     dependencies = attr.ib(factory=dict)
 
@@ -50,8 +47,6 @@ class Job:
             "optimization": self.optimization,
             "actual_gitlab_ci_job": self.actual_gitlab_ci_job,
         }
-        if self.task_id:
-            rv["task_id"] = self.task_id
         return rv
 
     @classmethod
@@ -70,6 +65,4 @@ class Job:
             optimization=job_dict["optimization"],
             dependencies=job_dict.get("dependencies"),
         )
-        if "task_id" in job_dict:
-            rv.task_id = job_dict["task_id"]
         return rv

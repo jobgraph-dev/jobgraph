@@ -253,7 +253,6 @@ def load_parameters_file(spec, strict=True, overrides=None):
         task-id=fdtgsD5DQUmAQZEaGMvQ4Q
     """
     from jobgraph.util import yaml
-    from jobgraph.util.taskcluster import get_artifact_url
 
     if overrides is None:
         overrides = {}
@@ -266,12 +265,6 @@ def load_parameters_file(spec, strict=True, overrides=None):
         # reading parameters from a local parameters.yml file
         f = open(spec)
     except OSError:
-        # fetching parameters.yml using task task-id or supplied url
-        task_id = None
-        if spec.startswith("task-id="):
-            task_id = spec.split("=")[1]
-        if task_id:
-            spec = get_artifact_url(task_id, "public/parameters.yml")
         f = urlopen(spec)
 
     if spec.endswith(".yml"):

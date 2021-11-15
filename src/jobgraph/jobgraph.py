@@ -74,8 +74,6 @@ class JobGraph:
         edges = set()
         for key, value in jobs_dict.items():
             jobs[key] = Job.from_json(value)
-            if "task_id" in value:
-                jobs[key].task_id = value["task_id"]
             for depname, dep in value["dependencies"].items():
                 edges.add((key, dep, depname))
         job_graph = cls(jobs, Graph(set(jobs), edges))

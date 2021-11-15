@@ -18,8 +18,6 @@ def graph_config():
 @pytest.fixture
 def make_jobgraph():
     def inner(tasks):
-        for label in tasks:
-            tasks[label].task_id = "TO-BE-REMOVED"
         graph = Graph(nodes=set(tasks), edges=set())
         jobgraph = JobGraph(tasks, graph)
         return jobgraph
