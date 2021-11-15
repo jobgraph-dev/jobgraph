@@ -1,10 +1,10 @@
 import pytest
 
-from jobgraph import generator
+from jobgraph import generator, optimize
+from jobgraph import parameters as jg_parameters
 from jobgraph import target_jobs as target_jobs_mod
 from jobgraph.config import GraphConfig
 from jobgraph.generator import JobGraphGenerator, Stage
-from jobgraph.optimize import OptimizationStrategy
 from jobgraph.util.templates import merge
 
 
@@ -64,7 +64,7 @@ class FakeParameters(dict):
     strict = True
 
 
-class FakeOptimization(OptimizationStrategy):
+class FakeOptimization(optimize.OptimizationStrategy):
     def __init__(self, mode, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.mode = mode
@@ -77,6 +77,16 @@ class FakeOptimization(OptimizationStrategy):
         if self.mode == "odd":
             return task.actual_gitlab_ci_job["i"] % 2 != 0
         return False
+
+
+class FakeRepo:
+    head_ref = "some-head-ref"
+
+    def get_url(*args, **kwargs):
+        return "some_url"
+
+    def get_file_at_given_revision(*args, **kwargs):
+        return "some_file_content"
 
 
 @pytest.fixture
@@ -102,6 +112,22 @@ def maketgg(monkeypatch):
         parameters.update(params)
 
         monkeypatch.setattr(generator, "load_graph_config", fake_load_graph_config)
+        monkeypatch.setattr(
+            optimize,
+            "_get_changed_external_docker_images",
+            lambda *args, **kwargs: "",
+        )
+
+        monkeypatch.setattr(
+            jg_parameters,
+            "get_repo",
+            lambda *args, **kwargs: FakeRepo(),
+        )
+        monkeypatch.setattr(
+            optimize,
+            "_remove_optimization_if_any_external_docker_image_has_changed",
+            lambda *args, **kwargs: {},
+        )
 
         return WithFakeKind("/root", parameters)
 

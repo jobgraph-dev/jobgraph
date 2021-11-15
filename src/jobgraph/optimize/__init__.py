@@ -18,10 +18,12 @@ import os
 from collections import defaultdict
 from pathlib import Path
 
+from yaml import safe_load
+
 from ..graph import Graph
 from ..jobgraph import JobGraph
 from ..parameters import get_repo
-from ..util.parameterization import resolve_task_references
+from ..util.parameterization import resolve_docker_image_references
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +47,13 @@ def optimize_job_graph(target_job_graph, params, do_not_optimize, graph_config):
     """
     Perform task optimization, returning a JobGraph.
     """
+    changed_external_docker_images = _get_changed_external_docker_images(
+        params, graph_config
+    )
+    _remove_optimization_if_any_external_docker_image_has_changed(
+        target_job_graph, changed_external_docker_images
+    )
+
     optimizations = _get_optimizations(target_job_graph, strategies)
 
     removed_jobs = remove_jobs(
@@ -59,6 +68,51 @@ def optimize_job_graph(target_job_graph, params, do_not_optimize, graph_config):
         removed_jobs,
         graph_config,
     )
+
+
+def _get_changed_external_docker_images(params, graph_config):
+    repo = get_repo()
+    config_file_relative_path = os.path.relpath(
+        graph_config.config_yml, graph_config.vcs_root
+    )
+    config_yml_at_base_rev = repo.get_file_at_given_revision(
+        params["base_rev"], config_file_relative_path
+    )
+    external_docker_images_at_base_rev = (
+        safe_load(config_yml_at_base_rev).get("docker", {}).get("external-images", {})
+    )
+    external_docker_images = graph_config["docker"].get("external-images", {})
+
+    return {
+        image_reference
+        for image_reference, image_full_location in external_docker_images.items()
+        if image_full_location not in external_docker_images_at_base_rev.values()
+    }
+
+
+def _remove_optimization_if_any_external_docker_image_has_changed(
+    target_job_graph, changed_external_docker_images
+):
+    for label in target_job_graph.graph.visit_preorder():
+        job = target_job_graph.jobs[label]
+        image_reference = job.actual_gitlab_ci_job["image"][
+            "docker-image-reference"
+        ].strip("<>")
+        service_image_references = [
+            service.get("docker-image-reference", "").strip("<>")
+            for service in job.actual_gitlab_ci_job.get("services", {})
+            if service.get("docker-image-reference", "")
+        ]
+        all_image_references = [image_reference] + service_image_references
+        if any(
+            image_reference in changed_external_docker_images
+            for image_reference in all_image_references
+        ):
+            logger.debug(
+                f'Cannot optimize "{label}", one or many of its external '
+                "docker images have changed."
+            )
+            job.optimization = {}
 
 
 def _get_optimizations(target_job_graph, strategies):
@@ -134,10 +188,9 @@ def get_subgraph(
             target_job_graph, named_links_dict, label, graph_config
         )
 
-        task.actual_gitlab_ci_job = resolve_task_references(
+        task.actual_gitlab_ci_job = resolve_docker_image_references(
             task.label,
             task.actual_gitlab_ci_job,
-            dependencies=named_task_dependencies,
             docker_images=candidate_docker_images,
         )
         deps = task.actual_gitlab_ci_job.setdefault("needs", [])

@@ -200,9 +200,7 @@ OptimizationSchema = voluptuous.Any(
 )
 
 # shortcut for a string where task references are allowed
-taskref_or_string = voluptuous.Any(
+docker_image_ref_or_string = voluptuous.Any(
     str,
-    {voluptuous.Required("artifact-reference"): str},
     {voluptuous.Required("docker-image-reference"): str},
-    {voluptuous.Required("task-reference"): str},
 )

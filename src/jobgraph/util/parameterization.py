@@ -36,27 +36,26 @@ def resolve_timestamps(now, task_def):
     )
 
 
-def resolve_task_references(label, task_def, dependencies, docker_images):
+def resolve_docker_image_references(label, job_def, docker_images):
     """Resolve all instances of
       {'docker-image-reference': '..<..>..'}
     in the given task definition, using the given dependencies"""
 
     def docker_image_reference(val):
         def repl(match):
-            key = match.group(1)
+            image_reference = match.group(1)
             try:
-                docker_image = docker_images[key]
+                docker_image = docker_images[image_reference]
                 return docker_image
             except KeyError:
-                # handle escaping '<'
-                if key == "<":
-                    return key
-                raise KeyError(f"task '{label}' has no dependency named '{key}'")
+                raise KeyError(
+                    f'job "{label}" has no docker image named "{image_reference}"'
+                )
 
         return DOCKER_IMAGE_REFERENCE_PATTERN.sub(repl, val)
 
     return _recurse(
-        task_def,
+        job_def,
         {
             "docker-image-reference": docker_image_reference,
         },

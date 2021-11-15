@@ -135,9 +135,7 @@ class TestOptimize(unittest.TestCase):
             self.make_opt_graph(
                 self.make_task("t1", dependencies={}),
                 self.make_task("t2", dependencies={"t1"}),
-                self.make_task(
-                    "t3", dependencies={"t1", "t2"}
-                ),
+                self.make_task("t3", dependencies={"t1", "t2"}),
                 ("t3", "t2", "dep"),
                 ("t3", "t1", "dep2"),
                 ("t2", "t1", "dep"),
@@ -150,7 +148,5 @@ class TestOptimize(unittest.TestCase):
         self.assert_subgraph(
             graph,
             {"t2", "t3"},
-            self.make_opt_graph(
-                self.make_task("t1", dependencies={})
-            ),
+            self.make_opt_graph(self.make_task("t1", dependencies={})),
         )

@@ -135,6 +135,9 @@ class GitRepository(Repository):
     def find_first_common_revision(self, base_branch, head_rev):
         return self.run("merge-base", base_branch, head_rev).strip()
 
+    def get_file_at_given_revision(self, revision, file_path):
+        return self.run("show", f"{revision}:{file_path}").strip()
+
 
 def get_repository(path):
     """Get a repository object for the repository at `path`.

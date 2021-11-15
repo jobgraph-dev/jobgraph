@@ -14,7 +14,7 @@ from voluptuous import All, Any, NotIn, Optional, Required
 
 from jobgraph import MAX_DEPENDENCIES
 from jobgraph.transforms.base import TransformSequence
-from jobgraph.util.schema import Schema, taskref_or_string, validate_schema
+from jobgraph.util.schema import Schema, docker_image_ref_or_string, validate_schema
 
 from ..util import docker as dockerutil
 from ..util.runners import get_runner_tag
@@ -57,17 +57,17 @@ job_description_schema = Schema(
         Required("always-target"): bool,
         # Optimization to perform on this job during the optimization phase.
         # Optimizations are defined in gitlab-ci/jobgraph/optimize.py.
-        Required("optimization"): Any(dict, None),
+        Optional("optimization"): dict,
         # the runner-alias for the job. Will be substituted into an actual Gitlab
         # CI tag.
         "runner-alias": str,
         Optional("before_script"): Any(
-            taskref_or_string,
-            [taskref_or_string],
+            docker_image_ref_or_string,
+            [docker_image_ref_or_string],
         ),
         Required("script"): Any(
-            taskref_or_string,
-            [taskref_or_string],
+            docker_image_ref_or_string,
+            [docker_image_ref_or_string],
         ),
         Optional("services"): [
             Any(
@@ -121,7 +121,7 @@ def build_docker_runner_payload(config, jobs):
 def set_defaults(config, jobs):
     for job in jobs:
         job.setdefault("always-target", False)
-        job.setdefault("optimization", None)
+        job.setdefault("optimization", {})
 
         yield job
 
@@ -187,7 +187,7 @@ def build_job(config, jobs):
             "actual_gitlab_ci_job": job_def,
             "dependencies": job.get("dependencies", {}),
             "attributes": attributes,
-            "optimization": job.get("optimization", None),
+            "optimization": job["optimization"],
         }
 
 

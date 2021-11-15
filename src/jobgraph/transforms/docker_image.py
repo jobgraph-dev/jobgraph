@@ -19,9 +19,9 @@ from jobgraph.util.docker_registries.gitlab import get_image_full_location
 from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 from jobgraph.util.schema import (
     Schema,
+    docker_image_ref_or_string,
     optionally_keyed_by,
     resolve_keyed_by,
-    taskref_or_string,
 )
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ docker_image_schema = Schema(
         Optional("definition"): str,
         # List of package jobs this docker image depends on.
         Optional("packages"): [str],
-        Optional("services"): [taskref_or_string],
+        Optional("services"): [docker_image_ref_or_string],
         Optional("variables"): dict,
     }
 )

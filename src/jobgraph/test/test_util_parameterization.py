@@ -6,7 +6,10 @@
 import datetime
 import unittest
 
-from jobgraph.util.parameterization import resolve_task_references, resolve_timestamps
+from jobgraph.util.parameterization import (
+    resolve_docker_image_references,
+    resolve_timestamps,
+)
 
 
 class TestTimestamps(unittest.TestCase):
@@ -38,78 +41,88 @@ class TestTimestamps(unittest.TestCase):
 
 class TestTaskRefs(unittest.TestCase):
     def do(self, input, output):
-        taskid_for_edge_name = {f"edge{n}": f"tid{n}" for n in range(1, 4)}
         self.assertEqual(
-            resolve_task_references(
+            resolve_docker_image_references(
                 "subject",
                 input,
-                "tid-self",
-                taskid_for_edge_name,
-                docker_images={},
+                docker_images={
+                    "image_reference1": "image1",
+                    "image_reference2": "image2",
+                    "image_reference3": "image3",
+                },
             ),
             output,
         )
 
     def test_no_change(self):
-        "resolve_task_references does nothing when there are no task references"
+        "resolve_docker_image_references does nothing when there are no task references"
         self.do(
-            {"in-a-list": ["stuff", {"property": "<edge1>"}]},
-            {"in-a-list": ["stuff", {"property": "<edge1>"}]},
+            {"in-a-list": ["stuff", {"property": "<image_reference1>"}]},
+            {"in-a-list": ["stuff", {"property": "<image_reference1>"}]},
         )
 
     def test_in_list(self):
-        "resolve_task_references resolves task references in a list"
+        "resolve_docker_image_references resolves task references in a list"
         self.do(
-            {"in-a-list": ["stuff", {"task-reference": "<edge1>"}]},
-            {"in-a-list": ["stuff", "tid1"]},
+            {"in-a-list": ["stuff", {"docker-image-reference": "<image_reference1>"}]},
+            {"in-a-list": ["stuff", "image1"]},
         )
 
     def test_in_dict(self):
-        "resolve_task_references resolves task references in a dict"
+        "resolve_docker_image_references resolves task references in a dict"
         self.do(
-            {"in-a-dict": {"stuff": {"task-reference": "<edge2>"}}},
-            {"in-a-dict": {"stuff": "tid2"}},
+            {"in-a-dict": {"stuff": {"docker-image-reference": "<image_reference2>"}}},
+            {"in-a-dict": {"stuff": "image2"}},
         )
 
     def test_multiple(self):
-        "resolve_task_references resolves multiple references in the same string"
+        "resolve_docker_image_references resolves multiple references in the same string"
         self.do(
-            {"multiple": {"task-reference": "stuff <edge1> stuff <edge2> after"}},
-            {"multiple": "stuff tid1 stuff tid2 after"},
+            {
+                "multiple": {
+                    "docker-image-reference": "stuff <image_reference1> stuff "
+                    "<image_reference2> after",
+                }
+            },
+            {"multiple": "stuff image1 stuff image2 after"},
         )
 
     def test_embedded(self):
-        "resolve_task_references resolves ebmedded references"
+        "resolve_docker_image_references resolves ebmedded references"
         self.do(
-            {"embedded": {"task-reference": "stuff before <edge3> stuff after"}},
-            {"embedded": "stuff before tid3 stuff after"},
+            {
+                "embedded": {
+                    "docker-image-reference": "stuff before <image_reference3> stuff after"
+                }
+            },
+            {"embedded": "stuff before image3 stuff after"},
         )
-
-    def test_escaping(self):
-        "resolve_task_references resolves escapes in task references"
-        self.do({"escape": {"task-reference": "<<><edge3>>"}}, {"escape": "<tid3>"})
 
     def test_multikey(self):
-        "resolve_task_references is ignored when there is another key in the dict"
+        "resolve_docker_image_references is ignored when there is another key in the dict"
         self.do(
-            {"escape": {"task-reference": "<edge3>", "another-key": True}},
-            {"escape": {"task-reference": "<edge3>", "another-key": True}},
+            {
+                "escape": {
+                    "docker-image-reference": "<image_reference3>",
+                    "another-key": True,
+                }
+            },
+            {
+                "escape": {
+                    "docker-image-reference": "<image_reference3>",
+                    "another-key": True,
+                }
+            },
         )
 
-    def test_self(self):
-        "resolve_task_references resolves `self` to the provided task id"
-        self.do({"escape": {"task-reference": "<self>"}}, {"escape": "tid-self"})
-
     def test_invalid(self):
-        "resolve_task_references raises a KeyError on reference to an invalid task"
+        "resolve_docker_image_references raises a KeyError on reference to an invalid task"
         self.assertRaisesRegex(
             KeyError,
-            "task 'subject' has no dependency named 'no-such'",
-            lambda: resolve_task_references(
+            'job "subject" has no docker image named "no-such"',
+            lambda: resolve_docker_image_references(
                 "subject",
-                {"task-reference": "<no-such>"},
-                "tid-self",
-                {},
+                {"docker-image-reference": "<no-such>"},
                 docker_images={},
             ),
         )
