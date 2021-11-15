@@ -67,8 +67,10 @@ def jobgraph_decision(options, parameters=None):
     write_artifact("target-jobs.yml", list(jgg.target_job_set.jobs.keys()))
 
     # write out the optimized job graph to describe what will actually happen
-    write_artifact("optimized-job-graph.yml", jgg.morphed_job_graph.to_json())
-    write_artifact("generated-gitlab-ci.yml", jgg.morphed_job_graph.to_gitlab_ci_jobs())
+    write_artifact("optimized-job-graph.yml", jgg.optimized_job_graph.to_json())
+    write_artifact(
+        "generated-gitlab-ci.yml", jgg.optimized_job_graph.to_gitlab_ci_jobs()
+    )
 
 
 def get_decision_parameters(graph_config, options):

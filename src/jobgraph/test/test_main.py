@@ -33,7 +33,6 @@ def run_main(maketgg, monkeypatch):
         ("target", ["_fake-t-0", "_fake-t-1"]),
         ("target-graph", ["_fake-t-0", "_fake-t-1"]),
         ("optimized", ["_fake-t-0", "_fake-t-1"]),
-        ("morphed", ["_fake-t-0", "_fake-t-1"]),
     ),
 )
 def test_show_jobgraph(run_main, capsys, attr, expected):

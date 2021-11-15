@@ -14,7 +14,6 @@ from .config import DEFAULT_ROOT_DIR, GraphConfig, load_graph_config
 from .graph import Graph
 from .job import Job
 from .jobgraph import JobGraph
-from .morph import morph
 from .optimize import optimize_job_graph
 from .parameters import Parameters
 from .transforms.base import TransformConfig, TransformSequence
@@ -194,17 +193,6 @@ class JobGraphGenerator:
         return self._run_until("optimized_job_graph")
 
     @property
-    def morphed_job_graph(self):
-        """
-        The optimized job graph, with any subsequent morphs applied. This graph
-        will have the same meaning as the optimized job graph, but be in a form
-        more palatable to Gitlab CI.
-
-        @type: JobGraph
-        """
-        return self._run_until("morphed_job_graph")
-
-    @property
     def graph_config(self):
         """
         The configuration for this graph.
@@ -330,7 +318,8 @@ class JobGraphGenerator:
         yield verifications("target_job_set", target_job_set, graph_config)
 
         logger.info("Generating target job graph")
-        # include all docker-image build jobs here, in case they are needed for a graph morph
+        # include all docker-image build jobs here, in case they are needed for a
+        # graph optimization
         docker_image_jobs = {
             job.label
             for job in full_job_graph.jobs.values()
@@ -368,10 +357,6 @@ class JobGraphGenerator:
         )
 
         yield verifications("optimized_job_graph", optimized_job_graph, graph_config)
-
-        morphed_job_graph = morph(optimized_job_graph, parameters, graph_config)
-
-        yield verifications("morphed_job_graph", morphed_job_graph, graph_config)
 
     def _run_until(self, name):
         while name not in self._run_results:
