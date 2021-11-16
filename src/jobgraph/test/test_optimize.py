@@ -88,25 +88,25 @@ class TestOptimize(unittest.TestCase):
         self.assert_remove_jobs(graph, set())
 
     def test_remove_jobs_all(self):
-        "A graph full of optimization=remove has removes everything"
+        "A graph full of optimization=remove has removed everything"
         graph = self.make_triangle(
             t1={"remove": None}, t2={"remove": None}, t3={"remove": None}
         )
         self.assert_remove_jobs(graph, {"t1", "t2", "t3"})
 
     def test_remove_jobs_blocked(self):
-        "Removable tasks that are depended on by non-removable tasks are not removed"
-        graph = self.make_triangle(t1={"remove": None}, t3={"remove": None})
-        self.assert_remove_jobs(graph, {"t1", "t3"})
+        "Removable jobs that depend on non-removable jobs are not removed"
+        graph = self.make_triangle(t1={}, t3={"remove": None})
+        self.assert_remove_jobs(graph, set())
 
     def test_remove_jobs_do_not_optimize(self):
-        "Removable tasks that are marked do_not_optimize are not removed"
+        "Removable jobs that are marked do_not_optimize are not removed"
         graph = self.make_triangle(
             t1={"remove": None},
             t2={"remove": None},  # but do_not_optimize
             t3={"remove": None},
         )
-        self.assert_remove_jobs(graph, {"t1", "t3"}, do_not_optimize={"t2"})
+        self.assert_remove_jobs(graph, {"t1"}, do_not_optimize={"t2"})
 
     def assert_subgraph(
         self,

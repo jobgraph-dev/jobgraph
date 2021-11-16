@@ -145,15 +145,29 @@ def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
     opt_counts = defaultdict(int)
     removed = set()
 
-    for label in target_job_graph.graph.visit_preorder():
+    for label in target_job_graph.graph.visit_postorder():
         # if we're not allowed to optimize, that's easy..
         if label in do_not_optimize:
             continue
 
+        # Do not optimize job if one of its upstreams deps wasn't optimized
+        # away. This usually means something upstream is new and we have to
+        # run the job anyway
+        job = target_job_graph.jobs[label]
+        named_links_dict = target_job_graph.graph.named_links_dict()
+        named_job_dependencies = {
+            upstream_dep_reference: upstream_dep_label
+            for upstream_dep_reference, upstream_dep_label in named_links_dict.get(
+                label, {}
+            ).items()
+            if upstream_dep_label not in removed
+        }
+        if named_job_dependencies:
+            job.optimization = {}
+
         # call the optimization strategy
-        task = target_job_graph.jobs[label]
         opt_by, opt, arg = optimizations(label)
-        if opt.should_remove_job(task, params, arg):
+        if opt.should_remove_job(job, params, arg):
             removed.add(label)
             opt_counts[opt_by] += 1
             continue

@@ -90,7 +90,7 @@ def test_always_target_jobs(maketgg):
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1", "_ignore-t-2"]
     )
     assert sorted(t.label for t in tgg.optimized_job_graph.jobs.values()) == sorted(
-        ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"]
+        ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1", "_ignore-t-2"]
     )
 
 
