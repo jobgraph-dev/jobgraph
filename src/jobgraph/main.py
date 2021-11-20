@@ -530,7 +530,7 @@ def image_digest(args):
     "You usually want to pass $CI_COMMIT_REF_PROTECTED to this argument",
 )
 @argument(
-    "--target-jobs-method", help="method for selecting the target jobs to generate"
+    "--target-jobs-method", default="default", help="method for selecting the target jobs to generate"
 )
 @argument("--base-repository", required=True, help='URL for "base" repository to clone')
 @argument(
