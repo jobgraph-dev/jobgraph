@@ -113,42 +113,28 @@ def define_image_name(config, jobs):
         attributes = job.setdefault("attributes", {})
         attributes["image_name"] = image_name
 
+        variables = job.setdefault("variables", {})
+        variables |= {
+            # We use hashes as tags to reduce potential collisions of regular tags
+            "DOCKER_IMAGE_NAME": image_name,
+        }
+
         yield job
 
 
 @transforms.add
-def fill_template(config, jobs):
+def fill_common_values(config, jobs):
     for job in jobs:
         image_base_name = job["name"]
 
-        description = (
-            f"Build the docker image {image_base_name} for use by dependent jobs"
-        )
-
-        variables = job.setdefault("variables", {})
-        variables |= {
-            # We use hashes as tags to reduce potential collisions of regular tags
-            "DOCKER_IMAGE_NAME": job["attributes"]["image_name"],
-        }
-
-        # include some information that is useful in reconstructing this job
-        # from JSON
-        jobdesc = {
+        job |= {
             "label": f"build-docker-image-{image_base_name}",
-            "description": description,
-            "attributes": job["attributes"],
+            "description": f"Build the docker image {image_base_name} for use by downstream jobs",
             "image": {"docker-image-reference": "<docker-in-docker>"},
-            "name": image_base_name,
-            "optimization": job.get("optimization", None),
-            "parent": job.get("parent", None),
             "runner-alias": "images",
-            "before_script": job.get("before_script", []),
-            "script": job.get("script", []),
-            "services": job.get("services", []),
-            "variables": variables,
         }
 
-        yield jobdesc
+        yield job
 
 
 @transforms.add
