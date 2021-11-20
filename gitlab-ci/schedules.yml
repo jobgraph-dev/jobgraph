@@ -1,6 +1,6 @@
 ---
 jobs:
     update-dependencies:
-        cron: "0 15 * * 4"
+        cron: "0 14 * * 4"
         description: Update jobgraph dependencies
         target-jobs-method: default
