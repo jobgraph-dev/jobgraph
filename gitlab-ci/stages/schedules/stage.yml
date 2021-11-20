@@ -17,6 +17,9 @@ job-defaults:
         skip-unless-changed:
         - gitlab-ci/schedules.yml
         - gitlab-ci/terraform/**/*
+    # We need to get access to $JOBGRAPH_GITLAB_TOKEN even for a `terraform plan`
+    run-on-git-branches:
+    - main
     runner-alias: misc
     variables:
         TF_ROOT: ${CI_PROJECT_DIR}/gitlab-ci/terraform/
@@ -33,8 +36,7 @@ jobs:
 
         description: "Report what changes are going to be made to Gitlab CI schedules, based on the content of schedules.yml"
         script:
-        # $CI_JOB_TOKEN gives read access to `terraform plan`
-        - gitlab-terraform plan -var "JOBGRAPH_GITLAB_TOKEN=$CI_JOB_TOKEN"
+        - gitlab-terraform plan -var "JOBGRAPH_GITLAB_TOKEN=$JOBGRAPH_GITLAB_TOKEN"
         - gitlab-terraform plan-json
 
     apply:
@@ -46,5 +48,3 @@ jobs:
         - gitlab-terraform apply -var "JOBGRAPH_GITLAB_TOKEN=$JOBGRAPH_GITLAB_TOKEN"
 
         dependencies: {schedules-plan: "schedules-plan"}
-        run-on-git-branches:
-        - main
