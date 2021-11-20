@@ -1,12 +1,18 @@
-import logging
 import hashlib
+import logging
 import os
 import subprocess
 
 import requests
 from dockerfile_parse import DockerfileParser
 
-from jobgraph.paths import PYTHON_VERSION_FILE, ROOT_DIR, TERRAFORM_DIR, TFENV_FILE, TERRAFORM_VERSION_FILE
+from jobgraph.paths import (
+    PYTHON_VERSION_FILE,
+    ROOT_DIR,
+    TERRAFORM_DIR,
+    TERRAFORM_VERSION_FILE,
+    TFENV_FILE,
+)
 from jobgraph.util.docker_registries import fetch_image_digest_from_registry, set_digest
 
 logger = logging.getLogger(__name__)
