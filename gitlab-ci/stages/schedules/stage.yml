@@ -22,7 +22,7 @@ job-defaults:
     - main
     runner-alias: misc
     variables:
-        TF_ROOT: ${CI_PROJECT_DIR}/gitlab-ci/terraform/
+        TF_ROOT: ${CI_PROJECT_DIR}/gitlab-ci/terraform
         TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/jobgraph
 
 jobs:
@@ -45,6 +45,7 @@ jobs:
             name: jobgraph
 
         script:
-        - gitlab-terraform apply -var "JOBGRAPH_GITLAB_TOKEN=$JOBGRAPH_GITLAB_TOKEN"
+        # No need to provide variable because it is going to reuse the existing cached plan.
+        - gitlab-terraform apply
 
         dependencies: {schedules-plan: "schedules-plan"}
