@@ -3,8 +3,12 @@ FROM $DOCKER_IMAGE_PARENT
 
 USER root
 RUN apk add --no-cache \
+    bash~=5.1 \
+    curl~=7.79 \
     docker~=20.10 \
-    openssh~=8.6
+    gzip~=1.10 \
+    openssh~=8.6 \
+    tar~=1.34
 
 USER "$RUNNER_USER"
 
@@ -12,3 +16,20 @@ ENV SSH_DIR="$RUNNER_HOME/.ssh"
 
 RUN mkdir -p "$SSH_DIR" && chmod 700 "$SSH_DIR"
 COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph-update/known_hosts "$SSH_DIR/known_hosts"
+
+ENV TFENV_SHA_FILE="$RUNNER_HOME/tfenv.sha256" \
+    TFENV_TARGET_DIR="$RUNNER_HOME/tfenv"
+
+ENV PATH="$TFENV_TARGET_DIR/bin:$PATH"
+
+COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph-update/tfenv.sha256 "$TFENV_SHA_FILE"
+RUN TFENV_VERSION="$(sed -E 's/[0-9a-f]+  tfenv-(.+)\.tar\.gz/\1/' "$TFENV_SHA_FILE")" && \
+    TFENV_ARCHIVE="$RUNNER_HOME/tfenv-$TFENV_VERSION.tar.gz" && \
+    curl --location "https://github.com/tfutils/tfenv/archive/refs/tags/v$TFENV_VERSION.tar.gz" --output "$TFENV_ARCHIVE" && \
+    sha256sum -c "$TFENV_SHA_FILE" && \
+    mkdir -p "$TFENV_TARGET_DIR" && \
+    tar xvf "$TFENV_ARCHIVE" --strip-components=1 --directory="$TFENV_TARGET_DIR" && \
+    rm "$TFENV_ARCHIVE"
+
+COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/terraform/.terraform-version "$RUNNER_HOME"
+RUN tfenv install

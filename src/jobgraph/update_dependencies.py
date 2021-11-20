@@ -4,7 +4,7 @@ import subprocess
 
 from dockerfile_parse import DockerfileParser
 
-from jobgraph.paths import PYTHON_VERSION_FILE, ROOT_DIR
+from jobgraph.paths import PYTHON_VERSION_FILE, ROOT_DIR, TERRAFORM_DIR
 from jobgraph.util.docker_registries import fetch_image_digest_from_registry, set_digest
 
 logger = logging.getLogger(__name__)
@@ -14,6 +14,7 @@ def update_dependencies(graph_config):
     _update_jobgraph_python_requirements()
     _update_dockerfiles()
     _update_docker_in_docker_image(graph_config)
+    _update_terraform()
 
 
 _PIN_COMMANDS = " && ".join(
@@ -79,3 +80,12 @@ def _update_docker_in_docker_image(graph_config):
         ].items()
     }
     graph_config.write()
+
+
+def _update_terraform():
+    terraform_command = [
+        "terraform",
+        "init",
+        "-upgrade",
+    ]
+    subprocess.run(terraform_command, cwd=TERRAFORM_DIR)
