@@ -53,14 +53,16 @@ class JobGraph:
 
     def to_gitlab_ci_jobs(self):
         json_graph = self.to_json()
-        all_stages = {
-            job["actual_gitlab_ci_job"]["stage"] for job in json_graph.values()
-        }
-        all_jobs = {
-            job["label"]: job["actual_gitlab_ci_job"] for job in json_graph.values()
-        }
+        all_stages = []
+        all_jobs = {}
+        for job in json_graph.values():
+            stage = job["actual_gitlab_ci_job"]["stage"]
+            if stage not in all_stages:
+                all_stages.append(stage)
+            all_jobs[job["label"]] = job["actual_gitlab_ci_job"]
+
         return {
-            "stages": sorted(list(all_stages)),
+            "stages": all_stages,
             **all_jobs,
         }
 
