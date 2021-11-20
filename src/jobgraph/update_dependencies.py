@@ -1,10 +1,12 @@
 import logging
+import hashlib
 import os
 import subprocess
 
+import requests
 from dockerfile_parse import DockerfileParser
 
-from jobgraph.paths import PYTHON_VERSION_FILE, ROOT_DIR, TERRAFORM_DIR
+from jobgraph.paths import PYTHON_VERSION_FILE, ROOT_DIR, TERRAFORM_DIR, TFENV_FILE, TERRAFORM_VERSION_FILE
 from jobgraph.util.docker_registries import fetch_image_digest_from_registry, set_digest
 
 logger = logging.getLogger(__name__)
@@ -14,7 +16,9 @@ def update_dependencies(graph_config):
     _update_jobgraph_python_requirements()
     _update_dockerfiles()
     _update_docker_in_docker_image(graph_config)
+    _update_tfenv()
     _update_terraform()
+    _update_terraform_providers()
 
 
 _PIN_COMMANDS = " && ".join(
@@ -82,10 +86,38 @@ def _update_docker_in_docker_image(graph_config):
     graph_config.write()
 
 
+def _update_tfenv():
+    tag = _get_latest_tag_on_github_release("tfutils", "tfenv")
+    sha256sum = _get_source_sha256_from_github("tfutils", "tfenv", tag)
+    version = tag.lstrip("v")
+    target_file_name = f"tfenv-{version}.tar.gz"
+    with open(TFENV_FILE, "w") as f:
+        f.write(f"{sha256sum}  {target_file_name}\n")
+
+
 def _update_terraform():
+    tag = _get_latest_tag_on_github_release("hashicorp", "terraform")
+    version = tag.lstrip("v")
+    with open(TERRAFORM_VERSION_FILE, "w") as f:
+        f.write(f"{version}\n")
+
+
+def _update_terraform_providers():
     terraform_command = [
         "terraform",
         "init",
         "-upgrade",
     ]
     subprocess.run(terraform_command, cwd=TERRAFORM_DIR)
+
+
+def _get_latest_tag_on_github_release(repo_owner, repo_name):
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+    response = requests.get(url)
+    return response.json()["tag_name"]
+
+
+def _get_source_sha256_from_github(repo_owner, repo_name, tag):
+    url = f"https://codeload.github.com/{repo_owner}/{repo_name}/tar.gz/refs/tags/{tag}"
+    response = requests.get(url)
+    return hashlib.sha256(response.content).hexdigest()
