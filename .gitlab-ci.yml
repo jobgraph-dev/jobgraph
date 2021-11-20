@@ -3,6 +3,8 @@ stages:
 - decision
 - generated-pipeline
 
+variables:
+    TARGET_JOBS_METHOD: default     # Can be overriden by schedules
 
 decision:
     artifacts:
@@ -47,6 +49,7 @@ decision:
         --message="$CI_COMMIT_MESSAGE"
         --owner="$CI_COMMIT_AUTHOR"
         --pipeline-source="$CI_PIPELINE_SOURCE"
+        --target-jobs-method="$TARGET_JOBS_METHOD"
     stage: decision
     variables:
         # We need the full history to ensure jobgraph makes the right decisions
