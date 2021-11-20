@@ -50,8 +50,6 @@ docker_image_schema = Schema(
         # Name of the docker image definition under gitlab-ci/docker, when
         # different from the docker image name.
         Optional("definition"): str,
-        # List of package jobs this docker image depends on.
-        Optional("packages"): [str],
         Optional("services"): [docker_image_ref_or_string],
         Optional("variables"): dict,
     }
@@ -120,22 +118,8 @@ def define_image_name(config, jobs):
 
 @transforms.add
 def fill_template(config, jobs):
-    available_packages = set()
-    for job in config.stage_dependencies_tasks:
-        if job.stage != "packages":
-            continue
-        name = job.label.replace("packages-", "")
-        available_packages.add(name)
-
     for job in jobs:
         image_base_name = job["name"]
-        packages = job.get("packages", [])
-
-        for p in packages:
-            if p not in available_packages:
-                raise Exception(
-                    f"Missing package job for {config.stage}-{image_base_name}: {p}"
-                )
 
         description = (
             f"Build the docker image {image_base_name} for use by dependent jobs"
@@ -163,11 +147,6 @@ def fill_template(config, jobs):
             "services": job.get("services", []),
             "variables": variables,
         }
-
-        if packages:
-            deps = jobdesc.setdefault("dependencies", {})
-            for p in sorted(packages):
-                deps[p] = f"packages-{p}"
 
         yield jobdesc
 
@@ -245,11 +224,7 @@ def fill_context_hash(config, jobs):
 @transforms.add
 def define_docker_script_instructions(config, jobs):
     for job in jobs:
-        packages = job.pop("packages", [])
         arguments = job.pop("args", {})
-
-        if packages:
-            arguments["DOCKER_IMAGE_PACKAGES"] = " ".join(f"<{p}>" for p in packages)
 
         image_name = job.pop("name")
         definition = job.get("definition", image_name)
