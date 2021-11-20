@@ -3,6 +3,7 @@ docker:
     external-images:
         docker-in-docker: docker:dind@sha256:04fd1a7a19db9f3d0a9d95ef5ad79db235875a8a73af6850e6c5c22bc84cf862
         hadolint: hadolint/hadolint:latest-alpine@sha256:6c4b7c23f96339489dd35f21a711996d7ce63047467a9a562287748a03ad5242
+        terraform: registry.gitlab.com/gitlab-org/terraform-images/stable@sha256:9c67ae50df519757c2e061a113f2c25b35e2f1330469c1abebccf8dffdcbbde9
 job-defaults:
     retry:
         max: 2

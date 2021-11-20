@@ -139,7 +139,7 @@ def validate_graph_config(config, config_yml):
             raise MissingImageDigest(external_image, config_yml)
 
 
-def load_graph_config(root_dir):
+def load_graph_config(root_dir, validate_config=True):
     # TODO set root_dir to be the one containing config.yml
     config_yml = _get_config_yml_path(root_dir)
     if not os.path.exists(config_yml):
@@ -148,7 +148,8 @@ def load_graph_config(root_dir):
     logger.debug(f"loading config from `{config_yml}`")
     config = load_yaml(config_yml)
 
-    validate_graph_config(config, config_yml)
+    if validate_config:
+        validate_graph_config(config, config_yml)
     return GraphConfig(config=config, root_dir=root_dir)
 
 

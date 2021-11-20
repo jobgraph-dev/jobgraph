@@ -591,7 +591,7 @@ def update_depdencies(options):
     from jobgraph.config import DEFAULT_ROOT_DIR, load_graph_config
     from jobgraph.update_dependencies import update_dependencies
 
-    graph_config = load_graph_config(DEFAULT_ROOT_DIR)
+    graph_config = load_graph_config(DEFAULT_ROOT_DIR, validate_config=False)
     update_dependencies(graph_config)
 
 

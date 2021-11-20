@@ -1,0 +1,49 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+---
+
+loader: jobgraph.loader.transform:loader
+
+transforms:
+- jobgraph.transforms.job:transforms
+
+
+job-defaults:
+    before_script:
+    - cd ${TF_ROOT}
+    image: {docker-image-reference: "<terraform>"}
+    optimization:
+        skip-unless-changed:
+        - gitlab-ci/schedules.yml
+        - gitlab-ci/terraform/**/*
+    runner-alias: misc
+    variables:
+        TF_ROOT: ${CI_PROJECT_DIR}/gitlab-ci/terraform/
+        TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/jobgraph
+
+jobs:
+    plan:
+        artifacts:
+            name: plan
+            paths:
+            - ${TF_ROOT}/plan.cache
+            reports:
+                terraform: ${TF_ROOT}/plan.json
+
+        description: "Report what changes are going to be made to Gitlab CI schedules, based on the content of schedules.yml"
+        script:
+        - gitlab-terraform plan
+        - gitlab-terraform plan-json
+
+    apply:
+        description: "Change Gitlab CI schedules, based on the content of schedules.yml"
+        environment:
+            name: jobgraph
+
+        script:
+        - gitlab-terraform apply
+
+        dependencies: {schedules-plan: "schedules-plan"}
+        run-on-git-branches:
+        - main

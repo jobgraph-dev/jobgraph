@@ -81,6 +81,15 @@ job_description_schema = Schema(
         ],
         Optional("timeout"): str,
         Optional("variables"): dict,
+        Optional("artifacts"): {
+            Required("name"): str,
+            Required("paths"): [str],
+            # TODO Be more restrictive for reports
+            Optional("reports"): dict,
+        },
+        Optional("environment"): {
+            Required("name"): str,
+        },
     }
 )
 
@@ -152,42 +161,45 @@ def validate(config, jobs):
 @transforms.add
 def build_job(config, jobs):
     for job in jobs:
-        head_ref_protection = config.params["head_ref_protection"]
+        # /!\ We make a copy of job because some transforms (like the docker_image one)
+        # expect job to still contain some keys (like "label").
+        # This behavior is explained by the fact transforms yield each job individually,
+        # meaning the first job gets through the whole transform chain before the next
+        # one is processed.
+        job = copy(job)
 
-        runner_tag = get_runner_tag(
-            config.graph_config,
-            job["runner-alias"],
-            head_ref_protection,
-        )
+        job_label = job.pop("label")
+        job_dependencies = job.pop("dependencies", {})
+        job_description = job.pop("description")
+        job_optimization = job.pop("optimization")
+        runner_alias = job.pop("runner-alias")
+        job.pop("job-from", None)
 
-        job_def = copy(config.graph_config["job-defaults"])
-        job_def["tags"] = [runner_tag]
-        job_def["script"] = job["script"]
-        for key in (
-            "before_script",
-            "image",
-            "retry",
-            "services",
-            "timeout",
-            "variables",
-        ):
-            if job.get(key):
-                job_def[key] = job[key]
-
-        attributes = job.get("attributes", {})
-        attributes["run_on_pipeline_sources"] = job.get(
+        attributes = job.pop("attributes", {})
+        attributes["run_on_pipeline_sources"] = job.pop(
             "run-on-pipeline-sources", ["push"]
         )
-        attributes["run_on_git_branches"] = job.get("run-on-git-branches", ["all"])
-        attributes["always_target"] = job["always-target"]
+        attributes["run_on_git_branches"] = job.pop("run-on-git-branches", ["all"])
+        attributes["always_target"] = job.pop("always-target")
+
+        actual_gitlab_ci_job = copy(config.graph_config["job-defaults"])
+        actual_gitlab_ci_job |= job
+
+        head_ref_protection = config.params["head_ref_protection"]
+        runner_tag = get_runner_tag(
+            config.graph_config,
+            runner_alias,
+            head_ref_protection,
+        )
+        actual_gitlab_ci_job["tags"] = [runner_tag]
 
         yield {
-            "label": job["label"],
-            "description": job["description"],
-            "actual_gitlab_ci_job": job_def,
-            "dependencies": job.get("dependencies", {}),
+            "label": job_label,
+            "description": job_description,
+            "actual_gitlab_ci_job": actual_gitlab_ci_job,
+            "dependencies": job_dependencies,
             "attributes": attributes,
-            "optimization": job["optimization"],
+            "optimization": job_optimization,
         }
 
 
