@@ -128,7 +128,7 @@ def fill_common_values(config, jobs):
         image_base_name = job["name"]
 
         job |= {
-            "label": f"build-docker-image-{image_base_name}",
+            "label": image_base_name,
             "description": f"Build the docker image {image_base_name} for use by downstream jobs",
             "image": {"docker-image-reference": "<docker-in-docker>"},
             "runner-alias": "images",
@@ -149,7 +149,7 @@ def fill_context_hash(config, jobs):
         variables = job.setdefault("variables", {})
 
         if parent:
-            parent_label = f"build-docker-image-{parent}"
+            parent_label = parent
             deps = job.setdefault("dependencies", {})
             deps["parent"] = parent_label
             variables["DOCKER_IMAGE_PARENT"] = {"docker-image-reference": "<parent>"}

@@ -48,4 +48,4 @@ jobs:
         # No need to provide variable because it is going to reuse the existing cached plan.
         - gitlab-terraform apply
 
-        dependencies: {schedules-plan: "schedules-plan"}
+        dependencies: {plan: "plan"}

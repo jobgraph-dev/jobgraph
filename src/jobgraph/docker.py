@@ -21,7 +21,7 @@ def get_image_context_hash(image_name):
         strict=False,
     )
     tasks = load_jobs_for_stage(params, "docker-image")
-    task = tasks[f"build-docker-image-{image_name}"]
+    task = tasks[image_name]
     return task.attributes["context_hash"]
 
 

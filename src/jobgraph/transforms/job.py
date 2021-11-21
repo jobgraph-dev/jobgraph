@@ -34,7 +34,7 @@ def build_docker_runner_payload(config, jobs):
         if isinstance(image, dict):
             if "in-tree" in image:
                 name = image["in-tree"]
-                docker_image_job = "build-docker-image-" + image["in-tree"]
+                docker_image_job = image["in-tree"]
                 job.setdefault("dependencies", {})["docker-image"] = docker_image_job
 
                 job["image"] = {"docker-image-reference": "<docker-image>"}
@@ -67,7 +67,7 @@ def job_name_from_label(config, jobs):
         if "label" not in job:
             if "name" not in job:
                 raise Exception("job has neither a name nor a label")
-            job["label"] = f"{config.stage}-{job['name']}"
+            job["label"] = job["name"]
         if job.get("name"):
             del job["name"]
         yield job
@@ -79,7 +79,7 @@ def validate(config, jobs):
         validate_schema(
             gitlab_ci_job_input,
             job,
-            f"In job {job.get('label', '?no-label?')!r}:",
+            f"In job {job['label']}:",
         )
         yield job
 
