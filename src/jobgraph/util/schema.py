@@ -200,7 +200,12 @@ OptimizationSchema = voluptuous.Any(
 )
 
 # shortcut for a string where task references are allowed
-docker_image_ref_or_string = voluptuous.Any(
-    str,
-    {voluptuous.Required("docker-image-reference"): str},
+docker_image_ref = voluptuous.Any(
+    # strings are now allowed because we want to keep track of external
+    # images in config.yml
+    #
+    # an external docker image defined in config.yml
+    {"docker-image-reference": str},
+    # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
+    {"in-tree": str},
 )

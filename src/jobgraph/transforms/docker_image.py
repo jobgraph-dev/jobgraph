@@ -19,7 +19,7 @@ from jobgraph.util.docker_registries.gitlab import get_image_full_location
 from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 from jobgraph.util.schema import (
     Schema,
-    docker_image_ref_or_string,
+    docker_image_ref,
     optionally_keyed_by,
     resolve_keyed_by,
 )
@@ -50,7 +50,7 @@ docker_image_schema = Schema(
         # Name of the docker image definition under gitlab-ci/docker, when
         # different from the docker image name.
         Optional("definition"): str,
-        Optional("services"): [docker_image_ref_or_string],
+        Optional("services"): [docker_image_ref],
         Optional("variables"): dict,
     }
 )
