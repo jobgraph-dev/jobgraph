@@ -1,5 +1,6 @@
 appdirs
 attrs
+deepmerge
 dockerfile-parse
 json-e
 PyYAML
