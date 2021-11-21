@@ -24,7 +24,7 @@ def filter_job(name):
 
 @filter_job("target_jobs_method")
 def filter_target_jobs(graph, parameters, graph_config):
-    """Proxy filter to use legacy target tasks code.
+    """Proxy filter to use legacy target jobs code.
 
     This should go away once target_jobs are converted to filters.
     """

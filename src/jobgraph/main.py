@@ -63,32 +63,30 @@ def format_jobgraph_yaml(jobgraph):
     return yaml.safe_dump(jobgraph.to_json(), default_flow_style=False)
 
 
-def get_filtered_jobgraph(jobgraph, tasksregex):
+def get_filtered_jobgraph(jobgraph, jobsregex):
     """
-    Filter all the tasks on basis of a regular expression
+    Filter all the jobs on basis of a regular expression
     and returns a new JobGraph object
     """
     from jobgraph.graph import Graph
     from jobgraph.jobgraph import JobGraph
 
     # return original jobgraph if no regular expression is passed
-    if not tasksregex:
+    if not jobsregex:
         return jobgraph
     named_links_dict = jobgraph.graph.named_links_dict()
-    filteredtasks = {}
+    filteredjobs = {}
     filterededges = set()
-    regexprogram = re.compile(tasksregex)
+    regexprogram = re.compile(jobsregex)
 
     for key in jobgraph.graph.visit_postorder():
         task = jobgraph.jobs[key]
         if regexprogram.match(task.label):
-            filteredtasks[key] = task
+            filteredjobs[key] = task
             for depname, dep in named_links_dict[key].items():
                 if regexprogram.match(dep):
                     filterededges.add((key, dep, depname))
-    filtered_jobgraph = JobGraph(
-        filteredtasks, Graph(set(filteredtasks), filterededges)
-    )
+    filtered_jobgraph = JobGraph(filteredjobs, Graph(set(filteredjobs), filterededges))
     return filtered_jobgraph
 
 
@@ -133,7 +131,7 @@ def format_jobgraph(options, parameters, logfile=None):
     tgg = get_jobgraph_generator(options.get("root"), parameters)
 
     tg = getattr(tgg, options["graph_attr"])
-    tg = get_filtered_jobgraph(tg, options["tasks_regex"])
+    tg = get_filtered_jobgraph(tg, options["jobs_regex"])
     format_method = FORMAT_METHODS[options["format"] or "labels"]
     return format_method(tg)
 
@@ -206,7 +204,7 @@ def generate_jobgraph(options, parameters, logdir):
 
 
 @command(
-    "tasks",
+    "jobs",
     help="Show all jobs in the jobgraph.",
     defaults={"graph_attr": "full_job_set"},
 )
@@ -273,7 +271,7 @@ def generate_jobgraph(options, parameters, logdir):
     dest="optimize",
     action="store_false",
     default="true",
-    help="do not remove tasks from the graph that are found in the "
+    help="do not remove jobs from the graph that are found in the "
     "index (a.k.a. optimize the graph)",
 )
 @argument(
@@ -283,15 +281,15 @@ def generate_jobgraph(options, parameters, logdir):
     help="file path to store generated output.",
 )
 @argument(
-    "--tasks-regex",
-    "--tasks",
+    "--jobs-regex",
+    "--jobs",
     default=None,
-    help="only return tasks with labels matching this regular " "expression.",
+    help="only return jobs with labels matching this regular " "expression.",
 )
 @argument(
     "--target-stage",
     default=None,
-    help="only return tasks that are of the given stage, or their dependencies.",
+    help="only return jobs that are of the given stage, or their dependencies.",
 )
 @argument(
     "-F",

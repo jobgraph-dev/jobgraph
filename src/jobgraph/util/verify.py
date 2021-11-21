@@ -47,7 +47,7 @@ verifications = VerificationSequence()
 @verifications.add("optimized_job_graph")
 def verify_always_optimized(task, jobgraph, scratch_pad, graph_config):
     """
-    This function ensures that always-optimized tasks have been optimized.
+    This function ensures that always-optimized jobs have been optimized.
     """
     if task is None:
         return

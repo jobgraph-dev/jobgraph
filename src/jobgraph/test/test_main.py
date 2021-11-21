@@ -28,7 +28,7 @@ def run_main(maketgg, monkeypatch):
 @pytest.mark.parametrize(
     "attr,expected",
     (
-        ("tasks", ["_fake-t-0", "_fake-t-1", "_fake-t-2"]),
+        ("jobs", ["_fake-t-0", "_fake-t-1", "_fake-t-2"]),
         ("full", ["_fake-t-0", "_fake-t-1", "_fake-t-2"]),
         ("target", ["_fake-t-0", "_fake-t-1"]),
         ("target-graph", ["_fake-t-0", "_fake-t-1"]),
@@ -42,8 +42,8 @@ def test_show_jobgraph(run_main, capsys, attr, expected):
     assert "Dumping result" in err
 
 
-def test_tasks_regex(run_main, capsys):
-    run_main(["full", "--tasks=_.*-t-1"])
+def test_jobs_regex(run_main, capsys):
+    run_main(["full", "--jobs=_.*-t-1"])
     out, _ = capsys.readouterr()
     assert out.strip() == "_fake-t-1"
 

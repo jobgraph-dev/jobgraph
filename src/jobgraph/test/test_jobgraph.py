@@ -15,7 +15,7 @@ class TestJobGraph(unittest.TestCase):
     maxDiff = None
 
     def test_jobgraph_to_json(self):
-        tasks = {
+        jobs = {
             "a": Job(
                 stage="test",
                 label="a",
@@ -36,7 +36,7 @@ class TestJobGraph(unittest.TestCase):
             ),
         }
         graph = Graph(nodes=set("ab"), edges={("a", "b", "edgelabel")})
-        jobgraph = JobGraph(tasks, graph)
+        jobgraph = JobGraph(jobs, graph)
 
         res = jobgraph.to_json()
 
@@ -89,7 +89,7 @@ class TestJobGraph(unittest.TestCase):
             graph=Graph(nodes={"a", "b"}, edges={("a", "b", "prereq")}),
         )
 
-        tasks, new_graph = JobGraph.from_json(graph.to_json())
+        jobs, new_graph = JobGraph.from_json(graph.to_json())
         self.assertEqual(graph, new_graph)
 
     simple_graph = JobGraph(

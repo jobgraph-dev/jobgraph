@@ -51,15 +51,15 @@ class TestOptimize(unittest.TestCase):
             task.actual_gitlab_ci_job["stage"] = "test"
         return task
 
-    def make_graph(self, *tasks_and_edges):
-        tasks = {t.label: t for t in tasks_and_edges if isinstance(t, Job)}
-        edges = {e for e in tasks_and_edges if not isinstance(e, Job)}
-        return JobGraph(tasks, graph.Graph(set(tasks), edges))
+    def make_graph(self, *jobs_and_edges):
+        jobs = {j.label: j for j in jobs_and_edges if isinstance(j, Job)}
+        edges = {e for e in jobs_and_edges if not isinstance(e, Job)}
+        return JobGraph(jobs, graph.Graph(set(jobs), edges))
 
-    def make_opt_graph(self, *tasks_and_edges):
-        tasks = {t.label: t for t in tasks_and_edges if isinstance(t, Job)}
-        edges = {e for e in tasks_and_edges if not isinstance(e, Job)}
-        return JobGraph(tasks, graph.Graph(set(tasks), edges))
+    def make_opt_graph(self, *jobs_and_edges):
+        jobs = {j.label: j for j in jobs_and_edges if isinstance(j, Job)}
+        edges = {e for e in jobs_and_edges if not isinstance(e, Job)}
+        return JobGraph(jobs, graph.Graph(set(jobs), edges))
 
     def make_triangle(self, **opts):
         """
@@ -147,7 +147,7 @@ class TestOptimize(unittest.TestCase):
         )
 
     def test_get_subgraph_removed(self):
-        "get_subgraph returns a smaller subgraph when tasks are removed"
+        "get_subgraph returns a smaller subgraph when jobs are removed"
         graph = self.make_triangle()
         self.assert_subgraph(
             graph,

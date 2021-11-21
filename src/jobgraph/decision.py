@@ -145,7 +145,7 @@ def get_decision_parameters(graph_config, options):
 
 def set_try_config(parameters, task_config_file):
     if os.path.isfile(task_config_file):
-        logger.info(f"using try tasks from {task_config_file}")
+        logger.info(f"using try jobs from {task_config_file}")
         with open(task_config_file) as fh:
             task_config = json.load(fh)
         task_config_version = task_config.pop("version")

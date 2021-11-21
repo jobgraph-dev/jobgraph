@@ -36,7 +36,7 @@ def filter_for_pipeline_source(task, parameters):
 
 
 def filter_for_git_branch(task, parameters):
-    """Filter tasks by git branch.
+    """Filter jobs by git branch.
     If `run_on_git_branch` is not defined, then task runs on all branches"""
     # Pull requests usually have arbitrary names, let's not filter git branches on them.
     if parameters["pipeline_source"] == "merge_request_event":
@@ -62,7 +62,7 @@ def standard_filter(task, parameters):
 
 @_target_task("default")
 def target_jobs_default(full_job_graph, parameters, graph_config):
-    """Target the tasks which have indicated they should be run based on attributes."""
+    """Target the jobs which have indicated they should be run based on attributes."""
     return [l for l, t in full_job_graph.jobs.items() if standard_filter(t, parameters)]
 
 

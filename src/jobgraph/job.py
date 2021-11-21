@@ -17,7 +17,7 @@ class Job:
     - actual_gitlab_ci_job: the job definition (JSON-able dictionary) which
       will be output to `.gitlab-ci.yml`
     - optimization: optimization to apply to the task (see jobgraph.optimize)
-    - dependencies: tasks this one depends on, in the form {name: label}, for example
+    - dependencies: jobs this one depends on, in the form {name: label}, for example
       {'build': 'build-linux64/opt', 'docker_image': 'desktop_test'}
 
     And later, as the task-graph processing proceeds:
@@ -54,7 +54,7 @@ class Job:
         """
         Given a data structure as produced by jobgraph.to_json, re-construct
         the original Task object.  This is used to "resume" the task-graph
-        generation process, for example in Action tasks.
+        generation process, for example in Action jobs.
         """
         rv = cls(
             stage=job_dict["stage"],

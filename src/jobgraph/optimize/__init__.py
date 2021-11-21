@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
-The objective of optimization is to remove as many tasks from the graph as
+The objective of optimization is to remove as many jobs from the graph as
 possible, as efficiently as possible, thereby delivering useful results as
 quickly as possible.  For example, ideally if only a test script is modified in
 a push, then the resulting graph contains only the corresponding test suite
@@ -131,17 +131,17 @@ def _get_optimizations(target_job_graph, strategies):
 def _log_optimization(verb, opt_counts):
     if opt_counts:
         optimization_stats = ", ".join(
-            f"{count} tasks by {optimization_rule}"
+            f"{count} jobs by {optimization_rule}"
             for optimization_rule, count in sorted(opt_counts.items())
         )
         logger.info(f"{verb.title()} {optimization_stats} during optimization.")
     else:
-        logger.info(f"No tasks {verb} during optimization")
+        logger.info(f"No jobs {verb} during optimization")
 
 
 def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
     """
-    Implement the "Removing Tasks" phase, returning a set of task labels of all removed tasks.
+    Implement the "Removing Tasks" phase, returning a set of task labels of all removed jobs.
     """
     opt_counts = defaultdict(int)
     removed = set()
@@ -184,7 +184,7 @@ def get_subgraph(
 ):
     """
     Return the subgraph of target_job_graph consisting only of
-    non-optimized tasks and edges between them.
+    non-optimized jobs and edges between them.
     """
 
     # populate task['dependencies']
@@ -218,20 +218,20 @@ def get_subgraph(
         )
 
     #  drop edges that are no longer entirely in the task graph
-    #   (note that this omits edges to replaced tasks, but they are still in task.dependnecies)
+    #   (note that this omits edges to replaced jobs, but they are still in task.dependnecies)
     remaining_edges = {
         (left, right, name)
         for (left, right, name) in target_job_graph.graph.edges
         if left not in omit and right not in omit
     }
     remaining_nodes = target_job_graph.graph.nodes - omit
-    remaining_tasks_by_label = {
+    remaining_jobs_by_label = {
         label: task
         for label, task in target_job_graph.jobs.items()
         if label not in omit
     }
 
-    return JobGraph(remaining_tasks_by_label, Graph(remaining_nodes, remaining_edges))
+    return JobGraph(remaining_jobs_by_label, Graph(remaining_nodes, remaining_edges))
 
 
 def _get_candidate_docker_images(

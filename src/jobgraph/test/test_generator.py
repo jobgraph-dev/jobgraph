@@ -21,7 +21,7 @@ def test_stage_ordering(maketgg):
 
 
 def test_full_job_set(maketgg):
-    "The full_job_set property has all tasks"
+    "The full_job_set property has all jobs"
     tgg = maketgg()
     assert tgg.full_job_set.graph == graph.Graph(
         {"_fake-t-0", "_fake-t-1", "_fake-t-2"}, set()
@@ -32,7 +32,7 @@ def test_full_job_set(maketgg):
 
 
 def test_full_job_graph(maketgg):
-    "The full_job_graph property has all tasks, and links"
+    "The full_job_graph property has all jobs, and links"
     tgg = maketgg()
     assert tgg.full_job_graph.graph == graph.Graph(
         {"_fake-t-0", "_fake-t-1", "_fake-t-2"},
@@ -47,14 +47,14 @@ def test_full_job_graph(maketgg):
 
 
 def test_target_job_set(maketgg):
-    "The target_job_set property has the targeted tasks"
+    "The target_job_set property has the targeted jobs"
     tgg = maketgg(["_fake-t-1"])
     assert tgg.target_job_set.graph == graph.Graph({"_fake-t-1"}, set())
     assert set(tgg.target_job_set.jobs.keys()) == {"_fake-t-1"}
 
 
 def test_target_job_graph(maketgg):
-    "The target_job_graph property has the targeted tasks and deps"
+    "The target_job_graph property has the targeted jobs and deps"
     tgg = maketgg(["_fake-t-1"])
     assert tgg.target_job_graph.graph == graph.Graph(
         {"_fake-t-0", "_fake-t-1"}, {("_fake-t-1", "_fake-t-0", "prev")}
@@ -65,7 +65,7 @@ def test_target_job_graph(maketgg):
 
 
 def test_always_target_jobs(maketgg):
-    "The target_job_graph includes tasks with 'always_target'"
+    "The target_job_graph includes jobs with 'always_target'"
     tgg_args = {
         "target_jobs": ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"],
         "stages": [
@@ -89,7 +89,7 @@ def test_always_target_jobs(maketgg):
     assert sorted(tgg.target_job_graph.jobs.keys()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1", "_ignore-t-2"]
     )
-    assert sorted(t.label for t in tgg.optimized_job_graph.jobs.values()) == sorted(
+    assert sorted(j.label for j in tgg.optimized_job_graph.jobs.values()) == sorted(
         ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1", "_ignore-t-2"]
     )
 

@@ -290,9 +290,9 @@ class JobGraphGenerator:
 
         logger.info("Generating full job graph")
         edges = set()
-        for t in full_job_set:
-            for depname, dep in t.dependencies.items():
-                edges.add((t.label, dep, depname))
+        for j in full_job_set:
+            for depname, dep in j.dependencies.items():
+                edges.add((j.label, dep, depname))
 
         full_job_graph = JobGraph(all_jobs, Graph(full_job_set.graph.nodes, edges))
         logger.info(

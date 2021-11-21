@@ -46,9 +46,9 @@ class TransformConfig:
     # the parameters for this task-graph generation run
     params = attr.ib(type=Parameters)
 
-    # a list of all the tasks associated with the stage dependencies of the
+    # a list of all the jobs associated with the stage dependencies of the
     # current stage
-    stage_dependencies_tasks = attr.ib()
+    stage_dependencies_jobs = attr.ib()
 
     # Global configuration of the jobgraph
     graph_config = attr.ib(type=GraphConfig)

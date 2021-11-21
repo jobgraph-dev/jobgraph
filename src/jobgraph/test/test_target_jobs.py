@@ -294,7 +294,7 @@ class TestTargetTasks(unittest.TestCase):
         )
 
     def make_task_graph(self):
-        tasks = {
+        jobs = {
             "a": Job(stage=None, label="a", attributes={}, actual_gitlab_ci_job={}),
             "b": Job(
                 stage=None,
@@ -304,4 +304,4 @@ class TestTargetTasks(unittest.TestCase):
             ),
         }
         graph = Graph(nodes=set("abc"), edges=set())
-        return JobGraph(tasks, graph)
+        return JobGraph(jobs, graph)

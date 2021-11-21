@@ -17,9 +17,9 @@ def graph_config():
 
 @pytest.fixture
 def make_jobgraph():
-    def inner(tasks):
-        graph = Graph(nodes=set(tasks), edges=set())
-        jobgraph = JobGraph(tasks, graph)
+    def inner(jobs):
+        graph = Graph(nodes=set(jobs), edges=set())
+        jobgraph = JobGraph(jobs, graph)
         return jobgraph
 
     return inner
