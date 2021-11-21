@@ -21,6 +21,7 @@ from voluptuous import Schema as VSchema
 from voluptuous.validators import Length
 
 import jobgraph
+from jobgraph import MAX_DEPENDENCIES
 
 from .keyed_by import evaluate_keyed_by
 
@@ -354,10 +355,11 @@ gitlab_ci_job_common = Schema(
         ),
         Optional("variables"): {
             str: Any(
+                int,
                 str,
                 docker_image_ref,
                 {
-                    Required("value"): str,
+                    Required("value"): Any(int, str, docker_image_ref),
                     Optional("description"): str,
                 },
             ),
@@ -399,5 +401,40 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
         # the runner-alias for the job. Will be substituted into an actual Gitlab
         # CI tag.
         "runner-alias": str,
+    }
+)
+
+gitlab_ci_job_output = gitlab_ci_job_common.extend(
+    {
+        Optional("dependencies"): [str],
+        Required("image"): str,
+        Optional("needs"): All(
+            [
+                Any(
+                    str,
+                    {
+                        Required("job"): str,
+                        Optional("artifacts"): bool,
+                        Optional("optional"): bool,
+                        Optional("pipeline"): int,
+                        Optional("project"): str,
+                        Optional("ref"): str,
+                    },
+                )
+            ],
+            Length(max=MAX_DEPENDENCIES),
+        ),
+        Required("stage"): str,
+        Required("tags"): All([str, Length(max=1)]),
+        Optional("variables"): {
+            str: Any(
+                int,
+                str,
+                {
+                    Required("value"): Any(int, str),
+                    Optional("description"): str,
+                },
+            ),
+        },
     }
 )

@@ -24,6 +24,7 @@ from ..graph import Graph
 from ..jobgraph import JobGraph
 from ..parameters import get_repo
 from ..util.parameterization import resolve_docker_image_references
+from ..util.schema import gitlab_ci_job_output, validate_schema
 
 logger = logging.getLogger(__name__)
 
@@ -210,6 +211,11 @@ def get_subgraph(
         deps = task.actual_gitlab_ci_job.setdefault("needs", [])
         deps.extend(sorted(named_task_dependencies.values()))
         task.actual_gitlab_ci_job.setdefault("stage", task.stage)
+        validate_schema(
+            gitlab_ci_job_output,
+            task.actual_gitlab_ci_job,
+            f"In job {task.label}:",
+        )
 
     #  drop edges that are no longer entirely in the task graph
     #   (note that this omits edges to replaced tasks, but they are still in task.dependnecies)

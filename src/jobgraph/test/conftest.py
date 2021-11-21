@@ -20,9 +20,9 @@ def fake_loader(stage, path, config, parameters, loaded_jobs):
             "description": f"{stage} task {i}",
             "attributes": {"_tasknum": str(i)},
             "actual_gitlab_ci_job": {
-                "i": i,
-                "metadata": {"name": f"t-{i}"},
-                "deadline": "soon",
+                "image": f"image-{i}",
+                "script": "some-script",
+                "tags": ["some-runner-tag"],
             },
             "dependencies": dependencies,
         }

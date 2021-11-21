@@ -33,7 +33,11 @@ class TestOptimize(unittest.TestCase):
         optimized=None,
         dependencies=None,
     ):
-        task_def = task_def or {"sample": "task-def"}
+        task_def = task_def or {
+            "image": "some-image",
+            "script": "some-script",
+            "tags": ["some-runner-tag"],
+        }
         task = Job(
             stage="test",
             label=label,
