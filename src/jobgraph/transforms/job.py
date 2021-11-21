@@ -8,74 +8,15 @@ transformations is generic to any kind of job, but abstracts away some of the
 complexities of runner implementations.
 """
 
-from copy import copy
-
-from voluptuous import All, Any, NotIn, Optional, Required
+from copy import copy, deepcopy
+from deepmerge import always_merger
 
 from jobgraph import MAX_DEPENDENCIES
 from jobgraph.transforms.base import TransformSequence
-from jobgraph.util.schema import Schema, docker_image_ref, validate_schema
+from jobgraph.util.schema import gitlab_ci_job_input, validate_schema
 
 from ..util import docker as dockerutil
 from ..util.runners import get_runner_tag
-
-# A job description is a general description of a JobGrab job
-job_description_schema = Schema(
-    {
-        Required("label"): str,
-        Required("description"): str,
-        Optional("attributes"): {str: object},
-        # relative path (from config.path) to the file this job was defined in
-        Optional("job-from"): str,
-        # dependencies of this job, keyed by name; these are passed through
-        # verbatim and subject to the interpretation of the Job's get_dependencies
-        # method.
-        Optional("dependencies"): {
-            All(
-                str,
-                NotIn(
-                    ["self", "decision"],
-                    "Can't use 'self` or 'decision' as depdency names.",
-                ),
-            ): object,
-        },
-        Required("image"): docker_image_ref,
-        Optional("run-on-pipeline-sources"): [str],
-        Optional("run-on-git-branches"): [str],
-        # The `always-target` attribute will cause the job to be included in the
-        # target_job_graph regardless of filtering. Jobs included in this manner
-        # will be candidates for optimization even when `optimize_target_jobs` is
-        # False, unless the job was also explicitly chosen by the target_jobs
-        # method.
-        Required("always-target"): bool,
-        # Optimization to perform on this job during the optimization phase.
-        # Optimizations are defined in gitlab-ci/jobgraph/optimize.py.
-        Optional("optimization"): dict,
-        # the runner-alias for the job. Will be substituted into an actual Gitlab
-        # CI tag.
-        "runner-alias": str,
-        Optional("before_script"): Any(
-            str,
-            [str],
-        ),
-        Required("script"): Any(
-            str,
-            [str],
-        ),
-        Optional("services"): [docker_image_ref],
-        Optional("timeout"): str,
-        Optional("variables"): dict,
-        Optional("artifacts"): {
-            Required("name"): str,
-            Required("paths"): [str],
-            # TODO Be more restrictive for reports
-            Optional("reports"): dict,
-        },
-        Optional("environment"): {
-            Required("name"): str,
-        },
-    }
-)
 
 
 def get_branch_rev(config):
@@ -135,7 +76,7 @@ def job_name_from_label(config, jobs):
 def validate(config, jobs):
     for job in jobs:
         validate_schema(
-            job_description_schema,
+            gitlab_ci_job_input,
             job,
             f"In job {job.get('label', '?no-label?')!r}:",
         )
