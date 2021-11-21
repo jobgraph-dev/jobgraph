@@ -52,14 +52,20 @@ class JobGraph:
         return jobs
 
     def to_gitlab_ci_jobs(self):
-        json_graph = self.to_json()
         all_stages = []
         all_jobs = {}
-        for job in json_graph.values():
+
+        # We need to visit the graph starting from the leaves. This way, we know what
+        # stages are the last ones. If we started from the roots, then we would end up
+        # with some jobs in later stages to be the first ones because they depend on
+        # no other jobs (they likely use external docker images)
+        for label in self.graph.visit_preorder():
+            job = self.jobs[label].to_json()
+            all_jobs[label] = job["actual_gitlab_ci_job"]
+
             stage = job["actual_gitlab_ci_job"]["stage"]
             if stage not in all_stages:
-                all_stages.append(stage)
-            all_jobs[job["label"]] = job["actual_gitlab_ci_job"]
+                all_stages.insert(0, stage)
 
         return {
             "stages": all_stages,
