@@ -50,3 +50,9 @@ repos:
   rev: "0.69"
   hooks:
   - id: flynt
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.58.0
+  hooks:
+  - id: terraform_fmt
+  - id: terraform_tflint
+  - id: terraform_tfsec
