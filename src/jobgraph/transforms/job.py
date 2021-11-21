@@ -9,6 +9,7 @@ complexities of runner implementations.
 """
 
 from copy import copy, deepcopy
+
 from deepmerge import always_merger
 
 from jobgraph import MAX_DEPENDENCIES
@@ -107,8 +108,9 @@ def build_job(config, jobs):
         attributes["run_on_git_branches"] = job.pop("run-on-git-branches", ["all"])
         attributes["always_target"] = job.pop("always-target")
 
-        actual_gitlab_ci_job = copy(config.graph_config["job-defaults"])
-        actual_gitlab_ci_job |= job
+        actual_gitlab_ci_job = always_merger.merge(
+            deepcopy(config.graph_config["job-defaults"]), job
+        )
 
         head_ref_protection = config.params["head_ref_protection"]
         runner_tag = get_runner_tag(
