@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 def update_dependencies(graph_config):
     _update_jobgraph_python_requirements()
+    _update_precommit_hooks()
     _update_dockerfiles()
     _update_docker_in_docker_image(graph_config)
     _update_tfenv()
@@ -58,6 +59,14 @@ def _update_jobgraph_python_requirements():
         _PIN_COMMANDS,
     )
     subprocess.run(docker_command)
+
+
+def _update_precommit_hooks():
+    precommit_command = (
+        "pre-commit",
+        "autoupdate",
+    )
+    subprocess.run(precommit_command)
 
 
 def _update_dockerfiles():
