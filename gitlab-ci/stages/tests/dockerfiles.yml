@@ -1,11 +1,11 @@
 ---
-job-defaults:
+job_defaults:
     optimization:
-        skip-unless-changed:
+        skip_unless_changed:
         - "**/Dockerfile"
 
 
 hadolint:
     description: "Run `hadolint` to validate dockerfiles"
-    image: {"docker-image-reference": "<hadolint>"}
+    image: {"docker_image_reference": "<hadolint>"}
     script: hadolint $(find . -name 'Dockerfile')

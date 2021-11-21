@@ -36,23 +36,23 @@ docker_image_schema = gitlab_ci_job_input.extend(
     {
         # Arguments to use for the Dockerfile.
         Optional("args"): {str: str},
-        Required("container-registry-type"): str,
+        Required("container_registry_type"): str,
         # Name of the docker image definition under gitlab-ci/docker, when
         # different from the docker image name.
         Optional("definition"): str,
         Optional("description"): str,
         Optional("image"): docker_image_ref,
-        Optional("image-name-template"): optionally_keyed_by(
-            "head-ref-protection", str
+        Optional("image_name_template"): optionally_keyed_by(
+            "head_ref_protection", str
         ),
         # relative path (from config.path) to the file the docker image was defined
         # in.
-        Optional("job-from"): str,
+        Optional("job_from"): str,
         Optional("label"): str,
         Required("name"): str,
         # Name of the parent docker image.
         Optional("parent"): str,
-        Optional("push-as-latest"): optionally_keyed_by("head-ref", bool),
+        Optional("push_as_latest"): optionally_keyed_by("head_ref", bool),
     }
 )
 
@@ -80,7 +80,7 @@ def ensure_external_base_images_have_digests(config, jobs):
 @transforms.add
 def add_registry_specific_config(config, jobs):
     for job in jobs:
-        registry_type = job.pop("container-registry-type")
+        registry_type = job.pop("container_registry_type")
         # TODO Use decorators instead
         if registry_type == "gitlab":
             job["before_script"] = [
@@ -88,10 +88,10 @@ def add_registry_specific_config(config, jobs):
                 '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
             ]
             job.setdefault("optimization", {}).setdefault(
-                "skip-if-on-gitlab-container-registry", True
+                "skip_if_on_gitlab_container_registry", True
             )
         else:
-            raise ValueError(f"Unknown container-registry-type: {registry_type}")
+            raise ValueError(f"Unknown container_registry_type: {registry_type}")
 
         yield job
 
@@ -99,14 +99,14 @@ def add_registry_specific_config(config, jobs):
 @transforms.add
 def resolve_keyed_variables(config, jobs):
     for job in jobs:
-        for key in ("image-name-template", "push-as-latest"):
+        for key in ("image_name_template", "push_as_latest"):
             resolve_keyed_by(
                 job,
                 key,
                 item_name=job["name"],
                 **{
-                    "head-ref-protection": config.params["head_ref_protection"],
-                    "head-ref": config.params["head_ref"],
+                    "head_ref_protection": config.params["head_ref_protection"],
+                    "head_ref": config.params["head_ref"],
                 },
             )
 
@@ -117,7 +117,7 @@ def resolve_keyed_variables(config, jobs):
 def define_image_name(config, jobs):
     for job in jobs:
         job_name = job["name"]
-        image_name_template = job.pop("image-name-template", job_name)
+        image_name_template = job.pop("image_name_template", job_name)
         image_name = image_name_template.format(job_name=job_name)
 
         attributes = job.setdefault("attributes", {})
@@ -140,8 +140,8 @@ def fill_common_values(config, jobs):
         job |= {
             "label": image_base_name,
             "description": f"Build the docker image {image_base_name} for use by downstream jobs",
-            "image": {"docker-image-reference": "<docker-in-docker>"},
-            "runner-alias": "images",
+            "image": {"docker_image_reference": "<docker_in_docker>"},
+            "runner_alias": "images",
         }
 
         yield job
@@ -162,7 +162,7 @@ def fill_context_hash(config, jobs):
             parent_label = parent
             deps = job.setdefault("dependencies", {})
             deps["parent"] = parent_label
-            variables["DOCKER_IMAGE_PARENT"] = {"docker-image-reference": "<parent>"}
+            variables["DOCKER_IMAGE_PARENT"] = {"docker_image_reference": "<parent>"}
             # If 2 parent jobs have the same name, then JobGraph will complain later
             parent_job = [j for j in jobs_list if j["label"] == parent_label][0]
 
@@ -177,8 +177,8 @@ def fill_context_hash(config, jobs):
             topsrcdir = os.path.dirname(config.graph_config.gitlab_ci_yml)
             # We need to use the real full location (not a reference to) here because
             # the context hash depends on it.
-            dind_image = config.graph_config["docker"]["external-images"][
-                "docker-in-docker"
+            dind_image = config.graph_config["docker"]["external_images"][
+                "docker_in_docker"
             ]
             context_hash = generate_context_hash(
                 topsrcdir, context_path, args, dind_image_full_location=dind_image
@@ -244,7 +244,7 @@ def define_docker_script_instructions(config, jobs):
 @transforms.add
 def define_whether_image_should_be_pushed_as_latest(config, jobs):
     for job in jobs:
-        push_as_latest = job.pop("push-as-latest", False)
+        push_as_latest = job.pop("push_as_latest", False)
         if push_as_latest:
             docker_image_latest_location = get_image_full_location(
                 *extract_gitlab_instance_and_namespace_and_name(

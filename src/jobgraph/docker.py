@@ -20,7 +20,7 @@ def get_image_context_hash(image_name):
         head_ref_protection="protected",
         strict=False,
     )
-    tasks = load_jobs_for_stage(params, "docker-image")
+    tasks = load_jobs_for_stage(params, "docker_image")
     task = tasks[image_name]
     return task.attributes["context_hash"]
 

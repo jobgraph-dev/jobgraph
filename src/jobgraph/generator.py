@@ -203,9 +203,9 @@ class JobGraphGenerator:
 
     def _load_stages(self, graph_config, target_stage=None):
         if target_stage:
-            # docker-image is an implicit dependency that never appears in
+            # docker_image is an implicit dependency that never appears in
             # stage-dependencies.
-            queue = [target_stage, "docker-image"]
+            queue = [target_stage, "docker_image"]
             seen_stages = set()
             while queue:
                 stage_name = queue.pop()
@@ -264,7 +264,7 @@ class JobGraphGenerator:
         stage_graph = Graph(set(stages), edges)
 
         if parameters.get("target-stage"):
-            stage_graph = stage_graph.transitive_closure({target_stage, "docker-image"})
+            stage_graph = stage_graph.transitive_closure({target_stage, "docker_image"})
 
         logger.info("Generating full job set")
         all_jobs = {}
@@ -318,12 +318,12 @@ class JobGraphGenerator:
         yield verifications("target_job_set", target_job_set, graph_config)
 
         logger.info("Generating target job graph")
-        # include all docker-image build jobs here, in case they are needed for a
+        # include all docker_image build jobs here, in case they are needed for a
         # graph optimization
         docker_image_jobs = {
             job.label
             for job in full_job_graph.jobs.values()
-            if job.attributes["stage"] == "docker-image"
+            if job.attributes["stage"] == "docker_image"
         }
         # include all jobs with `always_target` set
         always_target_jobs = {

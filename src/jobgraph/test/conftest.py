@@ -22,12 +22,12 @@ def fake_loader(stage, path, config, parameters, loaded_jobs):
             "actual_gitlab_ci_job": {
                 "image": f"image-{i}",
                 "script": "some-script",
-                "tags": ["some-runner-tag"],
+                "tags": ["some_runner_tag"],
             },
             "dependencies": dependencies,
         }
-        if "job-defaults" in config:
-            task = merge(config["job-defaults"], task)
+        if "job_defaults" in config:
+            task = merge(config["job_defaults"], task)
         yield task
 
 
@@ -53,7 +53,7 @@ class WithFakeKind(JobGraphGenerator):
 
 def fake_load_graph_config(root_dir):
     graph_config = GraphConfig(
-        {"docker": {"docker-in-docker": "some:dind@sha256:deadbeef"}, "jobgraph": {}},
+        {"docker": {"docker_in_docker": "some:dind@sha256:deadbeef"}, "jobgraph": {}},
         root_dir,
     )
     graph_config.__dict__["register"] = lambda: None
@@ -80,7 +80,7 @@ class FakeOptimization(optimize.OptimizationStrategy):
 
 
 class FakeRepo:
-    head_ref = "some-head-ref"
+    head_ref = "some_head_ref"
 
     def get_url(*args, **kwargs):
         return "some_url"

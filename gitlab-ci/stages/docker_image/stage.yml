@@ -11,23 +11,23 @@ transforms:
 - jobgraph.transforms.job:transforms
 
 
-job-defaults:
-    container-registry-type: gitlab
-    image-name-template:
-        by-head-ref-protection:
+job_defaults:
+    container_registry_type: gitlab
+    image_name_template:
+        by_head_ref_protection:
             protected: "{job_name}"
             unprotected: "unprotected/{job_name}"
-    push-as-latest:
-        by-head-ref:
+    push_as_latest:
+        by_head_ref:
             main: True
             default: False
 
 
 jobs:
-    python-base: {}
+    python_base: {}
     decision:
-        parent: python-base
-    python-test:
-        parent: python-base
-    jobgraph-update:
+        parent: python_base
+    python_test:
+        parent: python_base
+    jobgraph_update:
         parent: decision

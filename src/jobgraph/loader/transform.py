@@ -18,13 +18,13 @@ def loader(stage, path, config, params, loaded_jobs):
     first transform.
 
     By default, this reads jobs from the `jobs` key, or from yaml files
-    named by `jobs-from`.  The entities are read from mappings, and the
+    named by `jobs_from`.  The entities are read from mappings, and the
     keys to those mappings are added in the `name` key of each entity.
 
-    If there is a `job-defaults` config, then every job is merged with it.
+    If there is a `job_defaults` config, then every job is merged with it.
     This provides a simple way to set default values for all jobs of a stage.
-    The `job-defaults` key can also be specified in a yaml file pointed to by
-    `jobs-from`. In this case it will only apply to tasks defined in the same
+    The `job_defaults` key can also be specified in a yaml file pointed to by
+    `jobs_from`. In this case it will only apply to tasks defined in the same
     file.
 
     Other stage implementations can use a different loader function to
@@ -32,24 +32,24 @@ def loader(stage, path, config, params, loaded_jobs):
     """
 
     def jobs():
-        defaults = config.get("job-defaults")
+        defaults = config.get("job_defaults")
         for name, job in config.get("jobs", {}).items():
             if defaults:
                 job = merge(defaults, job)
-            job["job-from"] = "stage.yml"
+            job["job_from"] = "stage.yml"
             yield name, job
 
-        for filename in config.get("jobs-from", []):
+        for filename in config.get("jobs_from", []):
             tasks = load_yaml(path, filename)
 
-            file_defaults = tasks.pop("job-defaults", None)
+            file_defaults = tasks.pop("job_defaults", None)
             if defaults:
                 file_defaults = merge(defaults, file_defaults or {})
 
             for name, job in tasks.items():
                 if file_defaults:
                     job = merge(file_defaults, job)
-                job["job-from"] = filename
+                job["job_from"] = filename
                 yield name, job
 
     for name, job in jobs():

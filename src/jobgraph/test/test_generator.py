@@ -69,11 +69,11 @@ def test_always_target_jobs(maketgg):
     tgg_args = {
         "target_jobs": ["_fake-t-0", "_fake-t-1", "_ignore-t-0", "_ignore-t-1"],
         "stages": [
-            ("_fake", {"job-defaults": {"optimization": {"odd": None}}}),
+            ("_fake", {"job_defaults": {"optimization": {"odd": None}}}),
             (
                 "_ignore",
                 {
-                    "job-defaults": {
+                    "job_defaults": {
                         "attributes": {"always_target": True},
                         "optimization": {"always": True},
                     }

@@ -64,14 +64,14 @@ class TestTaskRefs(unittest.TestCase):
     def test_in_list(self):
         "resolve_docker_image_references resolves task references in a list"
         self.do(
-            {"in-a-list": ["stuff", {"docker-image-reference": "<image_reference1>"}]},
+            {"in-a-list": ["stuff", {"docker_image_reference": "<image_reference1>"}]},
             {"in-a-list": ["stuff", "image1"]},
         )
 
     def test_in_dict(self):
         "resolve_docker_image_references resolves task references in a dict"
         self.do(
-            {"in-a-dict": {"stuff": {"docker-image-reference": "<image_reference2>"}}},
+            {"in-a-dict": {"stuff": {"docker_image_reference": "<image_reference2>"}}},
             {"in-a-dict": {"stuff": "image2"}},
         )
 
@@ -80,7 +80,7 @@ class TestTaskRefs(unittest.TestCase):
         self.do(
             {
                 "multiple": {
-                    "docker-image-reference": "stuff <image_reference1> stuff "
+                    "docker_image_reference": "stuff <image_reference1> stuff "
                     "<image_reference2> after",
                 }
             },
@@ -92,7 +92,7 @@ class TestTaskRefs(unittest.TestCase):
         self.do(
             {
                 "embedded": {
-                    "docker-image-reference": "stuff before <image_reference3> stuff after"
+                    "docker_image_reference": "stuff before <image_reference3> stuff after"
                 }
             },
             {"embedded": "stuff before image3 stuff after"},
@@ -103,13 +103,13 @@ class TestTaskRefs(unittest.TestCase):
         self.do(
             {
                 "escape": {
-                    "docker-image-reference": "<image_reference3>",
+                    "docker_image_reference": "<image_reference3>",
                     "another-key": True,
                 }
             },
             {
                 "escape": {
-                    "docker-image-reference": "<image_reference3>",
+                    "docker_image_reference": "<image_reference3>",
                     "another-key": True,
                 }
             },
@@ -122,7 +122,7 @@ class TestTaskRefs(unittest.TestCase):
             'job "subject" has no docker image named "no-such"',
             lambda: resolve_docker_image_references(
                 "subject",
-                {"docker-image-reference": "<no-such>"},
+                {"docker_image_reference": "<no-such>"},
                 docker_images={},
             ),
         )

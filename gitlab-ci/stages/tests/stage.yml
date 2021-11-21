@@ -9,11 +9,11 @@ transforms:
 - jobgraph.transforms.reinstall_jobgraph:transforms
 - jobgraph.transforms.job:transforms
 
-jobs-from:
+jobs_from:
 - dockerfiles.yml
 - python.yml
 - yaml.yml
 
-job-defaults:
-    runner-alias: t-linux
+job_defaults:
+    runner_alias: t-linux
     timeout: 3 minutes

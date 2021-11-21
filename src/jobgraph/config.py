@@ -25,26 +25,26 @@ DEFAULT_ROOT_DIR = os.path.join("gitlab-ci", "stages")
 graph_config_schema = Schema(
     {
         Required("docker"): {
-            Required("external-images"): {
-                Required("docker-in-docker"): str,
+            Required("external_images"): {
+                Required("docker_in_docker"): str,
                 Extra: str,
             },
         },
         # TODO enforce stricter dictionaries
-        Required("job-defaults"): dict,
+        Required("job_defaults"): dict,
         Optional("jobgraph"): {
             Optional(
                 "register",
                 description="Python function to call to register extensions.",
             ): str,
-            Optional("decision-parameters"): str,
+            Optional("decision_parameters"): str,
         },
         Required("runners"): {
             Required("aliases"): {
                 str: {
                     Required("os"): str,
-                    Required("runner-tag"): optionally_keyed_by(
-                        "head-ref-protection", str
+                    Required("runner_tag"): optionally_keyed_by(
+                        "head_ref_protection", str
                     ),
                 }
             },
@@ -134,7 +134,7 @@ class GraphConfig:
 def validate_graph_config(config, config_yml):
     validate_schema(graph_config_schema, config, "Invalid graph configuration:")
 
-    for external_image in config["docker"].get("external-images", {}).values():
+    for external_image in config["docker"].get("external_images", {}).values():
         if not does_image_full_location_have_digest(external_image):
             raise MissingImageDigest(external_image, config_yml)
 

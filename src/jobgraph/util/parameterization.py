@@ -38,7 +38,7 @@ def resolve_timestamps(now, task_def):
 
 def resolve_docker_image_references(label, job_def, docker_images):
     """Resolve all instances of
-      {'docker-image-reference': '..<..>..'}
+      {'docker_image_reference': '..<..>..'}
     in the given task definition, using the given dependencies"""
 
     def docker_image_reference(val):
@@ -57,6 +57,6 @@ def resolve_docker_image_references(label, job_def, docker_images):
     return _recurse(
         job_def,
         {
-            "docker-image-reference": docker_image_reference,
+            "docker_image_reference": docker_image_reference,
         },
     )

@@ -119,13 +119,13 @@ def _update_decision_image():
 
 
 def _update_external_images(graph_config):
-    graph_config["docker"]["external-images"] = {
+    graph_config["docker"]["external_images"] = {
         image_name: set_digest(
             image_full_location,
             fetch_image_digest_from_registry(image_full_location),
         )
         for image_name, image_full_location in graph_config["docker"][
-            "external-images"
+            "external_images"
         ].items()
     }
     graph_config.write()

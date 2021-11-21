@@ -1,8 +1,8 @@
 ---
-job-defaults:
-    image: {in-tree: python-test}
+job_defaults:
+    image: {in_tree: python_test}
     optimization:
-        skip-unless-changed:
+        skip_unless_changed:
         - "**/*.py"
 
 

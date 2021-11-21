@@ -18,7 +18,7 @@ class Job:
       will be output to `.gitlab-ci.yml`
     - optimization: optimization to apply to the task (see jobgraph.optimize)
     - dependencies: tasks this one depends on, in the form {name: label}, for example
-      {'build': 'build-linux64/opt', 'docker-image': 'build-docker-image-desktop-test'}
+      {'build': 'build-linux64/opt', 'docker_image': 'desktop_test'}
 
     And later, as the task-graph processing proceeds:
 

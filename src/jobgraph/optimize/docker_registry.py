@@ -4,7 +4,7 @@ from jobgraph.util.docker_registries.gitlab import get_image_full_location
 from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 
 
-@register_strategy("skip-if-on-gitlab-container-registry")
+@register_strategy("skip_if_on_gitlab_container_registry")
 class GitlabContainerRegistrySearch(OptimizationStrategy):
     def should_remove_job(self, job, params, arg):
         if not arg:

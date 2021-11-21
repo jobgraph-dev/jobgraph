@@ -36,7 +36,7 @@ class TestOptimize(unittest.TestCase):
         task_def = task_def or {
             "image": "some-image",
             "script": "some-script",
-            "tags": ["some-runner-tag"],
+            "tags": ["some_runner_tag"],
         }
         task = Job(
             stage="test",

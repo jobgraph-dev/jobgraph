@@ -80,9 +80,9 @@ def _get_changed_external_docker_images(params, graph_config):
         params["base_rev"], config_file_relative_path
     )
     external_docker_images_at_base_rev = (
-        safe_load(config_yml_at_base_rev).get("docker", {}).get("external-images", {})
+        safe_load(config_yml_at_base_rev).get("docker", {}).get("external_images", {})
     )
-    external_docker_images = graph_config["docker"].get("external-images", {})
+    external_docker_images = graph_config["docker"].get("external_images", {})
 
     return {
         image_reference
@@ -97,12 +97,12 @@ def _remove_optimization_if_any_external_docker_image_has_changed(
     for label in target_job_graph.graph.visit_preorder():
         job = target_job_graph.jobs[label]
         image_reference = job.actual_gitlab_ci_job["image"][
-            "docker-image-reference"
+            "docker_image_reference"
         ].strip("<>")
         service_image_references = [
-            service.get("docker-image-reference", "").strip("<>")
+            service.get("docker_image_reference", "").strip("<>")
             for service in job.actual_gitlab_ci_job.get("services", {})
-            if service.get("docker-image-reference", "")
+            if service.get("docker_image_reference", "")
         ]
         all_image_references = [image_reference] + service_image_references
         if any(
@@ -245,13 +245,13 @@ def _get_candidate_docker_images(
         for name, dep_label in named_links_dict.get(label, {}).items()
         if target_job_graph.jobs[dep_label].attributes.get("docker_image_full_location")
     }
-    external_docker_images = graph_config["docker"].get("external-images", {})
+    external_docker_images = graph_config["docker"].get("external_images", {})
     duplicate_image_references = set(docker_images.keys()).intersection(
         set(external_docker_images.keys())
     )
     if duplicate_image_references:
         raise ValueError(
-            "Found duplicate image references between in-tree "
+            "Found duplicate image references between in_tree "
             f"and external ones: {duplicate_image_references}"
         )
     docker_images |= external_docker_images
@@ -305,7 +305,7 @@ class Never(OptimizationStrategy):
         return False
 
 
-@register_strategy("skip-unless-changed")
+@register_strategy("skip_unless_changed")
 class SkipUnlessChanged(OptimizationStrategy):
     def should_remove_job(self, task, params, file_patterns):
         repo = get_repo()
@@ -326,7 +326,7 @@ class SkipUnlessChanged(OptimizationStrategy):
 
         if not has_any_tracked_file_changed:
             logger.debug(
-                "no files found matching a pattern in `skip-unless-changed` for "
+                "no files found matching a pattern in `skip_unless_changed` for "
                 + task.label
             )
             return True

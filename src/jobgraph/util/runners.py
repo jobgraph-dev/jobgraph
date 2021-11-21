@@ -16,7 +16,7 @@ class _BuiltinRunnerAlias:
     @property
     def implementation(self):
         """
-        Since the list of built-in runner-aliases is small and fixed, we can get
+        Since the list of built-in runner_aliases is small and fixed, we can get
         away with punning the implementation name (in
         `jobgraph.transforms.task`) and the runner_tag.
         """
@@ -35,13 +35,13 @@ def get_runner_alias_implementation(graph_config, runner_alias):
     OS represents the host system, not the target OS, in the case of
     cross-compiles."""
     if runner_alias in _BUILTIN_TYPES:
-        # For the built-in runner-aliases, we use an `implementation that matches
-        # the runner-alias.
+        # For the built-in runner_aliases, we use an `implementation that matches
+        # the runner_alias.
         return _BUILTIN_TYPES[runner_alias].implementation, None
     runner_config = evaluate_keyed_by(
-        {"by-runner-alias": graph_config["runners"]["aliases"]},
-        "runner-aliases.yml",
-        {"runner-alias": runner_alias},
+        {"by_runner_alias": graph_config["runners"]["aliases"]},
+        "runner_aliases.yml",
+        {"runner_alias": runner_alias},
     )
     return runner_config["implementation"], runner_config.get("os")
 
@@ -57,12 +57,12 @@ def get_runner_tag(graph_config, alias, head_ref_protection):
 
     head_ref_protection = str(head_ref_protection)
     runner_config = evaluate_keyed_by(
-        {"by-alias": graph_config["runners"]["aliases"]},
+        {"by_alias": graph_config["runners"]["aliases"]},
         "graph_config.runners.aliases",
         {"alias": alias},
     )
     runner_tag = evaluate_keyed_by(
-        runner_config["runner-tag"],
+        runner_config["runner_tag"],
         alias,
         {"head_ref_protection": head_ref_protection},
     ).format(alias=alias)

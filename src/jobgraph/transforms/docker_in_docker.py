@@ -17,6 +17,6 @@ def add_variables(config, jobs):
         }
 
         services = job.setdefault("services", [])
-        services.append({"docker-image-reference": "<docker-in-docker>"})
+        services.append({"docker_image_reference": "<docker_in_docker>"})
 
         yield job

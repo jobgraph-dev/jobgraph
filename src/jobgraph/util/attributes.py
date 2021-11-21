@@ -64,7 +64,7 @@ match_run_on_pipeline_sources = _match_run_on
 
 def match_run_on_git_branches(git_branch, run_on_git_branches):
     """
-    Determine whether the given project is included in the `run-on-git-branches` parameter.
+    Determine whether the given project is included in the `run_on_git_branches` parameter.
     Allows 'all'.
     """
     if "all" in run_on_git_branches:

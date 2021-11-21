@@ -32,18 +32,18 @@ def build_docker_runner_payload(config, jobs):
     for job in jobs:
         image = job["image"]
         if isinstance(image, dict):
-            if "in-tree" in image:
-                name = image["in-tree"]
-                docker_image_job = image["in-tree"]
-                job.setdefault("dependencies", {})["docker-image"] = docker_image_job
+            if "in_tree" in image:
+                name = image["in_tree"]
+                docker_image_job = image["in_tree"]
+                job.setdefault("dependencies", {})["docker_image"] = docker_image_job
 
-                job["image"] = {"docker-image-reference": "<docker-image>"}
+                job["image"] = {"docker_image_reference": "<docker_image>"}
 
                 # Find VOLUME in Dockerfile.
                 volumes = dockerutil.parse_volumes(name)
                 if volumes:
                     raise Exception("volumes defined in Dockerfiles are not supported.")
-            elif "docker-image-reference" in image:
+            elif "docker_image_reference" in image:
                 # Nothing to do, this will get resolved in the optimization phase
                 pass
             else:
@@ -55,7 +55,7 @@ def build_docker_runner_payload(config, jobs):
 @transforms.add
 def set_defaults(config, jobs):
     for job in jobs:
-        job.setdefault("always-target", False)
+        job.setdefault("always_target", False)
         job.setdefault("optimization", {})
 
         yield job
@@ -98,18 +98,18 @@ def build_job(config, jobs):
         job_dependencies = job.pop("dependencies", {})
         job_description = job.pop("description")
         job_optimization = job.pop("optimization")
-        runner_alias = job.pop("runner-alias")
-        job.pop("job-from", None)
+        runner_alias = job.pop("runner_alias")
+        job.pop("job_from", None)
 
         attributes = job.pop("attributes", {})
         attributes["run_on_pipeline_sources"] = job.pop(
-            "run-on-pipeline-sources", ["push"]
+            "run_on_pipeline_sources", ["push"]
         )
-        attributes["run_on_git_branches"] = job.pop("run-on-git-branches", ["all"])
-        attributes["always_target"] = job.pop("always-target")
+        attributes["run_on_git_branches"] = job.pop("run_on_git_branches", ["all"])
+        attributes["always_target"] = job.pop("always_target")
 
         actual_gitlab_ci_job = always_merger.merge(
-            deepcopy(config.graph_config["job-defaults"]), job
+            deepcopy(config.graph_config["job_defaults"]), job
         )
 
         head_ref_protection = config.params["head_ref_protection"]

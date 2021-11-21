@@ -123,8 +123,8 @@ def get_decision_parameters(graph_config, options):
     if options.get("optimize_target_jobs") is not None:
         parameters["optimize_target_jobs"] = options["optimize_target_jobs"]
 
-    if "decision-parameters" in graph_config["jobgraph"]:
-        find_object(graph_config["jobgraph"]["decision-parameters"])(
+    if "decision_parameters" in graph_config["jobgraph"]:
+        find_object(graph_config["jobgraph"]["decision_parameters"])(
             graph_config, parameters
         )
 

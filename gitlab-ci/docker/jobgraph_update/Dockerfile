@@ -15,14 +15,14 @@ USER "$RUNNER_USER"
 ENV SSH_DIR="$RUNNER_HOME/.ssh"
 
 RUN mkdir -p "$SSH_DIR" && chmod 700 "$SSH_DIR"
-COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph-update/known_hosts "$SSH_DIR/known_hosts"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph_update/known_hosts "$SSH_DIR/known_hosts"
 
 ENV TFENV_SHA_FILE="$RUNNER_HOME/tfenv.sha256" \
     TFENV_TARGET_DIR="$RUNNER_HOME/tfenv"
 
 ENV PATH="$TFENV_TARGET_DIR/bin:$PATH"
 
-COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph-update/tfenv.sha256 "$TFENV_SHA_FILE"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph_update/tfenv.sha256 "$TFENV_SHA_FILE"
 RUN TFENV_VERSION="$(sed -E 's/[0-9a-f]+  tfenv-(.+)\.tar\.gz/\1/' "$TFENV_SHA_FILE")" && \
     TFENV_ARCHIVE="$RUNNER_HOME/tfenv-$TFENV_VERSION.tar.gz" && \
     curl --location "https://github.com/tfutils/tfenv/archive/refs/tags/v$TFENV_VERSION.tar.gz" --output "$TFENV_ARCHIVE" && \

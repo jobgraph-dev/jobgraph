@@ -63,9 +63,9 @@ class TestResolveKeyedBy(unittest.TestCase):
 
     def test_nested(self):
         x = {
-            "by-foo": {
+            "by_foo": {
                 "F1": {
-                    "by-bar": {
+                    "by_bar": {
                         "B1": 11,
                         "B2": 12,
                     },
@@ -90,8 +90,8 @@ class TestResolveKeyedBy(unittest.TestCase):
 
     def test_no_by_not_only_by(self):
         self.assertEqual(
-            resolve_keyed_by({"x": {"by-y": True, "a": 10}}, "x", "n"),
-            {"x": {"by-y": True, "a": 10}},
+            resolve_keyed_by({"x": {"by_y": True, "a": 10}}, "x", "n"),
+            {"x": {"by_y": True, "a": 10}},
         )
 
     def test_match_nested_exact(self):
@@ -99,7 +99,7 @@ class TestResolveKeyedBy(unittest.TestCase):
             resolve_keyed_by(
                 {
                     "f": "shoes",
-                    "x": {"y": {"by-f": {"shoes": "feet", "gloves": "hands"}}},
+                    "x": {"y": {"by_f": {"shoes": "feet", "gloves": "hands"}}},
                 },
                 "x.y",
                 "n",
@@ -112,7 +112,7 @@ class TestResolveKeyedBy(unittest.TestCase):
             resolve_keyed_by(
                 {
                     "f": "shoes",
-                    "x": {"by-f": {"s?[hH]oes?": "feet", "gloves": "hands"}},
+                    "x": {"by_f": {"s?[hH]oes?": "feet", "gloves": "hands"}},
                 },
                 "x",
                 "n",
@@ -123,7 +123,7 @@ class TestResolveKeyedBy(unittest.TestCase):
     def test_match_partial_regexp(self):
         self.assertEqual(
             resolve_keyed_by(
-                {"f": "shoes", "x": {"by-f": {"sh": "feet", "default": "hands"}}},
+                {"f": "shoes", "x": {"by_f": {"sh": "feet", "default": "hands"}}},
                 "x",
                 "n",
             ),
@@ -133,7 +133,7 @@ class TestResolveKeyedBy(unittest.TestCase):
     def test_match_default(self):
         self.assertEqual(
             resolve_keyed_by(
-                {"f": "shoes", "x": {"by-f": {"hat": "head", "default": "anywhere"}}},
+                {"f": "shoes", "x": {"by_f": {"hat": "head", "default": "anywhere"}}},
                 "x",
                 "n",
             ),
@@ -142,7 +142,7 @@ class TestResolveKeyedBy(unittest.TestCase):
 
     def test_match_extra_value(self):
         self.assertEqual(
-            resolve_keyed_by({"f": {"by-foo": {"x": 10, "y": 20}}}, "f", "n", foo="y"),
+            resolve_keyed_by({"f": {"by_foo": {"x": 10, "y": 20}}}, "f", "n", foo="y"),
             {"f": 20},
         )
 
@@ -150,7 +150,7 @@ class TestResolveKeyedBy(unittest.TestCase):
         self.assertRaises(
             Exception,
             resolve_keyed_by,
-            {"f": "shoes", "x": {"by-f": {"hat": "head"}}},
+            {"f": "shoes", "x": {"by_f": {"hat": "head"}}},
             "x",
             "n",
         )
@@ -159,32 +159,32 @@ class TestResolveKeyedBy(unittest.TestCase):
         self.assertRaises(
             Exception,
             resolve_keyed_by,
-            {"f": "hats", "x": {"by-f": {"hat.*": "head", "ha.*": "hair"}}},
+            {"f": "hats", "x": {"by_f": {"hat.*": "head", "ha.*": "hair"}}},
             "x",
             "n",
         )
 
     def test_no_key_no_default(self):
         """
-        When the key referenced in `by-*` doesn't exist, and there is not default value,
+        When the key referenced in `by_*` doesn't exist, and there is not default value,
         an exception is raised.
         """
         self.assertRaises(
             Exception,
             resolve_keyed_by,
-            {"x": {"by-f": {"hat.*": "head", "ha.*": "hair"}}},
+            {"x": {"by_f": {"hat.*": "head", "ha.*": "hair"}}},
             "x",
             "n",
         )
 
     def test_no_key(self):
         """
-        When the key referenced in `by-*` doesn't exist, and there is a default value,
+        When the key referenced in `by_*` doesn't exist, and there is a default value,
         that value is used as the result.
         """
         self.assertEqual(
             resolve_keyed_by(
-                {"x": {"by-f": {"hat": "head", "default": "anywhere"}}}, "x", "n"
+                {"x": {"by_f": {"hat": "head", "default": "anywhere"}}}, "x", "n"
             ),
             {"x": "anywhere"},
         )

@@ -15,17 +15,17 @@ def evaluate_keyed_by(
 
     For example, given item::
 
-        by-test-platform:
+        by_test_platform:
             macosx-10.11/debug: 13
             win.*: 6
             default: 12
 
-    a call to `evaluate_keyed_by(item, 'thing-name', {'test-platform': 'linux96')`
+    a call to `evaluate_keyed_by(item, 'thing-name', {'test_platform': 'linux96')`
     would return `12`.
 
     Items can be nested as deeply as desired::
 
-        by-test-platform:
+        by_test_platform:
             win.*: 10
             linux: 13
             default: 12
@@ -33,9 +33,9 @@ def evaluate_keyed_by(
     Args:
         value (str): Name of the value to perform evaluation on.
         item_name (str): Used to generate useful error messages.
-        attributes (dict): Dictionary of attributes used to lookup 'by-<key>' with.
+        attributes (dict): Dictionary of attributes used to lookup 'by_<key>' with.
         defer (list):
-            Allows evaluating a by-* entry at a later time.
+            Allows evaluating a by_* entry at a later time.
         enforce_single_match (bool):
             If True (default), each task may only match a single arm of the
             evaluation.
@@ -44,10 +44,10 @@ def evaluate_keyed_by(
         if not isinstance(value, dict) or len(value) != 1:
             return value
         value_key = next(iter(value))
-        if not value_key.startswith("by-"):
+        if not value_key.startswith("by_"):
             return value
 
-        keyed_by = value_key[3:]  # strip off 'by-' prefix
+        keyed_by = value_key[3:]  # strip off 'by_' prefix
 
         if defer and keyed_by in defer:
             return value
@@ -57,7 +57,7 @@ def evaluate_keyed_by(
 
         if len(alternatives) == 1 and "default" in alternatives:
             # Error out when only 'default' is specified as only alternatives,
-            # because we don't need to by-{keyed_by} there.
+            # because we don't need to by_{keyed_by} there.
             raise Exception(
                 f"Keyed-by '{keyed_by}' unnecessary with only value 'default' "
                 f"found, when determining item {item_name}"

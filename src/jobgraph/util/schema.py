@@ -49,22 +49,22 @@ def optionally_keyed_by(*arguments):
     field names.  For example:
 
         'some-value': optionally_keyed_by(
-            'test-platform', 'build-platform',
+            'test_platform', 'build-platform',
             Any('a', 'b', 'c'))
 
-    The resulting schema will allow nesting of `by-test-platform` and
-    `by-build-platform` in either order.
+    The resulting schema will allow nesting of `by_test_platform` and
+    `by_build_platform` in either order.
     """
     schema = arguments[-1]
     fields = arguments[:-1]
 
     # build the nestable schema by generating schema = Any(schema,
-    # by-fld1, by-fld2, by-fld3) once for each field.  So we don't allow
+    # by_fld1, by_fld2, by_fld3) once for each field.  So we don't allow
     # infinite nesting, but one level of nesting for each field.
     for _ in arguments:
         options = [schema]
         for field in fields:
-            options.append({"by-" + field: {str: schema}})
+            options.append({"by_" + field: {str: schema}})
         schema = Any(*options)
     return schema
 
@@ -79,9 +79,9 @@ def resolve_keyed_by(item, field, item_name, **extra_values):
     For example, given item::
 
         job:
-            test-platform: linux128
+            test_platform: linux128
             chunks:
-                by-test-platform:
+                by_test_platform:
                     macosx-10.11/debug: 13
                     win.*: 6
                     default: 12
@@ -90,18 +90,18 @@ def resolve_keyed_by(item, field, item_name, **extra_values):
     would mutate item in-place to::
 
         job:
-            test-platform: linux128
+            test_platform: linux128
             chunks: 12
 
     The `item_name` parameter is used to generate useful error messages.
 
     If extra_values are supplied, they represent additional values available
-    for reference from by-<field>.
+    for reference from by_<field>.
 
     Items can be nested as deeply as the schema will allow::
 
         chunks:
-            by-test-platform:
+            by_test_platform:
                 win.*: 10
                 linux: 13
                 default: 12
@@ -128,23 +128,8 @@ def resolve_keyed_by(item, field, item_name, **extra_values):
     return item
 
 
-# Schemas for YAML files should use dashed identifiers by default.  If there are
-# components of the schema for which there is a good reason to use another format,
-# they can be whitelisted here.
-WHITELISTED_SCHEMA_IDENTIFIERS = [
-    # upstream-artifacts and artifact-map are handed directly to scriptWorker,
-    # which expects interCaps
-    lambda path: any(
-        exc in path for exc in ("['upstream-artifacts']", "['artifact-map']")
-    )
-]
-
-
 def check_schema(schema):
-    identifier_re = re.compile("^[a-z][a-z0-9-_]*$")
-
-    def whitelisted(path):
-        return any(f(path) for f in WHITELISTED_SCHEMA_IDENTIFIERS)
+    identifier_re = re.compile("^[a-z][a-z0-9_]*$")
 
     def iter(path, sch):
         def check_identifier(path, k):
@@ -153,9 +138,9 @@ def check_schema(schema):
             elif isinstance(k, NotIn):
                 pass
             elif isinstance(k, str):
-                if not identifier_re.match(k) and not whitelisted(path):
+                if not identifier_re.match(k):
                     raise RuntimeError(
-                        "YAML schemas should use dashed/underscored lower-case identifiers, "
+                        "YAML schemas should use underscored lower-case identifiers, "
                         f"not {k!r} @ {path}"
                     )
             elif isinstance(k, (Optional, Required)):
@@ -163,7 +148,7 @@ def check_schema(schema):
             elif isinstance(k, (Any, All)):
                 for v in k.validators:
                     check_identifier(path, v)
-            elif not whitelisted(path):
+            else:
                 raise RuntimeError(
                     f"Unexpected type in YAML schema: {type(k).__name__} @ {path}"
                 )
@@ -210,9 +195,9 @@ docker_image_ref = Any(
     # images in config.yml
     #
     # an external docker image defined in config.yml
-    {"docker-image-reference": str},
-    # an in-tree generated docker image (from `gitlab-ci/docker/<name>`)
-    {"in-tree": str},
+    {"docker_image_reference": str},
+    # an in_tree generated docker image (from `gitlab-ci/docker/<name>`)
+    {"in_tree": str},
 )
 
 str_or_list_of_str = Any(
@@ -373,7 +358,7 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
         Required("description"): str,
         Optional("attributes"): {str: object},
         # relative path (from config.path) to the file this job was defined in
-        Optional("job-from"): str,
+        Optional("job_from"): str,
         # dependencies of this job, keyed by name; these are passed through
         # verbatim and subject to the interpretation of the Job's get_dependencies
         # method.
@@ -387,20 +372,20 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
             ): object,
         },
         Required("image"): docker_image_ref,
-        Optional("run-on-pipeline-sources"): [str],
-        Optional("run-on-git-branches"): [str],
-        # The `always-target` attribute will cause the job to be included in the
+        Optional("run_on_pipeline_sources"): [str],
+        Optional("run_on_git_branches"): [str],
+        # The `always_target` attribute will cause the job to be included in the
         # target_job_graph regardless of filtering. Jobs included in this manner
         # will be candidates for optimization even when `optimize_target_jobs` is
         # False, unless the job was also explicitly chosen by the target_jobs
         # method.
-        Optional("always-target"): bool,
+        Optional("always_target"): bool,
         # Optimization to perform on this job during the optimization phase.
         # Optimizations are defined in gitlab-ci/jobgraph/optimize.py.
         Optional("optimization"): dict,
-        # the runner-alias for the job. Will be substituted into an actual Gitlab
+        # the runner_alias for the job. Will be substituted into an actual Gitlab
         # CI tag.
-        "runner-alias": str,
+        "runner_alias": str,
     }
 )
 

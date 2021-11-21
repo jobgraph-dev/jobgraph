@@ -10,7 +10,7 @@ transforms:
 - jobgraph.transforms.reinstall_jobgraph:transforms
 - jobgraph.transforms.job:transforms
 
-job-defaults:
+job_defaults:
     # Taken from https://docs.gitlab.com/ee/ci/ssh_keys/#ssh-keys-when-using-the-docker-executor
     before_script:
     - eval $(ssh-agent -s)
@@ -20,9 +20,9 @@ job-defaults:
 jobs:
     jobgraph-dependencies:
         description: Bump jobgraph dependencies (python packages and docker images)
-        image: {in-tree: jobgraph-update}
+        image: {in_tree: jobgraph_update}
         reinstall-jobgraph: true
-        run-on-pipeline-sources:
+        run_on_pipeline_sources:
         - schedule
-        runner-alias: misc
+        runner_alias: misc
         script: gitlab-ci/scripts/update-dependencies.sh origin update-jobgraph-dependencies
