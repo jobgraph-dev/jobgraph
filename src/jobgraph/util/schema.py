@@ -424,6 +424,7 @@ gitlab_ci_job_output = gitlab_ci_job_common.extend(
             ],
             Length(max=MAX_DEPENDENCIES),
         ),
+        Optional("services"): [str],
         Required("stage"): str,
         Required("tags"): All(
             [str],
