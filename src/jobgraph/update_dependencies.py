@@ -7,6 +7,7 @@ import requests
 from dockerfile_parse import DockerfileParser
 
 from jobgraph.paths import (
+    GITLAB_CI_YML_FILE,
     PYTHON_VERSION_FILE,
     ROOT_DIR,
     TERRAFORM_DIR,
@@ -22,7 +23,8 @@ def update_dependencies(graph_config):
     _update_jobgraph_python_requirements()
     _update_precommit_hooks()
     _update_dockerfiles()
-    _update_docker_in_docker_image(graph_config)
+    _update_decision_image()
+    _update_external_images(graph_config)
     _update_tfenv()
     _update_terraform()
     _update_terraform_providers()
@@ -88,7 +90,35 @@ def _update_dockerfiles():
                 docker_file.baseimage = new_base_image
 
 
-def _update_docker_in_docker_image(graph_config):
+_IMAGE_INSTRUCTION_PREFIX = "    image: "
+
+
+# This implementation is quite basic and looks fragile at a first glance.
+# Although, parsing .gitlab-ci.yml with pyyaml actually badly messes up the
+# formatting.
+# Moreover, the indentation is safeguarded by yamllint.
+def _update_decision_image():
+    with open(GITLAB_CI_YML_FILE) as f:
+        lines = f.readlines()
+
+    new_lines = []
+    for line in lines:
+        if line.startswith(_IMAGE_INSTRUCTION_PREFIX):
+            image_full_location = line[len(_IMAGE_INSTRUCTION_PREFIX) :]
+            image_new_full_location = set_digest(
+                image_full_location,
+                fetch_image_digest_from_registry(image_full_location),
+            )
+
+            line = f"{_IMAGE_INSTRUCTION_PREFIX}{image_new_full_location}\n"
+
+        new_lines.append(line)
+
+    with open(GITLAB_CI_YML_FILE, "w") as f:
+        lines = f.writelines(new_lines)
+
+
+def _update_external_images(graph_config):
     graph_config["docker"]["external-images"] = {
         image_name: set_digest(
             image_full_location,
