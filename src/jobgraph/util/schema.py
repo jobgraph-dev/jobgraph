@@ -425,7 +425,15 @@ gitlab_ci_job_output = gitlab_ci_job_common.extend(
             Length(max=MAX_DEPENDENCIES),
         ),
         Required("stage"): str,
-        Required("tags"): All([str, Length(max=1)]),
+        Required("tags"): All(
+            [str],
+            Length(
+                max=1,
+                msg="For the sake of reproducibility, please use only a single tag "
+                "to identify a runner. Multiple tags are a potential footgun. You "
+                "may end up running your job on an unexpected runner.",
+            ),
+        ),
         Optional("variables"): {
             str: Any(
                 int,
