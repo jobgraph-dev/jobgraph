@@ -303,7 +303,7 @@ gitlab_ci_job_common = Schema(
                         Required("name"): str,
                         Required("url"): str,
                         Optional("filepath"): str,
-                        Optional("link_typ"): Any(
+                        Optional("link_type"): Any(
                             "runbook", "package", "image", "other"
                         ),
                     }
