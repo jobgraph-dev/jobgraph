@@ -18,8 +18,8 @@ from jobgraph.util.docker_registries import does_image_full_location_have_digest
 from jobgraph.util.docker_registries.gitlab import get_image_full_location
 from jobgraph.util.gitlab import extract_gitlab_instance_and_namespace_and_name
 from jobgraph.util.schema import (
-    Schema,
     docker_image_ref,
+    gitlab_ci_job_input,
     optionally_keyed_by,
     resolve_keyed_by,
 )
@@ -32,26 +32,27 @@ DIGEST_RE = re.compile("^[0-9a-f]{64}$")
 
 transforms = TransformSequence()
 
-docker_image_schema = Schema(
+docker_image_schema = gitlab_ci_job_input.extend(
     {
-        # Name of the docker image.
-        Required("name"): str,
-        # Name of the parent docker image.
-        Optional("parent"): str,
-        Optional("image-name-template"): optionally_keyed_by(
-            "head-ref-protection", str
-        ),
-        # relative path (from config.path) to the file the docker image was defined
-        # in.
-        Optional("job-from"): str,
         # Arguments to use for the Dockerfile.
         Optional("args"): {str: str},
         Required("container-registry-type"): str,
         # Name of the docker image definition under gitlab-ci/docker, when
         # different from the docker image name.
         Optional("definition"): str,
-        Optional("services"): [docker_image_ref],
-        Optional("variables"): dict,
+        Optional("description"): str,
+        Optional("image"): docker_image_ref,
+        Optional("image-name-template"): optionally_keyed_by(
+            "head-ref-protection", str
+        ),
+        # relative path (from config.path) to the file the docker image was defined
+        # in.
+        Optional("job-from"): str,
+        Optional("label"): str,
+        Required("name"): str,
+        # Name of the parent docker image.
+        Optional("parent"): str,
+        Optional("push-as-latest"): optionally_keyed_by("head-ref", bool),
     }
 )
 
@@ -96,17 +97,26 @@ def add_registry_specific_config(config, jobs):
 
 
 @transforms.add
+def resolve_keyed_variables(config, jobs):
+    for job in jobs:
+        for key in ("image-name-template", "push-as-latest"):
+            resolve_keyed_by(
+                job,
+                key,
+                item_name=job["name"],
+                **{
+                    "head-ref-protection": config.params["head_ref_protection"],
+                    "head-ref": config.params["head_ref"],
+                },
+            )
+
+        yield job
+
+
+@transforms.add
 def define_image_name(config, jobs):
     for job in jobs:
         job_name = job["name"]
-        resolve_keyed_by(
-            job,
-            "image-name-template",
-            item_name=job_name,
-            **{
-                "head-ref-protection": config.params["head_ref_protection"],
-            },
-        )
         image_name_template = job.pop("image-name-template", job_name)
         image_name = image_name_template.format(job_name=job_name)
 
@@ -227,5 +237,33 @@ def define_docker_script_instructions(config, jobs):
                 'docker push "$DOCKER_IMAGE_FULL_LOCATION"',
             ]
         )
+
+        yield job
+
+
+@transforms.add
+def define_whether_image_should_be_pushed_as_latest(config, jobs):
+    for job in jobs:
+        push_as_latest = job.pop("push-as-latest", False)
+        if push_as_latest:
+            docker_image_latest_location = get_image_full_location(
+                *extract_gitlab_instance_and_namespace_and_name(
+                    config.params["head_repository"]
+                ),
+                image_name=job["attributes"]["image_name"],
+                image_tag="latest",
+            )
+            variables = job.setdefault("variables", {})
+            variables |= {
+                "DOCKER_IMAGE_LATEST_LOCATION": docker_image_latest_location,
+            }
+
+            script = job.setdefault("script", [])
+            script.extend(
+                [
+                    'docker tag "$DOCKER_IMAGE_FULL_LOCATION" "$DOCKER_IMAGE_LATEST_LOCATION"',
+                    'docker push "$DOCKER_IMAGE_LATEST_LOCATION"',
+                ]
+            )
 
         yield job

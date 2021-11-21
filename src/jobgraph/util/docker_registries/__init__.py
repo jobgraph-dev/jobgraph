@@ -131,10 +131,8 @@ def build_image_full_location(image_data):
     ):
         string = f"{string}{image_data['namespace']}/".lower()
 
-    string = f"{string}{image_data['image_name']}".lower()
+    string = f"{string}{image_data['image_name']}:{image_data['tag']}".lower()
 
-    if image_data["tag"] != "latest":
-        string = f"{string}:{image_data['tag']}"
     if image_data.get("digest"):
         string = f"{string}@{image_data['digest']}"
 

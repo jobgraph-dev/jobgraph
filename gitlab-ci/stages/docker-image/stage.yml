@@ -17,6 +17,10 @@ job-defaults:
         by-head-ref-protection:
             protected: "{job_name}"
             unprotected: "unprotected/{job_name}"
+    push-as-latest:
+        by-head-ref:
+            main: True
+            default: False
 
 
 jobs:

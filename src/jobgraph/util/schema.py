@@ -394,7 +394,7 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
         # will be candidates for optimization even when `optimize_target_jobs` is
         # False, unless the job was also explicitly chosen by the target_jobs
         # method.
-        Required("always-target"): bool,
+        Optional("always-target"): bool,
         # Optimization to perform on this job during the optimization phase.
         # Optimizations are defined in gitlab-ci/jobgraph/optimize.py.
         Optional("optimization"): dict,
