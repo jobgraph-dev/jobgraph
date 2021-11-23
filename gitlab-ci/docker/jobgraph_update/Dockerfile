@@ -4,6 +4,7 @@ FROM $DOCKER_IMAGE_PARENT
 USER root
 RUN apk add --no-cache \
     bash~=5.1 \
+    build-base~=0.5 \
     curl~=7.79 \
     docker~=20.10 \
     gzip~=1.10 \
