@@ -6,11 +6,11 @@ terraform {
   }
 }
 
-variable "JOBGRAPH_GITLAB_TOKEN" {
+variable "JOBGRAPH_BOT_GITLAB_TOKEN" {
   type        = string
   description = "GitLab personal access token with `api` scope."
 }
 
 provider "gitlab" {
-  token = var.JOBGRAPH_GITLAB_TOKEN
+  token = var.JOBGRAPH_BOT_GITLAB_TOKEN
 }
