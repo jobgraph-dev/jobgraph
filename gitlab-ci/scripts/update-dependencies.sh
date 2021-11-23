@@ -18,8 +18,8 @@ ssh -T "$SSH_TEST_URL"
 jobgraph update-dependencies
 
 git switch --force-create "$GIT_BRANCH"
-git config user.name '[Bot] Jobgraph Cron'
-git config user.email ''
+git config user.name 'jobgraph-bot'
+git config user.email '10283475-jobgraph-bot@users.noreply.gitlab.com'
 git commit --all --message 'Run jobgraph update-dependencies' || (echo 'No updates found' && exit 0)
 
 git remote set-url --push "$GIT_REMOTE" "$SSH_URL"
