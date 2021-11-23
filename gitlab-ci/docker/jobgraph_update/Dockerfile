@@ -12,8 +12,10 @@ RUN apk add --no-cache \
 
 USER "$RUNNER_USER"
 
-ENV SSH_DIR="$RUNNER_HOME/.ssh"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/dev.txt /jobgraph/requirements/
+RUN pip install --user --no-cache-dir --require-hashes --requirement '/jobgraph/requirements/dev.txt'
 
+ENV SSH_DIR="$RUNNER_HOME/.ssh"
 RUN mkdir -p "$SSH_DIR" && chmod 700 "$SSH_DIR"
 COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph_update/known_hosts "$SSH_DIR/known_hosts"
 
