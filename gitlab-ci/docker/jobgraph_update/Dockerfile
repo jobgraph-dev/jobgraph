@@ -12,7 +12,7 @@ RUN apk add --no-cache \
 
 USER "$RUNNER_USER"
 
-COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/dev.txt /jobgraph/requirements/
+COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/test.txt requirements/dev.txt /jobgraph/requirements/
 RUN pip install --user --no-cache-dir --require-hashes --requirement '/jobgraph/requirements/dev.txt'
 
 ENV SSH_DIR="$RUNNER_HOME/.ssh"
