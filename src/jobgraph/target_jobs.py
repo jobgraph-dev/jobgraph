@@ -27,9 +27,7 @@ def get_method(method):
 
 
 def filter_for_pipeline_source(task, parameters):
-    run_on_pipeline_sources = set(
-        task.attributes.get("run_on_pipeline_sources", ["push"])
-    )
+    run_on_pipeline_sources = set(task.attributes["run_on_pipeline_sources"])
     return match_run_on_pipeline_sources(
         parameters["pipeline_source"], run_on_pipeline_sources
     )
@@ -42,7 +40,7 @@ def filter_for_git_branch(task, parameters):
     if parameters["pipeline_source"] == "merge_request_event":
         return True
 
-    run_on_git_branches = set(task.attributes.get("run_on_git_branches", ["all"]))
+    run_on_git_branches = set(task.attributes["run_on_git_branches"])
     git_branch = parameters["head_ref"]
     if git_branch.startswith(_GIT_REFS_HEADS_PREFIX):
         git_branch = git_branch[len(_GIT_REFS_HEADS_PREFIX) :]

@@ -103,7 +103,7 @@ def build_job(config, jobs):
 
         attributes = job.pop("attributes", {})
         attributes["run_on_pipeline_sources"] = job.pop(
-            "run_on_pipeline_sources", ["push"]
+            "run_on_pipeline_sources", ["push", "web"]
         )
         attributes["run_on_git_branches"] = job.pop("run_on_git_branches", ["all"])
         attributes["always_target"] = job.pop("always_target")

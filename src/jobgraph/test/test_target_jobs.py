@@ -13,7 +13,10 @@ from jobgraph.jobgraph import JobGraph
 
 class TestTargetTasks(unittest.TestCase):
     def default_matches_pipeline_source(self, run_on_pipeline_sources, pipeline_source):
-        attributes = {}
+        attributes = {
+            "run_on_pipeline_sources": ["push", "web"],
+            "run_on_git_branches": ["all"],
+        }
         if run_on_pipeline_sources is not None:
             attributes["run_on_pipeline_sources"] = run_on_pipeline_sources
 
@@ -61,11 +64,6 @@ class TestTargetTasks(unittest.TestCase):
         return "a" in method(graph, parameters, {})
 
     def test_default_pipeline_source(self):
-        self.assertTrue(self.default_matches_pipeline_source(None, "push"))
-        self.assertFalse(
-            self.default_matches_pipeline_source(None, "merge_request_event")
-        )
-
         self.assertFalse(self.default_matches_pipeline_source([], "push"))
         self.assertFalse(
             self.default_matches_pipeline_source([], "merge_request_event")
@@ -91,28 +89,6 @@ class TestTargetTasks(unittest.TestCase):
         )
 
     def test_default_git_branches(self):
-        self.assertFalse(
-            self.default_matches_git_branches(
-                None, "merge_request_event", None, "master"
-            )
-        )
-        self.assertFalse(
-            self.default_matches_git_branches(
-                None, "merge_request_event", None, "some-branch"
-            )
-        )
-        self.assertTrue(self.default_matches_git_branches(None, "push", None, "master"))
-        self.assertTrue(self.default_matches_git_branches(None, "push", None, "main"))
-        self.assertTrue(
-            self.default_matches_git_branches(None, "push", None, "some-branch")
-        )
-        self.assertTrue(
-            self.default_matches_git_branches(None, "push", None, "release/v1.0")
-        )
-        self.assertTrue(
-            self.default_matches_git_branches(None, "push", None, "release_v2.0")
-        )
-
         self.assertFalse(
             self.default_matches_git_branches([], "merge_request_event", None, "master")
         )
