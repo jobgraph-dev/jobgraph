@@ -11,10 +11,10 @@ job_defaults:
     retry:
         max: 2
         when:
-        - unknown_failure
-        - stale_schedule
         - runner_system_failure
+        - stale_schedule
         - stuck_or_timeout_failure
+        - unknown_failure
     timeout: 5 minutes
     variables:
         ARTIFACT_DOWNLOAD_ATTEMPTS: 3
