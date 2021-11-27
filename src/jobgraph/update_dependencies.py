@@ -7,12 +7,12 @@ import requests
 from dockerfile_parse import DockerfileParser
 
 from jobgraph.paths import (
-    GITLAB_CI_YML_FILE,
+    JOBGRAPH_ROOT_DIR,
     PYTHON_VERSION_FILE,
-    ROOT_DIR,
     TERRAFORM_DIR,
     TERRAFORM_VERSION_FILE,
     TFENV_FILE,
+    get_gitlab_ci_yml_path,
 )
 from jobgraph.util.docker_registries import fetch_image_digest_from_registry, set_digest
 
@@ -50,7 +50,7 @@ def _update_jobgraph_python_requirements():
         "run",
         "--tty",
         "--volume",
-        f"{ROOT_DIR}:/src",
+        f"{JOBGRAPH_ROOT_DIR}:/src",
         "--workdir",
         "/src",
         "--pull",
@@ -72,7 +72,7 @@ def _update_precommit_hooks():
 
 
 def _update_dockerfiles():
-    for docker_file_path in ROOT_DIR.glob("**/Dockerfile"):
+    for docker_file_path in JOBGRAPH_ROOT_DIR.glob("**/Dockerfile"):
         docker_file = DockerfileParser(
             path=str(docker_file_path),
             env_replace=True,
@@ -98,7 +98,7 @@ _IMAGE_INSTRUCTION_PREFIX = "    image: "
 # formatting.
 # Moreover, the indentation is safeguarded by yamllint.
 def _update_decision_image():
-    with open(GITLAB_CI_YML_FILE) as f:
+    with open(get_gitlab_ci_yml_path()) as f:
         lines = f.readlines()
 
     new_lines = []
@@ -114,7 +114,7 @@ def _update_decision_image():
 
         new_lines.append(line)
 
-    with open(GITLAB_CI_YML_FILE, "w") as f:
+    with open(get_gitlab_ci_yml_path(), "w") as f:
         lines = f.writelines(new_lines)
 
 
