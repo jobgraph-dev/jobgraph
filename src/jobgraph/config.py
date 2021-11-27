@@ -132,6 +132,10 @@ class GraphConfig:
         return get_config_yml_path(self.root_dir)
 
     def write(self):
+        target_dir = os.path.dirname(self.config_yml)
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir)
+
         with open(self.config_yml, "w") as f:
             yaml.safe_dump(
                 self._config,

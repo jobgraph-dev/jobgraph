@@ -21,6 +21,7 @@ from typing import Any
 import appdirs
 import yaml
 
+from jobgraph.util.gitlab import GITLAB_DEFAULT_ROOT_URL
 from jobgraph.util.strtobool import strtobool
 
 Command = namedtuple("Command", ["func", "args", "kwargs", "defaults"])
@@ -599,10 +600,22 @@ def update_depdencies(options):
     "bootstrap",
     help="Create files to get started with jobgraph",
 )
+@argument(
+    "--gitlab-project-id",
+    required=True,
+    type=int,
+    help="Project ID of the current Gitlab repository",
+)
+@argument(
+    "--gitlab-root-url",
+    default=GITLAB_DEFAULT_ROOT_URL,
+    help=f"Root URL of the Gitlab instance (default: {GITLAB_DEFAULT_ROOT_URL})",
+)
 def bootstrap(options):
     from jobgraph.bootstrap import bootstrap
 
-    bootstrap()
+    options.pop("command")
+    bootstrap(**options)
 
 
 def create_parser():

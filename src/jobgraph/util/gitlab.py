@@ -1,5 +1,7 @@
 from urllib.parse import unquote, urlparse
 
+GITLAB_DEFAULT_ROOT_URL = "https://gitlab.com"
+
 
 def extract_gitlab_instance_and_namespace_and_name(url):
     """Given an URL, return the instance domain name, repo name and the
