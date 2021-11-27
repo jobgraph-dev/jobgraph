@@ -161,16 +161,22 @@ def _update_terraform_providers(graph_config):
             f"{root_url}/api/v4/projects/{project_id}/terraform/state/jobgraph"
         )
 
-        gitlab_token = os.environ.get(
-            "CI_JOB_TOKEN", os.environ.get("GITLAB_PERSONAL_TOKEN")
+        # Logic from https://gitlab.com/gitlab-org/terraform-images/-/blob/37f671b7abb6d29ee033fd7586b29caf7b270182/src/bin/gitlab-terraform.sh#L26 # noqa: E501
+        terraform_username = os.environ.get(
+            "TF_USERNAME", os.environ["GITLAB_USER_LOGIN"]
         )
+        terraform_password = os.environ.get("TF_PASSWORD")
+        if not terraform_password:
+            terraform_username = "gitlab-ci-token"
+            terraform_password = os.environ["CI_JOB_TOKEN"]
+
         terraform_command.extend(
             [
                 f"-backend-config=address={backend_url}",
                 f"-backend-config=lock_address={backend_url}/lock",
                 f"-backend-config=unlock_address={backend_url}/lock",
-                "-backend-config=username=jobgraph-bot",
-                f"-backend-config=password={gitlab_token}",
+                f"-backend-config=username={terraform_username}",
+                f"-backend-config=password={terraform_password}",
                 "-backend-config=lock_method=POST",
                 "-backend-config=unlock_method=DELETE",
                 "-backend-config=retry_wait_min=5",
