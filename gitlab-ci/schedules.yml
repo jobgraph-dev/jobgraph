@@ -3,4 +3,4 @@ jobs:
     update-dependencies:
         cron: 30 21 * * 2
         description: Update jobgraph dependencies
-        target-jobs-method: default
+        target_jobs_method: default

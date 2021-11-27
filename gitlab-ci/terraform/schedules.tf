@@ -18,5 +18,5 @@ resource "gitlab_pipeline_schedule_variable" "schedules" {
   key                  = "TARGET_JOBS_METHOD"
   pipeline_schedule_id = gitlab_pipeline_schedule.schedules[each.key].id
   project              = gitlab_pipeline_schedule.schedules[each.key].project
-  value                = each.value.target-jobs-method
+  value                = each.value.target_jobs_method
 }
