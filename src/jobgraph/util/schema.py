@@ -320,6 +320,7 @@ gitlab_ci_job_common = Schema(
                 ],
             },
         ),
+        Optional("schedules"): dict,
         Optional("script"): str_or_list_of_str,
         Optional("secrets"): {
             str: secret_def,

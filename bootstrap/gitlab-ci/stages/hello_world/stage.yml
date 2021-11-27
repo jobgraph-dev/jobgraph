@@ -20,7 +20,7 @@ jobs:
         - cowsay 'Hello from a job!'
 
     from_a_schedule:
-        run_on_pipeline_sources:
-        - schedule
+        schedules:
+            single_job_on_given_schedule: True
         script:
         - cowsay 'Scheduled hello!'

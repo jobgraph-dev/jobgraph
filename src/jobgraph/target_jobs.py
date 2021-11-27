@@ -43,12 +43,20 @@ def filter_for_git_branch(job, parameters):
     return match_run_on_git_branches(git_branch, run_on_git_branches)
 
 
+def filter_out_schedules(task, parameters):
+    """
+    Filter out jobs that run within a schedule.
+    """
+    return not task.attributes.get("schedules")
+
+
 def standard_filter(job, parameters):
     return all(
         filter_func(job, parameters)
         for filter_func in (
             filter_for_pipeline_source,
             filter_for_git_branch,
+            filter_out_schedules,
         )
     )
 
