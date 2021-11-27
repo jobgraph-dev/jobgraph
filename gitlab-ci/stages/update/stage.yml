@@ -21,7 +21,7 @@ jobs:
     jobgraph-dependencies:
         description: Bump jobgraph dependencies (python packages and docker images)
         image: {in_tree: jobgraph_update}
-        reinstall-jobgraph: true
+        reinstall_jobgraph: true
         run_on_pipeline_sources:
         - schedule
         runner_alias: misc

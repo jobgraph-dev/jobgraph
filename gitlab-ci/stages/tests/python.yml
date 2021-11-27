@@ -28,5 +28,5 @@ pyupgrade:
 
 unit:
     description: "Run `unit tests` to validate the latest changes"
-    reinstall-jobgraph: true
+    reinstall_jobgraph: true
     script: pytest --pyargs jobgraph
