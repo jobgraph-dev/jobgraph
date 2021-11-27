@@ -12,6 +12,7 @@ import yaml
 from voluptuous import Extra, Optional, Required
 
 from .errors import MissingImageDigest
+from .paths import get_config_yml_path, get_gitlab_ci_dir
 from .util import path
 from .util.docker_registries import does_image_full_location_have_digest
 from .util.python_path import find_object
@@ -128,12 +129,7 @@ class GraphConfig:
 
     @property
     def config_yml(self):
-        if path.split(self.root_dir)[-2:] != path.split(DEFAULT_ROOT_DIR):
-            raise Exception(
-                "Not guessing path to `config.yml`. "
-                "Graph config in non-standard location."
-            )
-        return _get_config_yml_path(self.root_dir)
+        return get_config_yml_path(self.root_dir)
 
     def write(self):
         with open(self.config_yml, "w") as f:
@@ -155,9 +151,9 @@ def validate_graph_config(config, config_yml):
             raise MissingImageDigest(external_image, config_yml)
 
 
-def load_graph_config(root_dir, validate_config=True):
+def load_graph_config(root_dir=get_gitlab_ci_dir(), validate_config=True):
     # TODO set root_dir to be the one containing config.yml
-    config_yml = _get_config_yml_path(root_dir)
+    config_yml = get_config_yml_path(root_dir)
     if not os.path.exists(config_yml):
         raise Exception(f"Couldn't find jobgraph configuration: {config_yml}")
 
@@ -167,7 +163,3 @@ def load_graph_config(root_dir, validate_config=True):
     if validate_config:
         validate_graph_config(config, config_yml)
     return GraphConfig(config=config, root_dir=root_dir)
-
-
-def _get_config_yml_path(root_dir):
-    return os.path.abspath(os.path.join(root_dir, "..", "config.yml"))
