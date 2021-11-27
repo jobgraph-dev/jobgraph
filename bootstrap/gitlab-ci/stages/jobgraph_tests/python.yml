@@ -1,0 +1,27 @@
+---
+job_defaults:
+    image: {"docker_image_reference": "<jobgraph_tests>"}
+    optimization:
+        skip_unless_changed:
+        - "gitlab-ci/**/*.py"
+
+
+black:
+    description: "Run `black` to ensure strict code style"
+    script: black --check gitlab-ci/
+
+flake8:
+    description: "Run `flake8` to ensure code validates PEP8"
+    script: flake8 gitlab-ci/
+
+flynt:
+    description: "Run `flynt` to ensure f-strings are remain the only way to interpolate strings"
+    script: flynt --fail-on-change --dry-run gitlab-ci/
+
+isort:
+    description: "Run `isort` to ensure python import statements are well ordered"
+    script: isort --check --diff gitlab-ci/
+
+pyupgrade:
+    description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
+    script: pyupgrade --py310-plus $(find gitlab-ci/ -name '*.py')

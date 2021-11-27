@@ -4,6 +4,7 @@ jobs:
         cron: 00 12 * * 1
         description: Schedule a single targeted job each Monday, noon UTC.
         target_jobs_method: single_job_on_given_schedule
+
     update_dependencies:
         cron: 00 12 * * 3
         description: "Update jobgraph dependencies (e.g.: Docker images) each Wednesday, UTC"

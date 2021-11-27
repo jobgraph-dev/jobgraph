@@ -89,6 +89,9 @@ def generate_config_yml(
     graph_config["gitlab"]["root_url"] = gitlab_root_url
 
     graph_config["docker"]["external_images"]["jobgraph"] = decision_image_full_location
+    graph_config["docker"]["external_images"][
+        "jobgraph_tests"
+    ] = get_image_full_location_with_digest("python_test", root_dir=GITLAB_CI_DIR)
 
     graph_config["jobgraph"][
         "decision_parameters"

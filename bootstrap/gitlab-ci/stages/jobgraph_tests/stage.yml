@@ -1,0 +1,15 @@
+---
+loader: jobgraph.loader.transform:loader
+
+transforms:
+- jobgraph.transforms.job:transforms
+
+# You can split a stage into multiple files
+jobs_from:
+- dockerfiles.yml
+- python.yml
+- yaml.yml
+
+job_defaults:
+    runner_alias: t-linux
+    timeout: 3 minutes

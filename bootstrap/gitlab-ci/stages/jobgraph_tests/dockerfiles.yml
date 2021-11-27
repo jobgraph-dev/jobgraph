@@ -1,0 +1,11 @@
+---
+job_defaults:
+    optimization:
+        skip_unless_changed:
+        - "gitlab-ci/docker/*/Dockerfile"
+
+
+hadolint:
+    description: "Run `hadolint` to validate dockerfiles"
+    image: {"docker_image_reference": "<hadolint>"}
+    script: hadolint $(find gitlab-ci/docker/ -name 'Dockerfile')

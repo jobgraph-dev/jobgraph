@@ -1,0 +1,11 @@
+---
+job_defaults:
+    image: {"docker_image_reference": "<jobgraph_tests>"}
+    optimization:
+        skip_unless_changed:
+        - "gitlab-ci/**/*.yml"
+
+
+yamllint:
+    description: "Run `yamllint` to validate the latest changes"
+    script: yamllint gitlab-ci/
