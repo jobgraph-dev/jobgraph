@@ -1,0 +1,27 @@
+---
+loader: jobgraph.loader.transform:loader
+
+transforms:
+- jobgraph.transforms.docker_in_docker:transforms
+- jobgraph.transforms.docker_image:transforms
+- jobgraph.transforms.job:transforms
+
+
+job_defaults:
+    container_registry_type: gitlab
+    image_name_template:
+        by_head_ref_protection:
+            protected: "{job_name}"
+            unprotected: "unprotected/{job_name}"
+    push_as_latest:
+        by_head_ref:
+            main: True
+            default: False
+
+
+jobs:
+    hello_world: {}
+    # You can make docker images depend one another by setting the parent attribute.
+    # For instance:
+    # hello_world2:
+    #     parent: hello_world

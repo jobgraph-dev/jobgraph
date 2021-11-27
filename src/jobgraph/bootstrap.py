@@ -1,15 +1,30 @@
+import os
+import shutil
 from pathlib import Path
 
 from jobgraph.config import GraphConfig, load_graph_config
-from jobgraph.paths import get_gitlab_ci_dir, get_gitlab_ci_yml_path
+from jobgraph.paths import BOOTSTRAP_DIR, get_gitlab_ci_dir, get_gitlab_ci_yml_path
 from jobgraph.util.vcs import get_repository
 
 
 def bootstrap(gitlab_project_id, gitlab_root_url):
     cwd = Path.cwd()
     get_repository(cwd)
+    copy_bootstrap_folder(cwd)
     generate_gitlab_ci_yml(cwd)
     generate_config_yml(cwd, gitlab_project_id, gitlab_root_url)
+
+
+def copy_bootstrap_folder(cwd):
+    for path in BOOTSTRAP_DIR.glob("**/*"):
+        if not path.is_file():
+            continue
+
+        relative_path = path.relative_to(BOOTSTRAP_DIR)
+        target_path = cwd / relative_path
+        target_dir = target_path.parent
+        os.makedirs(target_dir, exist_ok=True)
+        shutil.copy(path, target_path)
 
 
 def generate_gitlab_ci_yml(cwd):
