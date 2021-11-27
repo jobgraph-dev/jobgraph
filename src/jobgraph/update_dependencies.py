@@ -27,7 +27,7 @@ def update_dependencies(graph_config):
     _update_external_images(graph_config)
     _update_tfenv()
     _update_terraform()
-    _update_terraform_providers()
+    _update_terraform_providers(graph_config)
 
 
 _PIN_COMMANDS = " && ".join(
@@ -147,12 +147,36 @@ def _update_terraform():
         f.write(f"{version}\n")
 
 
-def _update_terraform_providers():
+def _update_terraform_providers(graph_config):
     terraform_command = [
         "terraform",
         "init",
         "-upgrade",
     ]
+
+    if not (TERRAFORM_DIR / ".terraform").is_dir():
+        project_id = graph_config["gitlab"]["project_id"]
+        root_url = graph_config["gitlab"]["root_url"]
+        backend_url = (
+            f"{root_url}/api/v4/projects/{project_id}/terraform/state/jobgraph"
+        )
+
+        gitlab_token = os.environ.get(
+            "CI_JOB_TOKEN", os.environ.get("GITLAB_PERSONAL_TOKEN")
+        )
+        terraform_command.extend(
+            [
+                f"-backend-config=address={backend_url}",
+                f"-backend-config=lock_address={backend_url}/lock",
+                f"-backend-config=unlock_address={backend_url}/lock",
+                "-backend-config=username=jobgraph-bot",
+                f"-backend-config=password={gitlab_token}",
+                "-backend-config=lock_method=POST",
+                "-backend-config=unlock_method=DELETE",
+                "-backend-config=retry_wait_min=5",
+            ]
+        )
+
     _run_subprocess(terraform_command, cwd=TERRAFORM_DIR)
 
 

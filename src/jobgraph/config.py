@@ -30,6 +30,10 @@ graph_config_schema = Schema(
                 Extra: str,
             },
         },
+        Required("gitlab"): {
+            Required("root_url"): str,
+            Required("project_id"): int,
+        },
         # TODO enforce stricter dictionaries
         Required("job_defaults"): dict,
         Optional("jobgraph"): {
