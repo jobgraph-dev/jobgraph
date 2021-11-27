@@ -60,7 +60,7 @@ def _update_jobgraph_python_requirements():
         "-c",
         _PIN_COMMANDS,
     )
-    subprocess.run(docker_command)
+    _run_subprocess(docker_command)
 
 
 def _update_precommit_hooks():
@@ -68,7 +68,7 @@ def _update_precommit_hooks():
         "pre-commit",
         "autoupdate",
     )
-    subprocess.run(precommit_command)
+    _run_subprocess(precommit_command)
 
 
 def _update_dockerfiles():
@@ -153,7 +153,7 @@ def _update_terraform_providers():
         "init",
         "-upgrade",
     ]
-    subprocess.run(terraform_command, cwd=TERRAFORM_DIR)
+    _run_subprocess(terraform_command, cwd=TERRAFORM_DIR)
 
 
 def _get_latest_tag_on_github_release(repo_owner, repo_name):
@@ -166,3 +166,7 @@ def _get_source_sha256_from_github(repo_owner, repo_name, tag):
     url = f"https://codeload.github.com/{repo_owner}/{repo_name}/tar.gz/refs/tags/{tag}"
     response = requests.get(url)
     return hashlib.sha256(response.content).hexdigest()
+
+
+def _run_subprocess(*args, **kwargs):
+    subprocess.run(*args, **kwargs, check=True)
