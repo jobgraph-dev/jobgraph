@@ -8,6 +8,7 @@ def register(graph_config):
     """
     _import_modules(
         [
+            "parameters",
             "target_jobs",
         ]
     )
