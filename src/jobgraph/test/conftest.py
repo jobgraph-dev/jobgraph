@@ -99,7 +99,7 @@ def maketgg(monkeypatch):
         def target_jobs_method(full_job_graph, parameters, graph_config):
             return target_jobs
 
-        target_jobs_mod._target_task_methods["test_method"] = target_jobs_method
+        target_jobs_mod._target_jobs_methods["test_method"] = target_jobs_method
 
         parameters = FakeParameters(
             {

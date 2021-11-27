@@ -8,39 +8,39 @@ from jobgraph.util.attributes import (
     match_run_on_pipeline_sources,
 )
 
-_target_task_methods = {}
+_target_jobs_methods = {}
 
 _GIT_REFS_HEADS_PREFIX = "refs/heads/"
 
 
 def target_jobs(name):
     def wrap(func):
-        _target_task_methods[name] = func
+        _target_jobs_methods[name] = func
         return func
 
     return wrap
 
 
 def get_method(method):
-    """Get a target_task_method to pass to a JobGraphGenerator."""
-    return _target_task_methods[method]
+    """Get a target_job_method to pass to a JobGraphGenerator."""
+    return _target_jobs_methods[method]
 
 
-def filter_for_pipeline_source(task, parameters):
-    run_on_pipeline_sources = set(task.attributes["run_on_pipeline_sources"])
+def filter_for_pipeline_source(job, parameters):
+    run_on_pipeline_sources = set(job.attributes["run_on_pipeline_sources"])
     return match_run_on_pipeline_sources(
         parameters["pipeline_source"], run_on_pipeline_sources
     )
 
 
-def filter_for_git_branch(task, parameters):
+def filter_for_git_branch(job, parameters):
     """Filter jobs by git branch.
-    If `run_on_git_branch` is not defined, then task runs on all branches"""
+    If `run_on_git_branch` is not defined, then job runs on all branches"""
     # Pull requests usually have arbitrary names, let's not filter git branches on them.
     if parameters["pipeline_source"] == "merge_request_event":
         return True
 
-    run_on_git_branches = set(task.attributes["run_on_git_branches"])
+    run_on_git_branches = set(job.attributes["run_on_git_branches"])
     git_branch = parameters["head_ref"]
     if git_branch.startswith(_GIT_REFS_HEADS_PREFIX):
         git_branch = git_branch[len(_GIT_REFS_HEADS_PREFIX) :]
@@ -48,9 +48,9 @@ def filter_for_git_branch(task, parameters):
     return match_run_on_git_branches(git_branch, run_on_git_branches)
 
 
-def standard_filter(task, parameters):
+def standard_filter(job, parameters):
     return all(
-        filter_func(task, parameters)
+        filter_func(job, parameters)
         for filter_func in (
             filter_for_pipeline_source,
             filter_for_git_branch,
