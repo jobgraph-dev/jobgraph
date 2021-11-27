@@ -13,7 +13,7 @@ _target_task_methods = {}
 _GIT_REFS_HEADS_PREFIX = "refs/heads/"
 
 
-def _target_task(name):
+def target_jobs(name):
     def wrap(func):
         _target_task_methods[name] = func
         return func
@@ -58,13 +58,13 @@ def standard_filter(task, parameters):
     )
 
 
-@_target_task("default")
+@target_jobs("default")
 def target_jobs_default(full_job_graph, parameters, graph_config):
     """Target the jobs which have indicated they should be run based on attributes."""
     return [l for l, t in full_job_graph.jobs.items() if standard_filter(t, parameters)]
 
 
-@_target_task("nothing")
+@target_jobs("nothing")
 def target_jobs_nothing(full_job_graph, parameters, graph_config):
     """Select nothing, for DONTBUILD pushes"""
     return []
