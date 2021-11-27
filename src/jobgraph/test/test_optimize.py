@@ -31,7 +31,7 @@ class TestOptimize(unittest.TestCase):
         optimization=None,
         task_def=None,
         optimized=None,
-        dependencies=None,
+        upstream_dependencies=None,
     ):
         task_def = task_def or {
             "image": "some-image",
@@ -46,8 +46,8 @@ class TestOptimize(unittest.TestCase):
             actual_gitlab_ci_job=task_def,
         )
         task.optimization = optimization
-        if dependencies is not None:
-            task.actual_gitlab_ci_job["needs"] = sorted(dependencies)
+        if upstream_dependencies is not None:
+            task.actual_gitlab_ci_job["needs"] = sorted(upstream_dependencies)
             task.actual_gitlab_ci_job["stage"] = "test"
         return task
 
@@ -137,9 +137,9 @@ class TestOptimize(unittest.TestCase):
             graph,
             set(),
             self.make_opt_graph(
-                self.make_task("t1", dependencies={}),
-                self.make_task("t2", dependencies={"t1"}),
-                self.make_task("t3", dependencies={"t1", "t2"}),
+                self.make_task("t1", upstream_dependencies={}),
+                self.make_task("t2", upstream_dependencies={"t1"}),
+                self.make_task("t3", upstream_dependencies={"t1", "t2"}),
                 ("t3", "t2", "dep"),
                 ("t3", "t1", "dep2"),
                 ("t2", "t1", "dep"),
@@ -152,5 +152,5 @@ class TestOptimize(unittest.TestCase):
         self.assert_subgraph(
             graph,
             {"t2", "t3"},
-            self.make_opt_graph(self.make_task("t1", dependencies={})),
+            self.make_opt_graph(self.make_task("t1", upstream_dependencies={})),
         )

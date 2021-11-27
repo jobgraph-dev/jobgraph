@@ -12,7 +12,7 @@ from copy import copy, deepcopy
 
 from deepmerge import always_merger
 
-from jobgraph import MAX_DEPENDENCIES
+from jobgraph import MAX_UPSTREAM_DEPENDENCIES
 from jobgraph.transforms.base import TransformSequence
 from jobgraph.util.schema import gitlab_ci_job_input, validate_schema
 
@@ -35,7 +35,9 @@ def build_docker_runner_payload(config, jobs):
             if "in_tree" in image:
                 name = image["in_tree"]
                 docker_image_job = image["in_tree"]
-                job.setdefault("dependencies", {})["docker_image"] = docker_image_job
+                job.setdefault("upstream_dependencies", {})[
+                    "docker_image"
+                ] = docker_image_job
 
                 job["image"] = {"docker_image_reference": "<docker_image>"}
 
@@ -95,7 +97,7 @@ def build_job(config, jobs):
         job = copy(job)
 
         job_label = job.pop("label")
-        job_dependencies = job.pop("dependencies", {})
+        job_upstream_dependencies = job.pop("upstream_dependencies", {})
         job_description = job.pop("description")
         job_optimization = job.pop("optimization")
         runner_alias = job.pop("runner_alias")
@@ -124,7 +126,7 @@ def build_job(config, jobs):
             "label": job_label,
             "description": job_description,
             "actual_gitlab_ci_job": actual_gitlab_ci_job,
-            "dependencies": job_dependencies,
+            "upstream_dependencies": job_upstream_dependencies,
             "attributes": attributes,
             "optimization": job_optimization,
         }
@@ -132,11 +134,11 @@ def build_job(config, jobs):
 
 @transforms.add
 def check_job_dependencies(config, jobs):
-    """Ensures that jobs don't have more than 50 dependencies."""
+    """Ensures that jobs don't have more than 50 upstream dependencies."""
     for job in jobs:
-        if len(job["dependencies"]) > MAX_DEPENDENCIES:
+        if len(job["upstream_dependencies"]) > MAX_UPSTREAM_DEPENDENCIES:
             raise Exception(
                 f"job {config.stage}/{job['label']} has too many dependencies "
-                f"({len(job['dependencies'])} > {MAX_DEPENDENCIES})"
+                f"({len(job['upstream_dependencies'])} > {MAX_UPSTREAM_DEPENDENCIES})"
             )
         yield job

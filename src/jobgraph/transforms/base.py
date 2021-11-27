@@ -48,7 +48,7 @@ class TransformConfig:
 
     # a list of all the jobs associated with the stage dependencies of the
     # current stage
-    stage_dependencies_jobs = attr.ib()
+    stage_upstream_dependencies_jobs = attr.ib()
 
     # Global configuration of the jobgraph
     graph_config = attr.ib(type=GraphConfig)

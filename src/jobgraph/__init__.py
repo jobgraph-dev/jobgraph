@@ -4,7 +4,7 @@
 
 
 # Maximum number of dependencies a single job can have.
-MAX_DEPENDENCIES = 50
+MAX_UPSTREAM_DEPENDENCIES = 50
 
 # Enable fast task generation for local debugging
 # This is normally switched on via the --fast/-F flag.

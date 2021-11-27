@@ -49,7 +49,7 @@ class Stage:
         loader = self._get_loader()
         config = copy.deepcopy(self.config)
 
-        stage_dependencies = config.get("stage-dependencies", [])
+        stage_dependencies = config.get("stage_upstream_dependencies", [])
         stage_dependencies_jobs = [
             job for job in loaded_jobs if job.stage in stage_dependencies
         ]
@@ -79,7 +79,7 @@ class Stage:
                 attributes=job_dict["attributes"],
                 actual_gitlab_ci_job=job_dict["actual_gitlab_ci_job"],
                 optimization=job_dict.get("optimization"),
-                dependencies=job_dict.get("dependencies"),
+                upstream_dependencies=job_dict.get("upstream_dependencies"),
             )
             for job_dict in transforms(trans_config, inputs)
         ]
@@ -204,7 +204,7 @@ class JobGraphGenerator:
     def _load_stages(self, graph_config, target_stage=None):
         if target_stage:
             # docker_image is an implicit dependency that never appears in
-            # stage-dependencies.
+            # stage_upstream_dependencies.
             queue = [target_stage, "docker_image"]
             seen_stages = set()
             while queue:
@@ -214,7 +214,7 @@ class JobGraphGenerator:
                 seen_stages.add(stage_name)
                 stage = Stage.load(self.root_dir, graph_config, stage_name)
                 yield stage
-                queue.extend(stage.config.get("stage-dependencies", []))
+                queue.extend(stage.config.get("stage_upstream_dependencies", []))
         else:
             for stage_name in os.listdir(self.root_dir):
                 try:
@@ -259,7 +259,7 @@ class JobGraphGenerator:
 
         edges = set()
         for stage in stages.values():
-            for dep in stage.config.get("stage-dependencies", []):
+            for dep in stage.config.get("stage_upstream_dependencies", []):
                 edges.add((stage.name, dep, "stage-dependency"))
         stage_graph = Graph(set(stages), edges)
 
@@ -291,7 +291,7 @@ class JobGraphGenerator:
         logger.info("Generating full job graph")
         edges = set()
         for j in full_job_set:
-            for depname, dep in j.dependencies.items():
+            for depname, dep in j.upstream_dependencies.items():
                 edges.add((j.label, dep, depname))
 
         full_job_graph = JobGraph(all_jobs, Graph(full_job_set.graph.nodes, edges))

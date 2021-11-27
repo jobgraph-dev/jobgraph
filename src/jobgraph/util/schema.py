@@ -21,7 +21,7 @@ from voluptuous import Schema as VSchema
 from voluptuous.validators import Length
 
 import jobgraph
-from jobgraph import MAX_DEPENDENCIES
+from jobgraph import MAX_UPSTREAM_DEPENDENCIES
 
 from .keyed_by import evaluate_keyed_by
 
@@ -359,10 +359,9 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
         Optional("attributes"): {str: object},
         # relative path (from config.path) to the file this job was defined in
         Optional("job_from"): str,
-        # dependencies of this job, keyed by name; these are passed through
-        # verbatim and subject to the interpretation of the Job's get_dependencies
-        # method.
-        Optional("dependencies"): {
+        # upstream dependencies of this job, keyed by name; these are passed through
+        # verbatim.
+        Optional("upstream_dependencies"): {
             All(
                 str,
                 NotIn(
@@ -391,7 +390,7 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
 
 gitlab_ci_job_output = gitlab_ci_job_common.extend(
     {
-        Optional("dependencies"): [str],
+        Optional("upstream_dependencies"): [str],
         Required("image"): str,
         Optional("needs"): All(
             [
@@ -407,7 +406,7 @@ gitlab_ci_job_output = gitlab_ci_job_common.extend(
                     },
                 )
             ],
-            Length(max=MAX_DEPENDENCIES),
+            Length(max=MAX_UPSTREAM_DEPENDENCIES),
         ),
         Optional("services"): [str],
         Required("stage"): str,

@@ -187,7 +187,7 @@ def get_subgraph(
     non-optimized jobs and edges between them.
     """
 
-    # populate task['dependencies']
+    # populate task['upstream_dependencies']
     named_links_dict = target_job_graph.graph.named_links_dict()
     omit = removed_jobs
     for label, task in target_job_graph.jobs.items():

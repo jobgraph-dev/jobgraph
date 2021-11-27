@@ -17,8 +17,8 @@ class Job:
     - actual_gitlab_ci_job: the job definition (JSON-able dictionary) which
       will be output to `.gitlab-ci.yml`
     - optimization: optimization to apply to the task (see jobgraph.optimize)
-    - dependencies: jobs this one depends on, in the form {name: label}, for example
-      {'build': 'build-linux64/opt', 'docker_image': 'desktop_test'}
+    - upstream_dependencies: jobs this one depends on, in the form {name: label},
+      for example {'build': 'build-linux64/opt', 'docker_image': 'desktop_test'}
 
     And later, as the task-graph processing proceeds:
 
@@ -32,7 +32,7 @@ class Job:
     attributes = attr.ib()
     actual_gitlab_ci_job = attr.ib()
     optimization = attr.ib(default=None)
-    dependencies = attr.ib(factory=dict)
+    upstream_dependencies = attr.ib(factory=dict)
 
     def __attrs_post_init__(self):
         self.attributes["stage"] = self.stage
@@ -43,7 +43,7 @@ class Job:
             "label": self.label,
             "description": self.description,
             "attributes": self.attributes,
-            "dependencies": self.dependencies,
+            "upstream_dependencies": self.upstream_dependencies,
             "optimization": self.optimization,
             "actual_gitlab_ci_job": self.actual_gitlab_ci_job,
         }
@@ -63,6 +63,6 @@ class Job:
             attributes=job_dict["attributes"],
             actual_gitlab_ci_job=job_dict["actual_gitlab_ci_job"],
             optimization=job_dict["optimization"],
-            dependencies=job_dict.get("dependencies"),
+            upstream_dependencies=job_dict.get("upstream_dependencies"),
         )
         return rv

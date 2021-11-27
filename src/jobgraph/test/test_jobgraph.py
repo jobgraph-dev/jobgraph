@@ -32,7 +32,7 @@ class TestJobGraph(unittest.TestCase):
                 optimization={"seta": None},
                 # note that this dep is ignored, superseded by that
                 # from the jobgraph's edges
-                dependencies={"first": "a"},
+                upstream_dependencies={"first": "a"},
             ),
         }
         graph = Graph(nodes=set("ab"), edges={("a", "b", "edgelabel")})
@@ -49,7 +49,7 @@ class TestJobGraph(unittest.TestCase):
                     "description": "some test a",
                     "attributes": {"attr": "a-task", "stage": "test"},
                     "actual_gitlab_ci_job": {"taskdef": True},
-                    "dependencies": {"edgelabel": "b"},
+                    "upstream_dependencies": {"edgelabel": "b"},
                     "optimization": None,
                 },
                 "b": {
@@ -58,7 +58,7 @@ class TestJobGraph(unittest.TestCase):
                     "description": "some test b",
                     "attributes": {"stage": "test"},
                     "actual_gitlab_ci_job": {"task": "def"},
-                    "dependencies": {},
+                    "upstream_dependencies": {},
                     "optimization": {"seta": None},
                 },
             },
@@ -72,7 +72,7 @@ class TestJobGraph(unittest.TestCase):
                     label="a",
                     description="some fancy a",
                     attributes={},
-                    dependencies={"prereq": "b"},  # must match edges, below
+                    upstream_dependencies={"prereq": "b"},  # must match edges, below
                     optimization={"seta": None},
                     actual_gitlab_ci_job={"task": "def"},
                 ),
@@ -81,7 +81,7 @@ class TestJobGraph(unittest.TestCase):
                     label="b",
                     description="some pre b",
                     attributes={},
-                    dependencies={},
+                    upstream_dependencies={},
                     optimization={"seta": None},
                     actual_gitlab_ci_job={"task": "def2"},
                 ),
@@ -99,7 +99,7 @@ class TestJobGraph(unittest.TestCase):
                 label="a",
                 description="some fancy a",
                 attributes={},
-                dependencies={"prereq": "b"},  # must match edges, below
+                upstream_dependencies={"prereq": "b"},  # must match edges, below
                 optimization={"seta": None},
                 actual_gitlab_ci_job={"task": "def"},
             ),
@@ -108,7 +108,7 @@ class TestJobGraph(unittest.TestCase):
                 label="b",
                 description="some pre b",
                 attributes={},
-                dependencies={},
+                upstream_dependencies={},
                 optimization={"seta": None},
                 actual_gitlab_ci_job={"task": "def2"},
             ),

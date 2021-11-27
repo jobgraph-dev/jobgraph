@@ -160,7 +160,7 @@ def fill_context_hash(config, jobs):
 
         if parent:
             parent_label = parent
-            deps = job.setdefault("dependencies", {})
+            deps = job.setdefault("upstream_dependencies", {})
             deps["parent"] = parent_label
             variables["DOCKER_IMAGE_PARENT"] = {"docker_image_reference": "<parent>"}
             # If 2 parent jobs have the same name, then JobGraph will complain later

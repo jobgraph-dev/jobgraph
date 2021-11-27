@@ -47,8 +47,8 @@ class JobGraph:
         jobs = {}
         for key in self.graph.visit_postorder():
             jobs[key] = self.jobs[key].to_json()
-            # overwrite dependencies with the information in the jobgraph's edges.
-            jobs[key]["dependencies"] = named_links_dict.get(key, {})
+            # overwrite upstream_dependencies with the information in the jobgraph's edges.
+            jobs[key]["upstream_dependencies"] = named_links_dict.get(key, {})
         return jobs
 
     def to_gitlab_ci_jobs(self):
@@ -82,7 +82,7 @@ class JobGraph:
         edges = set()
         for key, value in jobs_dict.items():
             jobs[key] = Job.from_json(value)
-            for depname, dep in value["dependencies"].items():
+            for depname, dep in value["upstream_dependencies"].items():
                 edges.add((key, dep, depname))
         job_graph = cls(jobs, Graph(set(jobs), edges))
         return jobs, job_graph

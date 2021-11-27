@@ -10,9 +10,9 @@ from jobgraph.util.templates import merge
 
 def fake_loader(stage, path, config, parameters, loaded_jobs):
     for i in range(3):
-        dependencies = {}
+        upstream_dependencies = {}
         if i >= 1:
-            dependencies["prev"] = f"{stage}-t-{i - 1}"
+            upstream_dependencies["prev"] = f"{stage}-t-{i - 1}"
 
         task = {
             "stage": stage,
@@ -24,7 +24,7 @@ def fake_loader(stage, path, config, parameters, loaded_jobs):
                 "script": "some-script",
                 "tags": ["some_runner_tag"],
             },
-            "dependencies": dependencies,
+            "upstream_dependencies": upstream_dependencies,
         }
         if "job_defaults" in config:
             task = merge(config["job_defaults"], task)

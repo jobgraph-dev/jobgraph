@@ -11,9 +11,9 @@ def test_stage_ordering(maketgg):
     "When task stages depend on each other, they are loaded in postorder"
     tgg = maketgg(
         stages=[
-            ("_fake3", {"stage-dependencies": ["_fake2", "_fake1"]}),
-            ("_fake2", {"stage-dependencies": ["_fake1"]}),
-            ("_fake1", {"stage-dependencies": []}),
+            ("_fake3", {"stage_upstream_dependencies": ["_fake2", "_fake1"]}),
+            ("_fake2", {"stage_upstream_dependencies": ["_fake1"]}),
+            ("_fake1", {"stage_upstream_dependencies": []}),
         ]
     )
     tgg._run_until("full_job_set")
