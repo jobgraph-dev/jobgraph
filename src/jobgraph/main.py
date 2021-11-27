@@ -595,6 +595,16 @@ def update_depdencies(options):
     update_dependencies(graph_config)
 
 
+@command(
+    "bootstrap",
+    help="Create files to get started with jobgraph",
+)
+def bootstrap(options):
+    from jobgraph.bootstrap import bootstrap
+
+    bootstrap()
+
+
 def create_parser():
     parser = argparse.ArgumentParser(description="Interact with jobgraph")
     subparsers = parser.add_subparsers()
