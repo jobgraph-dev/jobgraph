@@ -366,8 +366,8 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
             All(
                 str,
                 NotIn(
-                    ["self", "decision"],
-                    "Can't use 'self` or 'decision' as depdency names.",
+                    ["self"],
+                    "Can't use 'self` as depdency names.",
                 ),
             ): object,
         },
