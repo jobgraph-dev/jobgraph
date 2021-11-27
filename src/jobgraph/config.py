@@ -15,7 +15,13 @@ from .errors import MissingImageDigest
 from .util import path
 from .util.docker_registries import does_image_full_location_have_digest
 from .util.python_path import find_object
-from .util.schema import Schema, optionally_keyed_by, validate_schema
+from .util.schema import (
+    Schema,
+    docker_image_ref,
+    gitlab_ci_job_input,
+    optionally_keyed_by,
+    validate_schema,
+)
 from .util.yaml import load_yaml
 
 logger = logging.getLogger(__name__)
@@ -34,8 +40,14 @@ graph_config_schema = Schema(
             Required("root_url"): str,
             Required("project_id"): int,
         },
-        # TODO enforce stricter dictionaries
-        Required("job_defaults"): dict,
+        Required("job_defaults"): gitlab_ci_job_input.extend(
+            {
+                # Make all required fields optional for job_defaults
+                Optional("description"): str,
+                Optional("image"): docker_image_ref,
+                Optional("label"): str,
+            }
+        ),
         Optional("jobgraph"): {
             Optional(
                 "register",
