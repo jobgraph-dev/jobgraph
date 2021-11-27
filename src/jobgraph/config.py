@@ -13,7 +13,6 @@ from voluptuous import Extra, Optional, Required
 
 from .errors import MissingImageDigest
 from .paths import get_config_yml_path, get_gitlab_ci_dir
-from .util import path
 from .util.docker_registries import does_image_full_location_have_digest
 from .util.python_path import find_object
 from .util.schema import (
@@ -108,22 +107,12 @@ class GraphConfig:
 
     @property
     def vcs_root(self):
-        if path.split(self.root_dir)[-2:] != path.split(DEFAULT_ROOT_DIR):
-            raise Exception(
-                "Not guessing path to vcs root. "
-                "Graph config in non-standard location."
-            )
-        return os.path.dirname(os.path.dirname(self.root_dir))
+        return os.path.dirname(self.root_dir)
 
     @property
     def gitlab_ci_yml(self):
-        if path.split(self.root_dir)[-2:] != path.split(DEFAULT_ROOT_DIR):
-            raise Exception(
-                "Not guessing path to `.gitlab-ci.yml`. "
-                "Graph config in non-standard location."
-            )
         return os.path.join(
-            os.path.dirname(os.path.dirname(self.root_dir)),
+            os.path.dirname(self.root_dir),
             ".gitlab-ci.yml",
         )
 

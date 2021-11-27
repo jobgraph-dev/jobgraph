@@ -10,12 +10,13 @@ from typing import AnyStr
 import attr
 
 from . import filter_jobs
-from .config import DEFAULT_ROOT_DIR, GraphConfig, load_graph_config
+from .config import GraphConfig, load_graph_config
 from .graph import Graph
 from .job import Job
 from .jobgraph import JobGraph
 from .optimize import optimize_job_graph
 from .parameters import Parameters
+from .paths import get_gitlab_ci_dir, get_stages_dir
 from .transforms.base import TransformConfig, TransformSequence
 from .util.python_path import find_object
 from .util.verify import verifications
@@ -86,8 +87,8 @@ class Stage:
         return jobs
 
     @classmethod
-    def load(cls, root_dir, graph_config, stage_name):
-        path = os.path.join(root_dir, stage_name)
+    def load(cls, stages_dir, graph_config, stage_name):
+        path = os.path.join(stages_dir, stage_name)
         stage_yml = os.path.join(path, "stage.yml")
         if not os.path.exists(stage_yml):
             raise KindNotFound(stage_yml)
@@ -126,8 +127,9 @@ class JobGraphGenerator:
         @type parameters: Union[Parameters, Callable[[GraphConfig], Parameters]]
         """
         if root_dir is None:
-            root_dir = DEFAULT_ROOT_DIR
+            root_dir = str(get_gitlab_ci_dir(os.getcwd()))
         self.root_dir = root_dir
+        self.stages_dir = get_stages_dir(root_dir)
         self._parameters = parameters
         self._write_artifacts = write_artifacts
 
@@ -212,19 +214,19 @@ class JobGraphGenerator:
                 if stage_name in seen_stages:
                     continue
                 seen_stages.add(stage_name)
-                stage = Stage.load(self.root_dir, graph_config, stage_name)
+                stage = Stage.load(self.stages_dir, graph_config, stage_name)
                 yield stage
                 queue.extend(stage.config.get("stage_upstream_dependencies", []))
         else:
-            for stage_name in os.listdir(self.root_dir):
+            for stage_name in os.listdir(self.stages_dir):
                 try:
-                    yield Stage.load(self.root_dir, graph_config, stage_name)
+                    yield Stage.load(self.stages_dir, graph_config, stage_name)
                 except KindNotFound:
                     continue
 
     def _run(self):
         logger.info("Loading graph configuration.")
-        graph_config = load_graph_config(self.root_dir)
+        graph_config = load_graph_config(os.path.join(self.root_dir))
 
         yield ("graph_config", graph_config)
 

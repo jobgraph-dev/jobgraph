@@ -14,6 +14,10 @@ def get_gitlab_ci_dir(root_dir=JOBGRAPH_ROOT_DIR):
     return Path(root_dir) / "gitlab-ci"
 
 
+def get_stages_dir(gitlab_ci_dir=get_gitlab_ci_dir()):
+    return Path(gitlab_ci_dir) / "stages"
+
+
 def get_gitlab_ci_yml_path(root_dir=JOBGRAPH_ROOT_DIR):
     return Path(root_dir) / ".gitlab-ci.yml"
 
