@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 from pathlib import Path
+from subprocess import CalledProcessError
 
 import requests
 from dockerfile_parse import DockerfileParser
@@ -17,19 +18,31 @@ from jobgraph.paths import (
     get_terraform_version_file,
 )
 from jobgraph.util.docker_registries import fetch_image_digest_from_registry, set_digest
+from jobgraph.util.gitlab import convert_https_url_into_ssh
 from jobgraph.util.subprocess import run_subprocess
 from jobgraph.util.terraform import terraform_init
+from jobgraph.util.vcs import get_repository
 
 logger = logging.getLogger(__name__)
 
 
-def update_dependencies():
-    cwd = Path.cwd()
+def update_dependencies(
+    create_new_merge_request,
+    git_committer_name,
+    git_committer_email,
+    git_remote_name,
+    git_branch,
+):
+    repo_root = Path.cwd()
+
+    if create_new_merge_request:
+        _test_git_connection(repo_root, git_remote_name)
+
     graph_config = load_graph_config(
-        root_dir=get_gitlab_ci_dir(cwd), validate_config=False
+        root_dir=get_gitlab_ci_dir(repo_root), validate_config=False
     )
 
-    is_upstream_jobgraph_being_updated = JOBGRAPH_ROOT_DIR == cwd
+    is_upstream_jobgraph_being_updated = JOBGRAPH_ROOT_DIR == repo_root
     if is_upstream_jobgraph_being_updated:
         _update_jobgraph_python_requirements()
         _update_precommit_hooks()
@@ -37,9 +50,26 @@ def update_dependencies():
         _update_terraform()
         _update_terraform_providers(graph_config)
 
-    _update_dockerfiles(root_dir=cwd)
+    _update_dockerfiles(root_dir=repo_root)
     _update_decision_image()
     _update_external_images(graph_config)
+
+    if create_new_merge_request:
+        _create_merge_request(
+            repo_root,
+            git_committer_name,
+            git_committer_email,
+            git_remote_name,
+            git_branch,
+        )
+
+
+def _test_git_connection(repo_root, git_remote_name):
+    repo_url = get_repository(repo_root).get_url(remote=git_remote_name)
+    ssh_url = convert_https_url_into_ssh(repo_url)
+    ssh_test_url = ssh_url.split(":")[0]
+    run_subprocess(["ssh", "-T", ssh_test_url])
+    logger.info("Connection to remote repo is working.")
 
 
 _PIN_COMMANDS = " && ".join(
@@ -192,3 +222,49 @@ def _get_source_sha256_from_github(repo_owner, repo_name, tag):
     url = f"https://codeload.github.com/{repo_owner}/{repo_name}/tar.gz/refs/tags/{tag}"
     response = requests.get(url)
     return hashlib.sha256(response.content).hexdigest()
+
+
+def _create_merge_request(
+    repo_root, git_committer_name, git_committer_email, git_remote_name, git_branch
+):
+    repo = get_repository(repo_root)
+
+    current_branch = repo.branch
+    repo.switch_branch(git_branch, force_create=True)
+
+    try:
+        repo.commit(
+            git_committer_name,
+            git_committer_email,
+            message="Update jobgraph dependencies",
+            commit_all_files=True,
+        )
+    except CalledProcessError:
+        repo.switch_branch(current_branch)
+        logger.info("No updates found. Nothing to commit")
+        return
+
+    repo_url = repo.get_url(remote=git_remote_name)
+    ssh_url = convert_https_url_into_ssh(repo_url)
+    repo.set_push_url(ssh_url)
+
+    main_branch = repo.get_main_branch(git_remote_name, short_format=True)
+    repo.push(
+        git_remote_name,
+        git_branch,
+        force_push=True,
+        push_options=[
+            "merge_request.create",
+            (
+                "merge_request.description=This merge request was automatically created by"
+                "jobgraph in `$CI_JOB_NAME` ([#$CI_JOB_ID]($CI_JOB_URL))."
+            ),
+            "merge_request.label=scheduled",
+            "merge_request.label=update-dependencies",
+            "merge_request.remove_source_branch",
+            f"merge_request.target={main_branch}",
+            "merge_request.title=Update jobgraph dependencies",
+        ],
+    )
+
+    repo.switch_branch(current_branch)

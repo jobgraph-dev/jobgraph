@@ -7,6 +7,7 @@ import os
 import re
 import subprocess
 from abc import ABC, abstractmethod, abstractproperty
+from copy import copy
 from pathlib import Path
 from shutil import which
 
@@ -18,9 +19,16 @@ class Repository(ABC):
         if self.binary is None:
             raise OSError(f"{self.tool} not found!")
 
-    def run(self, *args: str):
+    def run(self, *args: str, env=None):
         cmd = (self.binary,) + args
-        return subprocess.check_output(cmd, cwd=self.path, universal_newlines=True)
+
+        new_env = copy(os.environ)
+        if env:
+            new_env |= env
+
+        return subprocess.check_output(
+            cmd, cwd=self.path, env=new_env, universal_newlines=True
+        )
 
     @abstractproperty
     def tool(self) -> str:
@@ -88,11 +96,18 @@ class GitRepository(Repository):
     def branch(self):
         return self.run("branch", "--show-current").strip() or None
 
+    def switch_branch(self, branch, force_create=False):
+        command = ["switch"]
+        if force_create:
+            command.append("--force-create")
+        command.append(branch)
+        self.run(*command)
+
     @property
     def tracked_files(self):
         return {Path(file) for file in self.run("ls-files").splitlines()}
 
-    def get_main_branch(self, remote=DEFAULT_REMOTE_NAME):
+    def get_main_branch(self, remote=DEFAULT_REMOTE_NAME, short_format=False):
         output = self.run("ls-remote", "--symref", remote, "HEAD")
         matches = _LS_REMOTE_PATTERN.search(output)
         if not matches:
@@ -101,10 +116,15 @@ class GitRepository(Repository):
             )
 
         short_branch_name = matches.group("branch_name")
+        if short_format:
+            return short_branch_name
         return f"{remote}/{short_branch_name}"
 
     def get_url(self, remote=DEFAULT_REMOTE_NAME):
         return self.run("remote", "get-url", remote).strip()
+
+    def set_push_url(self, url, remote=DEFAULT_REMOTE_NAME):
+        return self.run("remote", "set-url", "--push", remote, url)
 
     def get_commit_message(self, revision=None):
         revision = revision or self.head_ref
@@ -137,6 +157,32 @@ class GitRepository(Repository):
 
     def get_file_at_given_revision(self, revision, file_path):
         return self.run("show", f"{revision}:{file_path}").strip()
+
+    def commit(self, committer_name, committer_email, message, commit_all_files=False):
+        command = ["commit", "--message", message]
+        if commit_all_files:
+            command.append("--all")
+
+        self.run(
+            *command,
+            env={
+                "GIT_AUTHOR_EMAIL": committer_email,
+                "GIT_AUTHOR_NAME": committer_name,
+                "GIT_COMMITTER_EMAIL": committer_email,
+                "GIT_COMMITTER_NAME": committer_name,
+            },
+        )
+
+    def push(self, remote_name, branch, force_push=False, push_options=None):
+        push_options = [] if push_options is None else push_options
+
+        command = ["push", remote_name, branch]
+        if force_push:
+            command.append("--force")
+
+        command.extend([f"--push-option={push_option}" for push_option in push_options])
+
+        self.run(*command)
 
 
 def get_repository(path):

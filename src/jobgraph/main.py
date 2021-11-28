@@ -568,10 +568,37 @@ def decision(options):
     "update-dependencies",
     help="Update all dependencies defined in jobgraph (Docker base images, python pacakges, etc.)",
 )
+@argument(
+    "--new-merge-request",
+    action="store_true",
+    dest="create_new_merge_request",
+    help="Create a new merge request if any changes can be committed",
+)
+@argument(
+    "--git-committer-name",
+    help="Name to use in the git commit",
+    default="jobgraph-bot",
+)
+@argument(
+    "--git-committer-email",
+    help="Email address to use in the git commit",
+    required="--new-merge-request" in sys.argv,
+)
+@argument(
+    "--git-remote-name",
+    help="Name of the remote repository",
+    default="origin",
+)
+@argument(
+    "--git-branch",
+    help="Git branch to create the merge request from",
+    default="update-jobgraph-dependencies",
+)
 def update_depdencies(options):
     from jobgraph.update_dependencies import update_dependencies
 
-    update_dependencies()
+    options.pop("command")
+    update_dependencies(**options)
 
 
 @command(

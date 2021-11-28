@@ -24,9 +24,23 @@ def extract_gitlab_instance_and_namespace_and_name(url):
 
 
 def convert_ssh_url_into_https(url):
+    if url.startswith("https://"):
+        return url
+
     new_url = url.replace("git@", "https://")
     new_url = new_url.replace("gitlab.com:", "gitlab.com/")
     if new_url.endswith(".git"):
         new_url = new_url[: -len(".git")]
 
     return new_url
+
+
+def convert_https_url_into_ssh(url):
+    if not url.startswith("https://"):
+        return url
+
+    parsed_url = urlparse(url)
+    domain_name = parsed_url.netloc
+    path = unquote(parsed_url.path).lstrip("/")
+
+    return f"git@{domain_name}:{path}.git"
