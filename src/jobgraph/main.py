@@ -589,10 +589,14 @@ def decision(options):
     help="Update all dependencies defined in jobgraph (Docker base images, python pacakges, etc.)",
 )
 def update_depdencies(options):
-    from jobgraph.config import DEFAULT_ROOT_DIR, load_graph_config
+    from jobgraph.config import load_graph_config
+    from jobgraph.paths import get_gitlab_ci_dir
     from jobgraph.update_dependencies import update_dependencies
 
-    graph_config = load_graph_config(DEFAULT_ROOT_DIR, validate_config=False)
+    cwd = Path.cwd()
+    graph_config = load_graph_config(
+        root_dir=get_gitlab_ci_dir(cwd), validate_config=False
+    )
     update_dependencies(graph_config)
 
 
