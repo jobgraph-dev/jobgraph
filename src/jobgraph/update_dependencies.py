@@ -256,7 +256,7 @@ def _create_merge_request(
         push_options=[
             "merge_request.create",
             (
-                "merge_request.description=This merge request was automatically created by"
+                "merge_request.description=This merge request was automatically created by "
                 "jobgraph in `$CI_JOB_NAME` ([#$CI_JOB_ID]($CI_JOB_URL))."
             ),
             "merge_request.label=scheduled",
