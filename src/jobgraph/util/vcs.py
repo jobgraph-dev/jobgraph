@@ -176,7 +176,7 @@ class GitRepository(Repository):
     def push(self, remote_name, branch, force_push=False, push_options=None):
         push_options = [] if push_options is None else push_options
 
-        command = ["push", remote_name, branch]
+        command = ["push", "--verbose", remote_name, branch]
         if force_push:
             command.append("--force")
 
