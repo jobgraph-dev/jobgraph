@@ -28,12 +28,12 @@ _AUTHENTICATION_CONFIG_PER_REGISTRY = {
 
 @memoize
 def fetch_image_digest_from_registry(image_full_location):
-    image_data = _parse_image_full_location(image_full_location)
+    image_data = parse_image_full_location(image_full_location)
     token = _get_container_registry_token(image_data)
     return _get_image_digest(image_data, token)
 
 
-def _parse_image_full_location(image_full_location):
+def parse_image_full_location(image_full_location):
     image_parts = image_full_location.split(_DOCKER_IMAGE_DIGEST_METHOD)
     image_name_and_tag = image_parts[0]
     digest = (
@@ -115,7 +115,7 @@ def _get_image_digest(image_data, token):
 
 
 def set_digest(image_full_location, new_digest):
-    image_data = _parse_image_full_location(image_full_location)
+    image_data = parse_image_full_location(image_full_location)
     image_data["digest"] = new_digest
     return build_image_full_location(image_data)
 
@@ -140,5 +140,5 @@ def build_image_full_location(image_data):
 
 
 def does_image_full_location_have_digest(image_full_location):
-    image_data = _parse_image_full_location(image_full_location)
+    image_data = parse_image_full_location(image_full_location)
     return image_data["digest"] != ""

@@ -65,7 +65,9 @@ def ensure_external_base_images_have_digests(config, jobs):
     for job in jobs:
         image_name = job["name"]
         definition = job.get("definition", image_name)
-        docker_file_path = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
+        docker_file_path = os.path.join(
+            config.graph_config.root_dir, "docker", definition, "Dockerfile"
+        )
         docker_file = DockerfileParser(docker_file_path)
 
         # baseimage is not defined if it's built within jobgraph
@@ -173,7 +175,9 @@ def fill_context_hash(config, jobs):
             }
 
         if not jobgraph.fast:
-            context_path = os.path.join("gitlab-ci", "docker", definition)
+            context_path = os.path.join(
+                config.graph_config.root_dir, "docker", definition
+            )
             topsrcdir = os.path.dirname(config.graph_config.gitlab_ci_yml)
             # We need to use the real full location (not a reference to) here because
             # the context hash depends on it.

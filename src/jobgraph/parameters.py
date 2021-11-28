@@ -70,14 +70,15 @@ def extend_parameters_schema(schema):
 class Parameters(ReadOnlyDict):
     """An immutable dictionary with nicer KeyError messages on failure"""
 
-    def __init__(self, strict=True, **kwargs):
+    def __init__(self, repo_dir=None, strict=True, **kwargs):
         self.strict = strict
         self.spec = kwargs.pop("spec", None)
         self._id = None
+        repo = get_repository(os.getcwd() if repo_dir is None else repo_dir)
 
         if not self.strict:
             # apply defaults to missing parameters
-            kwargs = Parameters._fill_defaults(**kwargs)
+            kwargs = Parameters._fill_defaults(repo, **kwargs)
 
         kwargs = _determine_base_rev(kwargs)
 
@@ -116,17 +117,17 @@ class Parameters(ReadOnlyDict):
         return os.path.splitext(os.path.basename(spec))[0]
 
     @staticmethod
-    def _fill_defaults(**kwargs):
+    def _fill_defaults(repo, **kwargs):
         defaults = {
-            "base_repository": get_repo().get_url(),
+            "base_repository": repo.get_url(),
             "base_rev": "0",  # TODO
             "build_date": int(time.time()),
             "do_not_optimize": [],
             "filters": ["target_jobs_method"],
-            "head_ref": get_repo().head_ref,
+            "head_ref": repo.head_ref,
             "head_ref_protection": "protected",  # main branch is protected by default
-            "head_repository": get_repo().get_url(),
-            "head_rev": get_repo().head_ref,
+            "head_repository": repo.get_url(),
+            "head_rev": repo.head_ref,
             "head_tag": "",
             "optimize_target_jobs": True,
             "owner": "nobody@mozilla.com",

@@ -3,10 +3,13 @@ import shutil
 from pathlib import Path
 
 from jobgraph.config import GraphConfig, load_graph_config
+from jobgraph.docker import get_image_full_location_with_digest
 from jobgraph.paths import (
     BOOTSTRAP_DIR,
+    GITLAB_CI_DIR,
     get_gitlab_ci_dir,
     get_gitlab_ci_yml_path,
+    get_stages_dir,
     get_terraform_dir,
 )
 from jobgraph.util.terraform import terraform_apply, terraform_init
@@ -18,7 +21,7 @@ def bootstrap(
 ):
     cwd = Path.cwd()
     get_repository(cwd)
-    copy_bootstrap_folder(cwd)
+    copy_gitlab_ci_in_bootstrap_folder(cwd)
     generate_gitlab_ci_yml(cwd)
     generate_config_yml(cwd, gitlab_project_id, gitlab_root_url)
     setup_repo_secrets(
@@ -27,10 +30,12 @@ def bootstrap(
         jobgraph_bot_username,
         jobgraph_bot_gitlab_token,
     )
+    generate_schedules_stage(cwd)
 
 
-def copy_bootstrap_folder(cwd):
-    for path in BOOTSTRAP_DIR.glob("**/*"):
+def copy_gitlab_ci_in_bootstrap_folder(cwd):
+    gitlab_ci_dir = get_gitlab_ci_dir(root_dir=BOOTSTRAP_DIR)
+    for path in gitlab_ci_dir.glob("**/*"):
         if not path.is_file():
             continue
 
@@ -68,6 +73,11 @@ def generate_config_yml(cwd, gitlab_project_id, gitlab_root_url):
     graph_config = load_graph_config()
     graph_config["gitlab"]["project_id"] = gitlab_project_id
     graph_config["gitlab"]["root_url"] = gitlab_root_url
+    graph_config["docker"]["external_images"][
+        "jobgraph_schedules"
+    ] = get_image_full_location_with_digest(
+        "jobgraph_schedules", root_dir=GITLAB_CI_DIR
+    )
 
     target_graph_config = GraphConfig(
         config=dict(graph_config._config), root_dir=str(get_gitlab_ci_dir(cwd))
@@ -94,3 +104,41 @@ def setup_repo_secrets(
         "JOBGRAPH_BOT_GITLAB_TOKEN": jobgraph_bot_gitlab_token,
     }
     terraform_apply(terraform_dir, **apply_variables)
+
+
+_LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML = {
+    "        - terraform/**/*": "",  # The terraform module is only present in the jobgraph repo
+    "    image: {in_tree: jobgraph_schedules}\n": '    image: {docker_image_reference: "<jobgraph_schedules>"}\n',  # noqa: E501
+    "        TF_ROOT: ${CI_PROJECT_DIR}/terraform\n": "        TF_ROOT: /jobgraph/terraform\n",
+}
+
+
+def generate_schedules_stage(cwd):
+    source_stage_yml_relative_path = Path("schedules/stage.yml")
+    source_stage_yml_path = get_stages_dir() / source_stage_yml_relative_path
+
+    with open(source_stage_yml_path) as f:
+        schedules_yml_lines = f.readlines()
+
+    new_schedules_yml_lines = [
+        "# This file lets jobgraph update Gitlab CI schedules based on the\n",
+        "# content of `gitlab-ci/schedules.yml`. Modify this current file\n",
+        "# at your own risks.\n",
+    ]
+
+    for line in schedules_yml_lines:
+        if line in _LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML:
+            new_line = _LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML[line]
+            new_schedules_yml_lines.append(new_line)
+            continue
+
+        new_schedules_yml_lines.append(line)
+
+    target_stage_dir = get_stages_dir(gitlab_ci_dir=get_gitlab_ci_dir(root_dir=cwd))
+    target_stage_yml_path = target_stage_dir / source_stage_yml_relative_path
+
+    target_dir = target_stage_yml_path.parent
+    os.makedirs(target_dir, exist_ok=True)
+
+    with open(target_stage_yml_path, "w") as f:
+        f.writelines(new_schedules_yml_lines)
