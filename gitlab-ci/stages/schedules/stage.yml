@@ -46,6 +46,7 @@ jobs:
             name: jobgraph
 
         script:
+        - mv "${CI_PROJECT_DIR}/plan.cache" "${TF_ROOT}"
         # No need to provide variable because it is going to reuse the existing cached plan.
         - gitlab-terraform apply
 
