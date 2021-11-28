@@ -107,7 +107,7 @@ def setup_repo_secrets(
 
 
 _LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML = {
-    "        - terraform/**/*": "",  # The terraform module is only present in the jobgraph repo
+    "        - terraform/**/*\n": "",  # The terraform module is only present in the jobgraph repo
     "    image: {in_tree: jobgraph_schedules}\n": '    image: {docker_image_reference: "<jobgraph_schedules>"}\n',  # noqa: E501
     "        TF_ROOT: ${CI_PROJECT_DIR}/terraform\n": "        TF_ROOT: /jobgraph/terraform\n",
 }
