@@ -39,7 +39,7 @@ jobs:
         - >-
             gitlab-terraform plan
             -var "GITLAB_PROJECT_ID=${GITLAB_PROJECT_ID}"
-            -var "JOBGRAPH_BOT_GITLAB_TOKEN=${CI_PROJECT_ID}"
+            -var "JOBGRAPH_BOT_GITLAB_TOKEN=${JOBGRAPH_BOT_GITLAB_TOKEN}"
             -var "SCHEDULES_YML_PATH=${CI_PROJECT_DIR}/gitlab-ci/schedules.yml"
         - gitlab-terraform plan-json
 
