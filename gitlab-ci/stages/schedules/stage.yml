@@ -23,10 +23,7 @@ job_defaults:
     runner_alias: misc
     variables:
         TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/jobgraph
-        TF_PASSWORD: ${CI_JOB_TOKEN}
         TF_ROOT: ${CI_PROJECT_DIR}/terraform
-        TF_USERNAME: gitlab-ci-token
-
 
 jobs:
     plan:
@@ -39,8 +36,8 @@ jobs:
 
         description: "Report what changes are going to be made to Gitlab CI schedules, based on the content of schedules.yml"
         script:
-        - terraform plan -var "JOBGRAPH_BOT_GITLAB_TOKEN=$JOBGRAPH_BOT_GITLAB_TOKEN"
-        - terraform plan-json
+        - gitlab-terraform plan -var "JOBGRAPH_BOT_GITLAB_TOKEN=$JOBGRAPH_BOT_GITLAB_TOKEN"
+        - gitlab-terraform plan-json
 
     apply:
         description: "Change Gitlab CI schedules, based on the content of schedules.yml"
@@ -49,6 +46,6 @@ jobs:
 
         script:
         # No need to provide variable because it is going to reuse the existing cached plan.
-        - terraform apply
+        - gitlab-terraform apply
 
         upstream_dependencies: {plan: "plan"}
