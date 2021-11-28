@@ -40,7 +40,9 @@ def convert_https_url_into_ssh(url):
         return url
 
     parsed_url = urlparse(url)
-    domain_name = parsed_url.netloc
+    domain_name_with_auth = parsed_url.netloc
+    domain_name = domain_name_with_auth.split("@")[-1]
+
     path = unquote(parsed_url.path).lstrip("/")
 
     return f"git@{domain_name}:{path}.git"
