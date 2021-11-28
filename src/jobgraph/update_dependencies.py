@@ -150,8 +150,12 @@ def _update_terraform():
 
 def _update_terraform_providers(graph_config):
     # Logic from https://gitlab.com/gitlab-org/terraform-images/-/blob/37f671b7abb6d29ee033fd7586b29caf7b270182/src/bin/gitlab-terraform.sh#L26 # noqa: E501
-    terraform_username = os.environ.get("TF_USERNAME", os.environ["GITLAB_USER_LOGIN"])
-    terraform_password = os.environ.get("TF_PASSWORD")
+    terraform_username = os.environ.get(
+        "TF_USERNAME", os.environ.get("GITLAB_USER_LOGIN")
+    )
+    terraform_password = os.environ.get(
+        "TF_PASSWORD", os.environ.get("GITLAB_PERSONAL_TOKEN")
+    )
     if not terraform_password:
         terraform_username = "gitlab-ci-token"
         terraform_password = os.environ["CI_JOB_TOKEN"]

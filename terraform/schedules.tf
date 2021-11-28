@@ -1,5 +1,5 @@
 locals {
-  schedules_config = yamldecode(file("${path.module}/../schedules.yml"))
+  schedules_config = yamldecode(file(var.SCHEDULES_YML_PATH))
 }
 
 resource "gitlab_pipeline_schedule" "schedules" {

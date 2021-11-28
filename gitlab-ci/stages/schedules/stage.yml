@@ -11,7 +11,7 @@ transforms:
 
 job_defaults:
     before_script:
-    - cd ${TF_ROOT}
+    - cd "${TF_ROOT}"
     image: {in_tree: jobgraph_schedules}
     optimization:
         skip_unless_changed:
@@ -36,7 +36,11 @@ jobs:
 
         description: "Report what changes are going to be made to Gitlab CI schedules, based on the content of schedules.yml"
         script:
-        - gitlab-terraform plan -var "JOBGRAPH_BOT_GITLAB_TOKEN=$JOBGRAPH_BOT_GITLAB_TOKEN"
+        - >-
+            gitlab-terraform plan
+            -var "GITLAB_PROJECT_ID=${GITLAB_PROJECT_ID}"
+            -var "JOBGRAPH_BOT_GITLAB_TOKEN=${CI_PROJECT_ID}"
+            -var "SCHEDULES_YML_PATH=${CI_PROJECT_DIR}/gitlab-ci/schedules.yml"
         - gitlab-terraform plan-json
 
     apply:
