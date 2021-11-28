@@ -49,7 +49,7 @@ _IMAGE_DATA_PER_FULL_LOCATION = {
     "image_full_location, expected", _IMAGE_DATA_PER_FULL_LOCATION.items()
 )
 def test_parse_image_full_location(image_full_location, expected):
-    assert docker_registries._parse_image_full_location(image_full_location) == expected
+    assert docker_registries.parse_image_full_location(image_full_location) == expected
 
 
 @pytest.mark.parametrize("expected, image_data", _IMAGE_DATA_PER_FULL_LOCATION.items())
