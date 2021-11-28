@@ -27,8 +27,8 @@ class ParameterMismatch(Exception):
 
 
 @memoize
-def get_repo():
-    return get_repository(os.getcwd())
+def get_repo(root_dir=None):
+    return get_repository(os.getcwd() if root_dir is None else root_dir)
 
 
 # Please keep this list sorted and in sync with taskcluster/docs/parameters.rst
@@ -74,7 +74,7 @@ class Parameters(ReadOnlyDict):
         self.strict = strict
         self.spec = kwargs.pop("spec", None)
         self._id = None
-        repo = get_repository(os.getcwd() if repo_dir is None else repo_dir)
+        repo = get_repo(repo_dir)
 
         if not self.strict:
             # apply defaults to missing parameters

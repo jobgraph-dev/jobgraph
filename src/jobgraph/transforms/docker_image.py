@@ -175,17 +175,20 @@ def fill_context_hash(config, jobs):
             }
 
         if not jobgraph.fast:
-            context_path = os.path.join(
-                config.graph_config.root_dir, "docker", definition
+            image_path = os.path.join(
+                config.graph_config.root_dir, "docker", definition, "Dockerfile"
             )
-            topsrcdir = os.path.dirname(config.graph_config.gitlab_ci_yml)
+            docker_context_root = os.path.dirname(config.graph_config.root_dir)
             # We need to use the real full location (not a reference to) here because
             # the context hash depends on it.
             dind_image = config.graph_config["docker"]["external_images"][
                 "docker_in_docker"
             ]
             context_hash = generate_context_hash(
-                topsrcdir, context_path, args, dind_image_full_location=dind_image
+                docker_context_root,
+                image_path,
+                args,
+                dind_image_full_location=dind_image,
             )
         else:
             if config.write_artifacts:

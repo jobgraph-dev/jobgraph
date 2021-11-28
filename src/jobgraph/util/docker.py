@@ -131,27 +131,34 @@ class VoidWriter:
 
 
 def generate_context_hash(
-    topsrcdir, image_path, args=None, dind_image_full_location=None
+    docker_context_root, image_path, args=None, dind_image_full_location=None
 ):
-    copied_files = _get_tracked_copied_files_to_docker_image(image_path, args)
+    copied_files = _get_tracked_copied_files_to_docker_image(
+        docker_context_root, image_path, args
+    )
     return stream_context_tar(
-        topsrcdir,
+        docker_context_root,
         image_path,
         VoidWriter(),
-        dind_image_full_location,
+        os.path.basename(image_path),
         copied_files=copied_files,
         args=args,
         dind_image_full_location=dind_image_full_location,
     )
 
 
-def _get_tracked_copied_files_to_docker_image(image_path, args):
-    all_copied_files = _get_all_copied_files_to_docker_image(image_path, args)
-    tracked_files = get_repo().tracked_files
+def _get_tracked_copied_files_to_docker_image(docker_context_root, image_path, args):
+    all_copied_files = _get_all_copied_files_to_docker_image(
+        docker_context_root, image_path, args
+    )
+    tracked_files = [
+        docker_context_root / file_path
+        for file_path in get_repo(docker_context_root).tracked_files
+    ]
     return sorted(str(file) for file in all_copied_files if file in tracked_files)
 
 
-def _get_all_copied_files_to_docker_image(image_path, args):
+def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args):
     docker_file = DockerfileParser(
         path=image_path, env_replace=True, build_args=args, cache_content=True
     )
@@ -168,7 +175,7 @@ def _get_all_copied_files_to_docker_image(image_path, args):
             if file_argument.startswith("--chown"):
                 continue
 
-            for path in Path("").glob(file_argument):
+            for path in Path(docker_context_root).glob(file_argument):
                 if not path.exists():
                     raise ValueError(f"path does not exist: {path}")
 
@@ -203,7 +210,7 @@ class HashingWriter:
         return self._hash.hexdigest()
 
 
-def create_context_tar(topsrcdir, context_dir, out_path, args=None):
+def create_context_tar(docker_context_root, context_dir, out_path, args=None):
     """Create a context tarball.
 
     A directory ``context_dir`` containing a Dockerfile will be assembled into
@@ -215,7 +222,7 @@ def create_context_tar(topsrcdir, context_dir, out_path, args=None):
     If a line in the Dockerfile has the form ``# %include <path>``,
     the relative path specified on that line will be matched against
     files in the source repository and added to the context under the
-    path ``topsrcdir/``. If an entry is a directory, we add all files
+    path ``docker_context_root/``. If an entry is a directory, we add all files
     under that directory.
 
     If a line in the Dockerfile has the form ``# %ARG <name>``, occurrences of
@@ -226,7 +233,7 @@ def create_context_tar(topsrcdir, context_dir, out_path, args=None):
     """
     with open(out_path, "wb") as fh:
         return stream_context_tar(
-            topsrcdir,
+            docker_context_root,
             context_dir,
             fh,
             image_name=os.path.basename(out_path),
@@ -235,7 +242,7 @@ def create_context_tar(topsrcdir, context_dir, out_path, args=None):
 
 
 def stream_context_tar(
-    topsrcdir,
+    docker_context_root,
     context_dir,
     out_file,
     image_name=None,
@@ -250,8 +257,8 @@ def stream_context_tar(
 
     archive_files = {file: open(file, "rb") for file in copied_files}
 
-    topsrcdir = os.path.abspath(topsrcdir)
-    context_dir = os.path.join(topsrcdir, context_dir)
+    docker_context_root = os.path.abspath(docker_context_root)
+    context_dir = os.path.join(docker_context_root, context_dir)
 
     for root, dirs, files in os.walk(context_dir):
         for f in files:
