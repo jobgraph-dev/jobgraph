@@ -45,4 +45,7 @@ def convert_https_url_into_ssh(url):
 
     path = unquote(parsed_url.path).lstrip("/")
 
-    return f"git@{domain_name}:{path}.git"
+    if not path.endswith(".git"):
+        path = f"{path}.git"
+
+    return f"git@{domain_name}:{path}"
