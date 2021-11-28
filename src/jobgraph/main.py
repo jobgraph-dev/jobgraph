@@ -611,6 +611,19 @@ def update_depdencies(options):
     default=GITLAB_DEFAULT_ROOT_URL,
     help=f"Root URL of the Gitlab instance (default: {GITLAB_DEFAULT_ROOT_URL})",
 )
+@argument(
+    "--jobgraph-bot-username",
+    required=True,
+    help="Gitlab username that will setup repository secrets to let jobgraph update "
+    "Gitlab CI schedules. Username must be the owner of the supplied token. Gitlab "
+    "user must have at least the `maintainer` role.",
+)
+@argument(
+    "--jobgraph-bot-gitlab-token",
+    required=True,
+    help="Gitlab token that let jobgraph update Gitlab CI schedules based on a file "
+    "stored on the repo an monitored by jobgraph. Token must have the `api` scope",
+)
 def bootstrap(options):
     from jobgraph.bootstrap import bootstrap
 

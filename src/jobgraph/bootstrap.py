@@ -3,16 +3,30 @@ import shutil
 from pathlib import Path
 
 from jobgraph.config import GraphConfig, load_graph_config
-from jobgraph.paths import BOOTSTRAP_DIR, get_gitlab_ci_dir, get_gitlab_ci_yml_path
+from jobgraph.paths import (
+    BOOTSTRAP_DIR,
+    get_gitlab_ci_dir,
+    get_gitlab_ci_yml_path,
+    get_terraform_dir,
+)
+from jobgraph.util.terraform import terraform_apply, terraform_init
 from jobgraph.util.vcs import get_repository
 
 
-def bootstrap(gitlab_project_id, gitlab_root_url):
+def bootstrap(
+    gitlab_project_id, gitlab_root_url, jobgraph_bot_username, jobgraph_bot_gitlab_token
+):
     cwd = Path.cwd()
     get_repository(cwd)
     copy_bootstrap_folder(cwd)
     generate_gitlab_ci_yml(cwd)
     generate_config_yml(cwd, gitlab_project_id, gitlab_root_url)
+    setup_repo_secrets(
+        gitlab_project_id,
+        gitlab_root_url,
+        jobgraph_bot_username,
+        jobgraph_bot_gitlab_token,
+    )
 
 
 def copy_bootstrap_folder(cwd):
@@ -59,3 +73,24 @@ def generate_config_yml(cwd, gitlab_project_id, gitlab_root_url):
         config=dict(graph_config._config), root_dir=str(get_gitlab_ci_dir(cwd))
     )
     target_graph_config.write()
+
+
+def setup_repo_secrets(
+    gitlab_project_id, gitlab_root_url, jobgraph_bot_username, jobgraph_bot_gitlab_token
+):
+    terraform_dir = get_terraform_dir(root_dir=BOOTSTRAP_DIR)
+
+    terraform_init(
+        terraform_dir=terraform_dir,
+        gitlab_project_id=gitlab_project_id,
+        gitlab_root_url=gitlab_root_url,
+        terraform_username=jobgraph_bot_username,
+        terraform_password=jobgraph_bot_gitlab_token,
+        upgrade_providers=False,
+    )
+
+    apply_variables = {
+        "GITLAB_PROJECT_ID": gitlab_project_id,
+        "JOBGRAPH_BOT_GITLAB_TOKEN": jobgraph_bot_gitlab_token,
+    }
+    terraform_apply(terraform_dir, **apply_variables)

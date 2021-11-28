@@ -25,3 +25,8 @@ def get_gitlab_ci_yml_path(root_dir=JOBGRAPH_ROOT_DIR):
 
 def get_config_yml_path(ci_dir=get_gitlab_ci_dir()):
     return Path.resolve(Path(ci_dir) / "config.yml")
+
+
+# TODO: Move terraform dir outside of gitlab-ci dir.
+def get_terraform_dir(root_dir=GITLAB_CI_DIR):
+    return Path(root_dir) / "terraform"

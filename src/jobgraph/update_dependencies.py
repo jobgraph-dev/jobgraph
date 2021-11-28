@@ -1,7 +1,6 @@
 import hashlib
 import logging
 import os
-import subprocess
 
 import requests
 from dockerfile_parse import DockerfileParser
@@ -15,6 +14,8 @@ from jobgraph.paths import (
     get_gitlab_ci_yml_path,
 )
 from jobgraph.util.docker_registries import fetch_image_digest_from_registry, set_digest
+from jobgraph.util.subprocess import run_subprocess
+from jobgraph.util.terraform import terraform_init
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ def _update_jobgraph_python_requirements():
         "-c",
         _PIN_COMMANDS,
     )
-    _run_subprocess(docker_command)
+    run_subprocess(docker_command)
 
 
 def _update_precommit_hooks():
@@ -68,7 +69,7 @@ def _update_precommit_hooks():
         "pre-commit",
         "autoupdate",
     )
-    _run_subprocess(precommit_command)
+    run_subprocess(precommit_command)
 
 
 def _update_dockerfiles():
@@ -148,42 +149,21 @@ def _update_terraform():
 
 
 def _update_terraform_providers(graph_config):
-    terraform_command = [
-        "terraform",
-        "init",
-        "-upgrade",
-    ]
+    # Logic from https://gitlab.com/gitlab-org/terraform-images/-/blob/37f671b7abb6d29ee033fd7586b29caf7b270182/src/bin/gitlab-terraform.sh#L26 # noqa: E501
+    terraform_username = os.environ.get("TF_USERNAME", os.environ["GITLAB_USER_LOGIN"])
+    terraform_password = os.environ.get("TF_PASSWORD")
+    if not terraform_password:
+        terraform_username = "gitlab-ci-token"
+        terraform_password = os.environ["CI_JOB_TOKEN"]
 
-    if not (TERRAFORM_DIR / ".terraform").is_dir():
-        project_id = graph_config["gitlab"]["project_id"]
-        root_url = graph_config["gitlab"]["root_url"]
-        backend_url = (
-            f"{root_url}/api/v4/projects/{project_id}/terraform/state/jobgraph"
-        )
-
-        # Logic from https://gitlab.com/gitlab-org/terraform-images/-/blob/37f671b7abb6d29ee033fd7586b29caf7b270182/src/bin/gitlab-terraform.sh#L26 # noqa: E501
-        terraform_username = os.environ.get(
-            "TF_USERNAME", os.environ["GITLAB_USER_LOGIN"]
-        )
-        terraform_password = os.environ.get("TF_PASSWORD")
-        if not terraform_password:
-            terraform_username = "gitlab-ci-token"
-            terraform_password = os.environ["CI_JOB_TOKEN"]
-
-        terraform_command.extend(
-            [
-                f"-backend-config=address={backend_url}",
-                f"-backend-config=lock_address={backend_url}/lock",
-                f"-backend-config=unlock_address={backend_url}/lock",
-                f"-backend-config=username={terraform_username}",
-                f"-backend-config=password={terraform_password}",
-                "-backend-config=lock_method=POST",
-                "-backend-config=unlock_method=DELETE",
-                "-backend-config=retry_wait_min=5",
-            ]
-        )
-
-    _run_subprocess(terraform_command, cwd=TERRAFORM_DIR)
+    terraform_init(
+        terraform_dir=TERRAFORM_DIR,
+        gitlab_project_id=graph_config["gitlab"]["project_id"],
+        gitlab_root_url=graph_config["gitlab"]["root_url"],
+        terraform_username=terraform_username,
+        terraform_password=terraform_password,
+        upgrade_providers=True,
+    )
 
 
 def _get_latest_tag_on_github_release(repo_owner, repo_name):
@@ -196,7 +176,3 @@ def _get_source_sha256_from_github(repo_owner, repo_name, tag):
     url = f"https://codeload.github.com/{repo_owner}/{repo_name}/tar.gz/refs/tags/{tag}"
     response = requests.get(url)
     return hashlib.sha256(response.content).hexdigest()
-
-
-def _run_subprocess(*args, **kwargs):
-    subprocess.run(*args, **kwargs, check=True)
