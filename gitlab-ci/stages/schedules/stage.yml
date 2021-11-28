@@ -26,9 +26,9 @@ jobs:
         artifacts:
             name: plan
             paths:
-            - ${TF_ROOT}/plan.cache
+            - ${CI_PROJECT_DIR}/plan.cache
             reports:
-                terraform: ${TF_ROOT}/plan.json
+                terraform: ${CI_PROJECT_DIR}/plan.json
 
         description: "Report what changes are going to be made to Gitlab CI schedules, based on the content of schedules.yml"
         script:
@@ -38,6 +38,7 @@ jobs:
             -var "JOBGRAPH_BOT_GITLAB_TOKEN=${JOBGRAPH_BOT_GITLAB_TOKEN}"
             -var "SCHEDULES_YML_PATH=${CI_PROJECT_DIR}/gitlab-ci/schedules.yml"
         - gitlab-terraform plan-json
+        - mv "${TF_ROOT}"/plan.* "${CI_PROJECT_DIR}"
 
     apply:
         description: "Change Gitlab CI schedules, based on the content of schedules.yml"
