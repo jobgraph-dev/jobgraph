@@ -464,26 +464,6 @@ def show_jobgraph(options):
         print(f"See '{logdir}' for logs", file=sys.stderr)
 
 
-@command("build-image", help="Build a Docker image")
-@argument("image_name", help="Name of the image to build")
-@argument(
-    "-t", "--tag", help="tag that the image should be built as.", metavar="name:tag"
-)
-@argument(
-    "--context-only",
-    help="File name the context tarball should be written to."
-    "with this option it will only build the context.tar.",
-    metavar="context.tar",
-)
-def build_image(args):
-    from jobgraph.docker import build_context, build_image
-
-    if args["context_only"] is None:
-        build_image(args["image_name"], args["tag"], os.environ)
-    else:
-        build_context(args["image_name"], args["context_only"], os.environ)
-
-
 @command(
     "image-context-hash",
     help="Print the context hash of a docker image. This hash used as the tag.",

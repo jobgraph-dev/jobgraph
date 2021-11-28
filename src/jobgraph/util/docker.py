@@ -16,7 +16,6 @@ from dockerfile_parse import DockerfileParser
 
 from jobgraph.config import DEFAULT_ROOT_DIR
 from jobgraph.parameters import get_repo
-from jobgraph.util.archive import create_tar_gz_from_files
 from jobgraph.util.memoize import memoize
 
 IMAGE_DIR = os.path.join(".", "gitlab-ci", "docker")
@@ -122,14 +121,6 @@ def post_to_docker(tar, api_path, **kwargs):
         sys.stderr.flush()
 
 
-class VoidWriter:
-    """A file object with write capabilities that does nothing with the written
-    data."""
-
-    def write(self, buf):
-        pass
-
-
 def generate_context_hash(
     docker_context_root, image_path, args=None, dind_image_full_location=None
 ):
@@ -139,8 +130,6 @@ def generate_context_hash(
     return stream_context_tar(
         docker_context_root,
         image_path,
-        VoidWriter(),
-        image_name=os.path.basename(os.path.dirname(image_path)),
         copied_files=copied_files,
         args=args,
         dind_image_full_location=dind_image_full_location,
@@ -155,7 +144,7 @@ def _get_tracked_copied_files_to_docker_image(docker_context_root, image_path, a
         docker_context_root / file_path
         for file_path in get_repo(docker_context_root).tracked_files
     ]
-    return sorted(str(file) for file in all_copied_files if file in tracked_files)
+    return [file for file in all_copied_files if file in tracked_files]
 
 
 def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args):
@@ -194,88 +183,41 @@ def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args)
     return all_copied_files
 
 
-class HashingWriter:
-    """A file object with write capabilities that hashes the written data at
-    the same time it passes down to a real file object."""
-
-    def __init__(self, writer):
-        self._hash = hashlib.sha256()
-        self._writer = writer
-
-    def write(self, buf):
-        self._hash.update(buf)
-        self._writer.write(buf)
-
-    def hexdigest(self):
-        return self._hash.hexdigest()
-
-
-def create_context_tar(docker_context_root, context_dir, out_path, args=None):
-    """Create a context tarball.
-
-    A directory ``context_dir`` containing a Dockerfile will be assembled into
-    a gzipped tar file at ``out_path``.
-
-    We also scan the source Dockerfile for special syntax that influences
-    context generation.
-
-    If a line in the Dockerfile has the form ``# %include <path>``,
-    the relative path specified on that line will be matched against
-    files in the source repository and added to the context under the
-    path ``docker_context_root/``. If an entry is a directory, we add all files
-    under that directory.
-
-    If a line in the Dockerfile has the form ``# %ARG <name>``, occurrences of
-    the string ``$<name>`` in subsequent lines are replaced with the value
-    found in the ``args`` argument.
-
-    Returns the SHA-256 hex digest of the created archive.
-    """
-    with open(out_path, "wb") as fh:
-        return stream_context_tar(
-            docker_context_root,
-            context_dir,
-            fh,
-            image_name=os.path.basename(out_path),
-            args=args,
-        )
-
-
 def stream_context_tar(
     docker_context_root,
-    context_dir,
-    out_file,
-    image_name=None,
+    image_path,
     copied_files=None,
     args=None,
     dind_image_full_location=None,
 ):
-    """Like create_context_tar, but streams the tar file to the `out_file` file
-    object."""
-    copied_files = {} if copied_files is None else copied_files
     args = {} if args is None else args
+    copied_files = [] if copied_files is None else copied_files
+    copied_files.append(Path(image_path))
+    docker_context_root = Path(docker_context_root).resolve()
 
-    archive_files = {file: open(file, "rb") for file in copied_files}
+    hash = hashlib.sha256()
+    for file_path in sorted(copied_files):
+        if not file_path.is_absolute():
+            file_path = docker_context_root / file_path
 
-    docker_context_root = os.path.abspath(docker_context_root)
-    context_dir = os.path.join(docker_context_root, context_dir)
+        elif not file_path.is_relative_to(docker_context_root):
+            raise ValueError(
+                f'File "{file_path}" is not within the docker context root "{docker_context_root}"'
+            )
 
-    for root, dirs, files in os.walk(context_dir):
-        for f in files:
-            source_path = os.path.join(root, f)
-            archive_path = source_path[len(context_dir) + 1 :]
-            archive_files[archive_path] = open(source_path, "rb")
+        if not file_path.is_file():
+            raise ValueError(f'Path "{file_path}" must be a file')
 
-    writer = HashingWriter(out_file)
-    create_tar_gz_from_files(writer, archive_files, image_name)
+        with open(file_path, "rb") as f:
+            hash.update(f.read())
 
     for arg_name, arg_value in args.items():
-        writer.write(f"ARG {arg_name}={arg_value}".encode())
+        hash.update(f"ARG {arg_name}={arg_value}".encode())
 
     if dind_image_full_location:
-        writer.write(f"DOCKER_IN_DOCKER {dind_image_full_location}".encode())
+        hash.update(f"DOCKER_IN_DOCKER {dind_image_full_location}".encode())
 
-    return writer.hexdigest()
+    return hash.hexdigest()
 
 
 @memoize
