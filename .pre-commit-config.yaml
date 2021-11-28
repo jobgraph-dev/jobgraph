@@ -17,7 +17,7 @@ repos:
   - id: debug-statements
   - id: end-of-file-fixer
   - id: file-contents-sorter
-    files: requirements/base.in|requirements/dev.in|requirements/test.in
+    files: requirements/base.in|requirements/test.in
     args: [--ignore-case, --unique]
   - id: fix-byte-order-marker
   - id: trailing-whitespace

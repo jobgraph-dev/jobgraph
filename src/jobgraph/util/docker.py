@@ -161,6 +161,11 @@ def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args)
         # The last file argument is always the destination in the docker
         # image. We just want the source files/dirs.
         for file_argument in file_arguments[:-1]:
+            # `--from` copies files from another container, these files
+            # are not part of the root context
+            if file_argument.startswith("--from"):
+                break
+
             if file_argument.startswith("--chown"):
                 continue
 

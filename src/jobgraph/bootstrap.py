@@ -74,10 +74,8 @@ def generate_config_yml(cwd, gitlab_project_id, gitlab_root_url):
     graph_config["gitlab"]["project_id"] = gitlab_project_id
     graph_config["gitlab"]["root_url"] = gitlab_root_url
     graph_config["docker"]["external_images"][
-        "jobgraph_schedules"
-    ] = get_image_full_location_with_digest(
-        "jobgraph_schedules", root_dir=GITLAB_CI_DIR
-    )
+        "jobgraph"
+    ] = get_image_full_location_with_digest("decision", root_dir=GITLAB_CI_DIR)
 
     target_graph_config = GraphConfig(
         config=dict(graph_config._config), root_dir=str(get_gitlab_ci_dir(cwd))
@@ -108,8 +106,7 @@ def setup_repo_secrets(
 
 
 _LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML = {
-    "        - terraform/**/*\n": "",  # The terraform module is only present in the jobgraph repo
-    "    image: {in_tree: jobgraph_schedules}\n": '    image: {docker_image_reference: "<jobgraph_schedules>"}\n',  # noqa: E501
+    "    image: {in_tree: decision}\n": '    image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
     "        TF_ROOT: ${CI_PROJECT_DIR}/terraform\n": "        TF_ROOT: /jobgraph/terraform\n",
 }
 
