@@ -19,7 +19,7 @@ job_defaults:
 
 
 jobs:
-    jobgraph-dependencies:
+    jobgraph_dependencies:
         description: Bump jobgraph dependencies (python packages and docker images)
         upstream_dependencies:
             decision: decision
