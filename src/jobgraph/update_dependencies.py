@@ -1,14 +1,17 @@
 import hashlib
 import logging
 import os
+from pathlib import Path
 
 import requests
 from dockerfile_parse import DockerfileParser
 
+from jobgraph.config import load_graph_config
 from jobgraph.paths import (
     JOBGRAPH_ROOT_DIR,
     PYTHON_VERSION_FILE,
     TFENV_FILE,
+    get_gitlab_ci_dir,
     get_gitlab_ci_yml_path,
     get_terraform_dir,
     get_terraform_version_file,
@@ -20,15 +23,23 @@ from jobgraph.util.terraform import terraform_init
 logger = logging.getLogger(__name__)
 
 
-def update_dependencies(graph_config):
-    _update_jobgraph_python_requirements()
-    _update_precommit_hooks()
-    _update_dockerfiles()
+def update_dependencies():
+    cwd = Path.cwd()
+    graph_config = load_graph_config(
+        root_dir=get_gitlab_ci_dir(cwd), validate_config=False
+    )
+
+    is_upstream_jobgraph_being_updated = JOBGRAPH_ROOT_DIR == cwd
+    if is_upstream_jobgraph_being_updated:
+        _update_jobgraph_python_requirements()
+        _update_precommit_hooks()
+        _update_tfenv()
+        _update_terraform()
+        _update_terraform_providers(graph_config)
+
+    _update_dockerfiles(root_dir=cwd)
     _update_decision_image()
     _update_external_images(graph_config)
-    _update_tfenv()
-    _update_terraform()
-    _update_terraform_providers(graph_config)
 
 
 _PIN_COMMANDS = " && ".join(
@@ -72,8 +83,8 @@ def _update_precommit_hooks():
     run_subprocess(precommit_command)
 
 
-def _update_dockerfiles():
-    for docker_file_path in JOBGRAPH_ROOT_DIR.glob("**/Dockerfile"):
+def _update_dockerfiles(root_dir):
+    for docker_file_path in root_dir.glob("**/Dockerfile"):
         docker_file = DockerfileParser(
             path=str(docker_file_path),
             env_replace=True,
