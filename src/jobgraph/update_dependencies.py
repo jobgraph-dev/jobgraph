@@ -8,10 +8,10 @@ from dockerfile_parse import DockerfileParser
 from jobgraph.paths import (
     JOBGRAPH_ROOT_DIR,
     PYTHON_VERSION_FILE,
-    TERRAFORM_DIR,
-    TERRAFORM_VERSION_FILE,
     TFENV_FILE,
     get_gitlab_ci_yml_path,
+    get_terraform_dir,
+    get_terraform_version_file,
 )
 from jobgraph.util.docker_registries import fetch_image_digest_from_registry, set_digest
 from jobgraph.util.subprocess import run_subprocess
@@ -144,7 +144,7 @@ def _update_tfenv():
 def _update_terraform():
     tag = _get_latest_tag_on_github_release("hashicorp", "terraform")
     version = tag.lstrip("v")
-    with open(TERRAFORM_VERSION_FILE, "w") as f:
+    with open(get_terraform_version_file(), "w") as f:
         f.write(f"{version}\n")
 
 
@@ -157,7 +157,7 @@ def _update_terraform_providers(graph_config):
         terraform_password = os.environ["CI_JOB_TOKEN"]
 
     terraform_init(
-        terraform_dir=TERRAFORM_DIR,
+        terraform_dir=get_terraform_dir(),
         gitlab_project_id=graph_config["gitlab"]["project_id"],
         gitlab_root_url=graph_config["gitlab"]["root_url"],
         terraform_username=terraform_username,

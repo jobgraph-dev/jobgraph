@@ -16,13 +16,13 @@ job_defaults:
     optimization:
         skip_unless_changed:
         - gitlab-ci/schedules.yml
-        - gitlab-ci/terraform/**/*
+        - terraform/**/*
     # We need to get access to $JOBGRAPH_BOT_GITLAB_TOKEN even for a `terraform plan`
     run_on_git_branches:
     - main
     runner_alias: misc
     variables:
-        TF_ROOT: ${CI_PROJECT_DIR}/gitlab-ci/terraform
+        TF_ROOT: ${CI_PROJECT_DIR}/terraform
         TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/jobgraph
 
 jobs:

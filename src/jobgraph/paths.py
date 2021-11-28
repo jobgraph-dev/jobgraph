@@ -7,8 +7,6 @@ BOOTSTRAP_DIR = JOBGRAPH_ROOT_DIR / "bootstrap"
 
 PYTHON_VERSION_FILE = JOBGRAPH_ROOT_DIR / "python-version.txt"
 TFENV_FILE = GITLAB_CI_DIR / "docker" / "jobgraph_update" / "tfenv.sha256"
-TERRAFORM_DIR = GITLAB_CI_DIR / "terraform"
-TERRAFORM_VERSION_FILE = TERRAFORM_DIR / ".terraform-version"
 
 
 def get_gitlab_ci_dir(root_dir=JOBGRAPH_ROOT_DIR):
@@ -27,6 +25,9 @@ def get_config_yml_path(ci_dir=get_gitlab_ci_dir()):
     return Path.resolve(Path(ci_dir) / "config.yml")
 
 
-# TODO: Move terraform dir outside of gitlab-ci dir.
-def get_terraform_dir(root_dir=GITLAB_CI_DIR):
+def get_terraform_dir(root_dir=JOBGRAPH_ROOT_DIR):
     return Path(root_dir) / "terraform"
+
+
+def get_terraform_version_file(terraform_dir=get_terraform_dir()):
+    return Path(terraform_dir) / ".terraform-version"

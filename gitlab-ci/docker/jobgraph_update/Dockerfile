@@ -34,5 +34,5 @@ RUN TFENV_VERSION="$(sed -E 's/[0-9a-f]+  tfenv-(.+)\.tar\.gz/\1/' "$TFENV_SHA_F
     tar xvf "$TFENV_ARCHIVE" --strip-components=1 --directory="$TFENV_TARGET_DIR" && \
     rm "$TFENV_ARCHIVE"
 
-COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/terraform/.terraform-version "$RUNNER_HOME"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" terraform/.terraform-version "$RUNNER_HOME"
 RUN tfenv install
