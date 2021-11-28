@@ -240,7 +240,8 @@ def _create_merge_request(
             commit_all_files=True,
         )
     except CalledProcessError:
-        repo.switch_branch(current_branch)
+        if current_branch:
+            repo.switch_branch(current_branch)
         logger.info("No updates found. Nothing to commit")
         return
 
@@ -267,4 +268,5 @@ def _create_merge_request(
         ],
     )
 
-    repo.switch_branch(current_branch)
+    if current_branch:
+        repo.switch_branch(current_branch)
