@@ -25,7 +25,7 @@ def _load_all_docker_image_jobs(root_dir):
     from jobgraph.parameters import Parameters
 
     params = Parameters(
-        repo_dir=os.path.dirname(root_dir),
+        repo_dir=os.path.dirname(root_dir) if root_dir else None,
         head_ref_protection="protected",
         strict=False,
     )

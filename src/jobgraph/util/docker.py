@@ -140,7 +140,7 @@ def generate_context_hash(
         docker_context_root,
         image_path,
         VoidWriter(),
-        os.path.basename(image_path),
+        image_name=os.path.basename(os.path.dirname(image_path)),
         copied_files=copied_files,
         args=args,
         dind_image_full_location=dind_image_full_location,
