@@ -7,6 +7,7 @@ def terraform_init(
     gitlab_root_url,
     terraform_username,
     terraform_password,
+    terraform_state_name,
     upgrade_providers=False,
 ):
     terraform_command = [
@@ -20,7 +21,7 @@ def terraform_init(
     if not (terraform_dir / ".terraform").is_dir():
         backend_url = (
             f"{gitlab_root_url}/api/v4/projects/"
-            f"{gitlab_project_id}/terraform/state/jobgraph"
+            f"{gitlab_project_id}/terraform/state/{terraform_state_name}"
         )
 
         terraform_command.extend(

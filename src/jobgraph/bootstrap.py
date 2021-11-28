@@ -96,6 +96,7 @@ def setup_repo_secrets(
         gitlab_root_url=gitlab_root_url,
         terraform_username=jobgraph_bot_username,
         terraform_password=jobgraph_bot_gitlab_token,
+        terraform_state_name="jobgraph-bootstrap",
         upgrade_providers=False,
     )
 

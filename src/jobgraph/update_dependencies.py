@@ -166,6 +166,7 @@ def _update_terraform_providers(graph_config):
         gitlab_root_url=graph_config["gitlab"]["root_url"],
         terraform_username=terraform_username,
         terraform_password=terraform_password,
+        terraform_state_name="jobgraph",
         upgrade_providers=True,
     )
 
