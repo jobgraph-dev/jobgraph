@@ -168,22 +168,21 @@ def _get_all_copied_files_to_docker_image(image_path, args):
             if file_argument.startswith("--chown"):
                 continue
 
-            path = Path(file_argument)
-            if not path.exists():
-                raise ValueError(f"path does not exist: {path}")
+            for path in Path("").glob(file_argument):
+                if not path.exists():
+                    raise ValueError(f"path does not exist: {path}")
 
-            if path.is_file():
-                all_copied_files.add(path)
-                continue
+                if path.is_file():
+                    all_copied_files.add(path)
+                    continue
 
-            if path.is_dir():
-                for file_in_dir in path.glob("**/*"):
-                    if file_in_dir.is_file():
-                        all_copied_files.add(path)
-                        continue
-                continue
+                if path.is_dir():
+                    for file_in_dir in path.glob("**/*"):
+                        if file_in_dir.is_file():
+                            all_copied_files.add(file_in_dir)
+                    continue
 
-            raise ValueError(f"Unsupported path: {path}")
+                raise ValueError(f"Unsupported path: {path}")
 
     return all_copied_files
 
