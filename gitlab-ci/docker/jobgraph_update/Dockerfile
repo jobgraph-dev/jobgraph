@@ -8,6 +8,7 @@ RUN apk add --no-cache \
     curl~=7.79 \
     docker~=20.10 \
     gzip~=1.10 \
+    jq~=1.6 \
     openssh~=8.6 \
     tar~=1.34
 
