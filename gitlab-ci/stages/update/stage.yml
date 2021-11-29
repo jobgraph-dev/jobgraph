@@ -21,8 +21,6 @@ job_defaults:
 jobs:
     jobgraph_dependencies:
         description: Bump jobgraph dependencies (python packages and docker images)
-        upstream_dependencies:
-            decision: decision
         image: {in_tree: decision}
         # We want to run this job in 3 scenarios:
         #  * when the decision image has changed
