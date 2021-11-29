@@ -69,15 +69,12 @@ def ensure_external_base_images_have_digests(config, jobs):
             config.graph_config.root_dir, "docker", definition, "Dockerfile"
         )
         docker_file = DockerfileParser(docker_file_path)
-        base_image = docker_file.baseimage
 
         # baseimage is not defined if it's built within jobgraph
-        if (
-            base_image
-            and base_image != "common"
-            and not does_image_full_location_have_digest(base_image)
+        if docker_file.baseimage and not does_image_full_location_have_digest(
+            docker_file.baseimage
         ):
-            raise MissingImageDigest("base docker", docker_file_path)
+            raise MissingImageDigest("base docker image", docker_file_path)
 
         yield job
 

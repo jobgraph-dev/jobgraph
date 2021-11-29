@@ -76,7 +76,7 @@ _PIN_COMMANDS = " && ".join(
     (
         "pip install --upgrade pip",
         "pip install pip-compile-multi",
-        "pip-compile-multi --generate-hashes base --generate-hashes test",
+        "pip-compile-multi --generate-hashes base --generate-hashes test --generate-hashes dev",
         "chmod 644 requirements/*.txt",
         f"chown {os.getuid()}:{os.getgid()} requirements/*.txt",
     )
@@ -121,9 +121,8 @@ def _update_dockerfiles(root_dir):
         )
         base_image = docker_file.baseimage
 
-        # base_image may not be defined if it's generated within jobgraph.
-        # "common" is an "AS statement" that gets incorrectly parsed by DockerfileParser.
-        if base_image and base_image != "common":
+        # base_image may not be defined if it's generated within jobgraph
+        if base_image:
             new_digest = fetch_image_digest_from_registry(base_image)
             new_base_image = set_digest(base_image, new_digest)
             if new_base_image != base_image:

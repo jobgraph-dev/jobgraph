@@ -8,10 +8,11 @@ transforms:
 job_defaults:
     before_script:
     - cd "${TF_ROOT}"
-    image: {in_tree: decision}
+    image: {in_tree: jobgraph_schedules}
     optimization:
         skip_unless_changed:
         - gitlab-ci/schedules.yml
+        - terraform/**/*
     # We need to get access to $JOBGRAPH_BOT_GITLAB_TOKEN even for a `terraform plan`
     run_on_git_branches:
     - main

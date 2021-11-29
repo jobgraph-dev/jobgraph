@@ -29,3 +29,7 @@ jobs:
         parent: python_base
     python_test:
         parent: python_base
+    jobgraph_update:
+        parent: decision
+    jobgraph_schedules:
+        parent: jobgraph_update

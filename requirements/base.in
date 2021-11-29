@@ -3,8 +3,6 @@ attrs
 deepmerge
 dockerfile-parse
 json-e
-pip-compile-multi
-pre-commit
 PyYAML
 redo
 requests

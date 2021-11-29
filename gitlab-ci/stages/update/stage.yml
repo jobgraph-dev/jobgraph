@@ -23,9 +23,9 @@ jobs:
         description: Bump jobgraph dependencies (python packages and docker images)
         upstream_dependencies:
             decision: decision
-        image: {in_tree: decision}
+        image: {in_tree: jobgraph_update}
         # We want to run this job in 3 scenarios:
-        #  * when the decision image has changed
+        #  * when the jobgraph_update image has changed
         #  * on a regular schedule to update dependencies periodically
         #  * whenever we add a new dependency to the decision image. This
         #    way .gitlab-ci.yml is automatically bumped and the next commit

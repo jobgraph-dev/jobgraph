@@ -6,7 +6,7 @@ GITLAB_CI_DIR = JOBGRAPH_ROOT_DIR / "gitlab-ci"
 BOOTSTRAP_DIR = JOBGRAPH_ROOT_DIR / "bootstrap"
 
 PYTHON_VERSION_FILE = JOBGRAPH_ROOT_DIR / "python-version.txt"
-TFENV_FILE = GITLAB_CI_DIR / "docker" / "decision" / "tfenv.sha256"
+TFENV_FILE = GITLAB_CI_DIR / "docker" / "jobgraph_update" / "tfenv.sha256"
 
 
 def get_gitlab_ci_dir(root_dir=JOBGRAPH_ROOT_DIR):

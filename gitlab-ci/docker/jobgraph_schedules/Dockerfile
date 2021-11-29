@@ -1,0 +1,4 @@
+ARG DOCKER_IMAGE_PARENT
+FROM $DOCKER_IMAGE_PARENT
+
+COPY --chown="$RUNNER_USER:$RUNNER_USER" terraform/*.tf /jobgraph/terraform/
