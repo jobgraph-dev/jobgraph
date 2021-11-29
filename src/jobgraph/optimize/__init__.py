@@ -6,9 +6,7 @@ The objective of optimization is to remove as many jobs from the graph as
 possible, as efficiently as possible, thereby delivering useful results as
 quickly as possible.  For example, ideally if only a test script is modified in
 a push, then the resulting graph contains only the corresponding test suite
-task.
-
-See ``taskcluster/docs/optimization.rst`` for more information.
+job.
 """
 
 
@@ -46,7 +44,7 @@ def register_strategy(name, args=()):
 
 def optimize_job_graph(target_job_graph, params, do_not_optimize, graph_config):
     """
-    Perform task optimization, returning a JobGraph.
+    Perform job optimization, returning a JobGraph.
     """
     changed_external_docker_images = _get_changed_external_docker_images(
         params, graph_config
@@ -118,9 +116,9 @@ def _remove_optimization_if_any_external_docker_image_has_changed(
 
 def _get_optimizations(target_job_graph, strategies):
     def optimizations(label):
-        task = target_job_graph.jobs[label]
-        if task.optimization:
-            opt_by, arg = list(task.optimization.items())[0]
+        job = target_job_graph.jobs[label]
+        if job.optimization:
+            opt_by, arg = list(job.optimization.items())[0]
             return (opt_by, strategies[opt_by], arg)
         else:
             return ("never", strategies["never"], None)
@@ -141,7 +139,7 @@ def _log_optimization(verb, opt_counts):
 
 def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
     """
-    Implement the "Removing Tasks" phase, returning a set of task labels of all removed jobs.
+    Implement the "Removing Tasks" phase, returning a set of job labels of all removed jobs.
     """
     opt_counts = defaultdict(int)
     removed = set()
@@ -187,13 +185,13 @@ def get_subgraph(
     non-optimized jobs and edges between them.
     """
 
-    # populate task['upstream_dependencies']
+    # populate job['upstream_dependencies']
     named_links_dict = target_job_graph.graph.named_links_dict()
     omit = removed_jobs
-    for label, task in target_job_graph.jobs.items():
+    for label, job in target_job_graph.jobs.items():
         if label in omit:
             continue
-        named_task_dependencies = {
+        named_job_dependencies = {
             name: label
             for name, label in named_links_dict.get(label, {}).items()
             if label not in omit
@@ -203,22 +201,22 @@ def get_subgraph(
             target_job_graph, named_links_dict, label, graph_config
         )
 
-        task.actual_gitlab_ci_job = resolve_docker_image_references(
-            task.label,
-            task.actual_gitlab_ci_job,
+        job.actual_gitlab_ci_job = resolve_docker_image_references(
+            job.label,
+            job.actual_gitlab_ci_job,
             docker_images=candidate_docker_images,
         )
-        unique_dependencies = set(named_task_dependencies.values())
-        task.actual_gitlab_ci_job["needs"] = sorted(list(unique_dependencies))
-        task.actual_gitlab_ci_job.setdefault("stage", task.stage)
+        unique_dependencies = set(named_job_dependencies.values())
+        job.actual_gitlab_ci_job["needs"] = sorted(list(unique_dependencies))
+        job.actual_gitlab_ci_job.setdefault("stage", job.stage)
         validate_schema(
             gitlab_ci_job_output,
-            task.actual_gitlab_ci_job,
-            f"In job {task.label}:",
+            job.actual_gitlab_ci_job,
+            f"In job {job.label}:",
         )
 
-    #  drop edges that are no longer entirely in the task graph
-    #   (note that this omits edges to replaced jobs, but they are still in task.dependnecies)
+    #  drop edges that are no longer entirely in the job graph
+    #   (note that this omits edges to replaced jobs, but they are still in job.dependnecies)
     remaining_edges = {
         (left, right, name)
         for (left, right, name) in target_job_graph.graph.edges
@@ -226,9 +224,7 @@ def get_subgraph(
     }
     remaining_nodes = target_job_graph.graph.nodes - omit
     remaining_jobs_by_label = {
-        label: task
-        for label, task in target_job_graph.jobs.items()
-        if label not in omit
+        label: job for label, job in target_job_graph.jobs.items() if label not in omit
     }
 
     return JobGraph(remaining_jobs_by_label, Graph(remaining_nodes, remaining_edges))
@@ -260,15 +256,15 @@ def _get_candidate_docker_images(
 
 
 class OptimizationStrategy:
-    def should_remove_job(self, task, params, arg):
-        """Determine whether to optimize this task by removing it.  Returns
+    def should_remove_job(self, job, params, arg):
+        """Determine whether to optimize this job by removing it.  Returns
         True to remove."""
         return False
 
 
 class Either(OptimizationStrategy):
-    """Given one or more optimization strategies, remove a task if any of them
-    says to, and replace with a task if any finds a replacement (preferring the
+    """Given one or more optimization strategies, remove a job if any of them
+    says to, and replace with a job if any finds a replacement (preferring the
     earliest).  By default, each substrategy gets the same arg, but split_args
     can return a list of args for each strategy, if desired."""
 
@@ -287,27 +283,27 @@ class Either(OptimizationStrategy):
                 return rv
         return False
 
-    def should_remove_job(self, task, params, arg):
+    def should_remove_job(self, job, params, arg):
         return self._for_substrategies(
-            arg, lambda sub, arg: sub.should_remove_job(task, params, arg)
+            arg, lambda sub, arg: sub.should_remove_job(job, params, arg)
         )
 
 
 @register_strategy("always")
 class Always(OptimizationStrategy):
-    def should_remove_job(self, task, params, file_patterns):
+    def should_remove_job(self, job, params, file_patterns):
         return True
 
 
 @register_strategy("never")
 class Never(OptimizationStrategy):
-    def should_remove_job(self, task, params, file_patterns):
+    def should_remove_job(self, job, params, file_patterns):
         return False
 
 
 @register_strategy("skip_unless_changed")
 class SkipUnlessChanged(OptimizationStrategy):
-    def should_remove_job(self, task, params, file_patterns):
+    def should_remove_job(self, job, params, file_patterns):
         repo = get_repo()
         repo_root = Path(repo.path)
 
@@ -327,7 +323,7 @@ class SkipUnlessChanged(OptimizationStrategy):
         if not has_any_tracked_file_changed:
             logger.debug(
                 "no files found matching a pattern in `skip_unless_changed` for "
-                + task.label
+                + job.label
             )
             return True
         return False
