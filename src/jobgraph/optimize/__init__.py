@@ -262,33 +262,6 @@ class OptimizationStrategy:
         return False
 
 
-class Either(OptimizationStrategy):
-    """Given one or more optimization strategies, remove a job if any of them
-    says to, and replace with a job if any finds a replacement (preferring the
-    earliest).  By default, each substrategy gets the same arg, but split_args
-    can return a list of args for each strategy, if desired."""
-
-    def __init__(self, *substrategies, **kwargs):
-        self.substrategies = substrategies
-        self.split_args = kwargs.pop("split_args", None)
-        if not self.split_args:
-            self.split_args = lambda arg: [arg] * len(substrategies)
-        if kwargs:
-            raise TypeError("unexpected keyword args")
-
-    def _for_substrategies(self, arg, fn):
-        for sub, arg in zip(self.substrategies, self.split_args(arg)):
-            rv = fn(sub, arg)
-            if rv:
-                return rv
-        return False
-
-    def should_remove_job(self, job, params, arg):
-        return self._for_substrategies(
-            arg, lambda sub, arg: sub.should_remove_job(job, params, arg)
-        )
-
-
 @register_strategy("always")
 class Always(OptimizationStrategy):
     def should_remove_job(self, job, params, file_patterns):
