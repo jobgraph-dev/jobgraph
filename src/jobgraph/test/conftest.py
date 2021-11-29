@@ -88,6 +88,9 @@ class FakeRepo:
     def get_file_at_given_revision(*args, **kwargs):
         return "some_file_content"
 
+    def does_commit_exist_locally(*args, **kwargs):
+        return True
+
 
 @pytest.fixture
 def maketgg(monkeypatch):

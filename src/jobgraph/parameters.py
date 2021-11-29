@@ -218,10 +218,24 @@ class Parameters(ReadOnlyDict):
 
 
 def _determine_base_rev(kwargs):
-    if kwargs.get("base_rev") == NULL_GIT_COMMIT:
-        logger.info(
+    repo = get_repo()
+    base_rev = kwargs.get("base_rev")
+
+    should_find_first_common_revision = False
+
+    if base_rev and base_rev == NULL_GIT_COMMIT:
+        logger.warning(
             f'base_rev equals "{NULL_GIT_COMMIT}". Finding the most common ancestor...'
         )
+        should_find_first_common_revision = True
+    elif base_rev and not repo.does_commit_exist_locally(base_rev):
+        logger.warning(
+            f'base_rev "{base_rev}" does not exist locally. Was the branch '
+            "force-pushed? Finding the most common ancestor..."
+        )
+        should_find_first_common_revision = True
+
+    if should_find_first_common_revision:
         if kwargs["base_repository"] != kwargs["head_repository"]:
             # TODO Clone the base repo to determine the first common
             # ancestor revision
@@ -231,7 +245,6 @@ def _determine_base_rev(kwargs):
                 f'({kwargs["head_repository"]}))'
             )
 
-        repo = get_repo()
         # Gitlab runners check out a detached HEAD which prevents us
         # from getting the remote repository of the kwargs["head_ref"]
         # branch. Thus, we have to rely on the fact that "origin" is
@@ -240,7 +253,7 @@ def _determine_base_rev(kwargs):
         kwargs["base_rev"] = repo.find_first_common_revision(
             main_branch, kwargs["head_rev"]
         )
-        logger.info(f'base_rev has been set to "{kwargs["base_rev"]}"')
+        logger.warning(f'base_rev has been set to "{kwargs["base_rev"]}"')
 
     return kwargs
 

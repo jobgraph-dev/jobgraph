@@ -3,18 +3,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-import unittest
-
 import pytest
 
-from jobgraph.parameters import ParameterMismatch, Parameters, load_parameters_file
+from jobgraph import parameters
+from jobgraph.test.conftest import FakeRepo
 
 from .mockedopen import MockedOpen
 
 
-class TestParameters(unittest.TestCase):
-
-    vals = {
+@pytest.fixture
+def vals():
+    return {
         "base_repository": "repository",
         "base_rev": "baserev",
         "build_date": 0,
@@ -31,119 +30,134 @@ class TestParameters(unittest.TestCase):
         "pipeline_source": "push",
     }
 
-    def test_Parameters_immutable(self):
-        p = Parameters(**self.vals)
 
-        def assign():
-            p["owner"] = "nobody@example.test"
-
-        self.assertRaises(Exception, assign)
-
-    def test_Parameters_missing_KeyError(self):
-        p = Parameters(**self.vals)
-        self.assertRaises(KeyError, lambda: p["z"])
-
-    def test_Parameters_invalid_KeyError(self):
-        """even if the value is present, if it's not a valid property, raise KeyError"""
-        p = Parameters(xyz=10, strict=True, **self.vals)
-        self.assertRaises(ParameterMismatch, lambda: p.check())
-
-    def test_Parameters_get(self):
-        p = Parameters(owner="nobody@example.test")
-        self.assertEqual(p["owner"], "nobody@example.test")
-
-    def test_Parameters_check(self):
-        p = Parameters(**self.vals)
-        p.check()  # should not raise
-
-    def test_Parameters_check_missing(self):
-        p = Parameters()
-        self.assertRaises(ParameterMismatch, lambda: p.check())
-
-        p = Parameters(strict=False)
-        p.check()  # should not raise
-
-    def test_Parameters_check_extra(self):
-        p = Parameters(xyz=10, **self.vals)
-        self.assertRaises(ParameterMismatch, lambda: p.check())
-
-        p = Parameters(strict=False, xyz=10, **self.vals)
-        p.check()  # should not raise
-
-    def test_Parameters_file_url_git_remote(self):
-        vals = self.vals.copy()
-        vals["head_repository"] = "git@bitbucket.com:owner/repo.git"
-        p = Parameters(**vals)
-        self.assertRaises(ParameterMismatch, lambda: p.file_url(""))
-
-        vals["head_repository"] = "git@github.com:owner/repo.git"
-        p = Parameters(**vals)
-        self.assertTrue(
-            p.file_url("", pretty=True).startswith(
-                "https://github.com/owner/repo/blob/"
-            )
-        )
-
-        vals["head_repository"] = "https://github.com/mozilla-mobile/reference-browser"
-        p = Parameters(**vals)
-        self.assertTrue(
-            p.file_url("", pretty=True).startswith(
-                "https://github.com/mozilla-mobile/reference-browser/blob/"
-            )
-        )
-
-        vals["head_repository"] = "https://github.com/mozilla-mobile/reference-browser/"
-        p = Parameters(**vals)
-        self.assertTrue(
-            p.file_url("", pretty=True).startswith(
-                "https://github.com/mozilla-mobile/reference-browser/blob/"
-            )
-        )
-
-    def test_load_parameters_file_yaml(self):
-        with MockedOpen({"params.yml": "some: data\n"}):
-            self.assertEqual(load_parameters_file("params.yml"), {"some": "data"})
-
-    def test_load_parameters_file_json(self):
-        with MockedOpen({"params.json": '{"some": "data"}'}):
-            self.assertEqual(load_parameters_file("params.json"), {"some": "data"})
-
-    def test_load_parameters_override(self):
-        """
-        When ``load_parameters_file`` is passed overrides, they are included in
-        the generated parameters.
-        """
-        self.assertEqual(
-            load_parameters_file("", overrides={"some": "data"}), {"some": "data"}
-        )
-
-    def test_load_parameters_override_file(self):
-        """
-        When ``load_parameters_file`` is passed overrides, they overwrite data
-        loaded from a file.
-        """
-        with MockedOpen({"params.json": '{"some": "data"}'}):
-            self.assertEqual(
-                load_parameters_file("params.json", overrides={"some": "other"}),
-                {"some": "other"},
-            )
+@pytest.fixture
+def repo_mock(monkeypatch):
+    monkeypatch.setattr(
+        parameters,
+        "get_repo",
+        lambda *args, **kwargs: FakeRepo(),
+    )
 
 
-def test_parameters_id():
+def test_Parameters_immutable(repo_mock, vals):
+    p = parameters.Parameters(**vals)
+
+    with pytest.raises(Exception):
+        p["owner"] = "nobody@example.test"
+
+
+def test_Parameters_missing_KeyError(repo_mock, vals):
+    p = parameters.Parameters(**vals)
+    with pytest.raises(KeyError):
+        p["z"]
+
+
+def test_Parameters_invalid_KeyError(repo_mock, vals):
+    """even if the value is present, if it's not a valid property, raise KeyError"""
+    p = parameters.Parameters(xyz=10, strict=True, **vals)
+    with pytest.raises(parameters.ParameterMismatch):
+        p.check()
+
+
+def test_Parameters_get(repo_mock, vals):
+    p = parameters.Parameters(owner="nobody@example.test")
+    assert p["owner"] == "nobody@example.test"
+
+
+def test_Parameters_check(repo_mock, vals):
+    p = parameters.Parameters(**vals)
+    p.check()  # should not raise
+
+
+def test_Parameters_check_missing(repo_mock, vals):
+    p = parameters.Parameters()
+    with pytest.raises(parameters.ParameterMismatch):
+        p.check()
+
+    p = parameters.Parameters(strict=False)
+    p.check()  # should not raise
+
+
+def test_Parameters_check_extra(repo_mock, vals):
+    p = parameters.Parameters(xyz=10, **vals)
+    with pytest.raises(parameters.ParameterMismatch):
+        p.check()
+
+    p = parameters.Parameters(strict=False, xyz=10, **vals)
+    p.check()  # should not raise
+
+
+def test_Parameters_file_url_git_remote(repo_mock, vals):
+    vals = vals.copy()
+    vals["head_repository"] = "git@bitbucket.com:owner/repo.git"
+    p = parameters.Parameters(**vals)
+    with pytest.raises(parameters.ParameterMismatch):
+        p.file_url("")
+
+    vals["head_repository"] = "git@github.com:owner/repo.git"
+    p = parameters.Parameters(**vals)
+    assert p.file_url("", pretty=True).startswith("https://github.com/owner/repo/blob/")
+
+    vals["head_repository"] = "https://github.com/mozilla-mobile/reference-browser"
+    p = parameters.Parameters(**vals)
+    assert p.file_url("", pretty=True).startswith(
+        "https://github.com/mozilla-mobile/reference-browser/blob/"
+    )
+
+    vals["head_repository"] = "https://github.com/mozilla-mobile/reference-browser/"
+    p = parameters.Parameters(**vals)
+    assert p.file_url("", pretty=True).startswith(
+        "https://github.com/mozilla-mobile/reference-browser/blob/"
+    )
+
+
+def test_load_parameters_file_yaml(repo_mock, vals):
+    with MockedOpen({"params.yml": "some: data\n"}):
+        assert parameters.load_parameters_file("params.yml") == {"some": "data"}
+
+
+def test_load_parameters_file_json(repo_mock, vals):
+    with MockedOpen({"params.json": '{"some": "data"}'}):
+        assert parameters.load_parameters_file("params.json") == {"some": "data"}
+
+
+def test_load_parameters_override(repo_mock, vals):
+    """
+    When ``load_parameters_file`` is passed overrides, they are included in
+    the generated parameters.
+    """
+    assert parameters.load_parameters_file("", overrides={"some": "data"}) == {
+        "some": "data"
+    }
+
+
+def test_load_parameters_override_file(repo_mock, vals):
+    """
+    When ``load_parameters_file`` is passed overrides, they overwrite data
+    loaded from a file.
+    """
+    with MockedOpen({"params.json": '{"some": "data"}'}):
+        assert parameters.load_parameters_file(
+            "params.json", overrides={"some": "other"}
+        ) == {"some": "other"}
+
+
+def test_parameters_id(repo_mock):
     # Some parameters rely on current time, ensure these are the same for the
     # purposes of this test.
     defaults = {
         "build_date": 0,
     }
 
-    params1 = Parameters(strict=False, spec=None, foo="bar", **defaults)
+    params1 = parameters.Parameters(strict=False, spec=None, foo="bar", **defaults)
     assert params1.id
     assert len(params1.id) == 12
 
-    params2 = Parameters(strict=False, spec="p2", foo="bar", **defaults)
+    params2 = parameters.Parameters(strict=False, spec="p2", foo="bar", **defaults)
     assert params1.id == params2.id
 
-    params3 = Parameters(strict=False, spec="p3", foo="baz", **defaults)
+    params3 = parameters.Parameters(strict=False, spec="p3", foo="baz", **defaults)
     assert params1.id != params3.id
 
 
@@ -159,4 +173,4 @@ def test_parameters_id():
     ),
 )
 def test_parameters_format_spec(spec, expected):
-    assert Parameters.format_spec(spec) == expected
+    assert parameters.Parameters.format_spec(spec) == expected

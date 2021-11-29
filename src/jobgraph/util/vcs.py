@@ -184,6 +184,16 @@ class GitRepository(Repository):
 
         self.run(*command)
 
+    def does_commit_exist_locally(self, commit_sha):
+        try:
+            return self.run("cat-file", "-t", commit_sha).strip() == "commit"
+        except subprocess.CalledProcessError as e:
+            # Error code 128 comes with the message:
+            # "git cat-file: could not get object info"
+            if e.returncode == 128:
+                return False
+            raise
+
 
 def get_repository(path):
     """Get a repository object for the repository at `path`.
