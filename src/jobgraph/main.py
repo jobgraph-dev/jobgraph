@@ -262,7 +262,7 @@ def generate_jobgraph(options, parameters, logdir):
     default=None,
     action="append",
     help="Parameters to use for the generation. Can be a path to file (.yml or "
-    ".json; see `taskcluster/docs/parameters.rst`), a directory (containing "
+    ".json), a directory (containing "
     "parameters files). Can be specified multiple times, in which case multiple "
     "generations will happen from the same invocation (one per parameters "
     "specified).",

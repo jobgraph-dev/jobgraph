@@ -10,17 +10,14 @@ import sys
 import tarfile
 import tempfile
 import unittest
-from unittest import mock
 
 import pytest
-import taskcluster_urls as liburls
 
 from jobgraph.util import docker
 
 MODE_STANDARD = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
 
 
-@mock.patch.dict("os.environ", {"TASKCLUSTER_ROOT_URL": liburls.test_root_url()})
 class TestDocker(unittest.TestCase):
     @pytest.mark.xfail(sys.version_info >= (3, 8), reason="Hash is different")
     def test_generate_context_hash(self):

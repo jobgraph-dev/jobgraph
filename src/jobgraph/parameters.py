@@ -31,7 +31,6 @@ def get_repo(root_dir=None):
     return get_repository(os.getcwd() if root_dir is None else root_dir)
 
 
-# Please keep this list sorted and in sync with taskcluster/docs/parameters.rst
 base_schema = Schema(
     {
         Required("base_repository"): str,

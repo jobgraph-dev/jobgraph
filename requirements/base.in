@@ -10,5 +10,4 @@ redo
 requests
 requests_unixsocket
 slugid
-taskcluster-urls
 voluptuous
