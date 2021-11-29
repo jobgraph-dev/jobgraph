@@ -139,7 +139,7 @@ def _log_optimization(verb, opt_counts):
 
 def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
     """
-    Implement the "Removing Tasks" phase, returning a set of job labels of all removed jobs.
+    Implement the "Removing Jobs" phase, returning a set of job labels of all removed jobs.
     """
     opt_counts = defaultdict(int)
     removed = set()

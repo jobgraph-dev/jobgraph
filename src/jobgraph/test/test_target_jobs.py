@@ -11,7 +11,7 @@ from jobgraph.job import Job
 from jobgraph.jobgraph import JobGraph
 
 
-class TestTargetTasks(unittest.TestCase):
+class TestTargetJobs(unittest.TestCase):
     def default_matches_pipeline_source(self, run_on_pipeline_sources, pipeline_source):
         attributes = {
             "run_on_pipeline_sources": ["push", "web"],
