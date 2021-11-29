@@ -14,5 +14,7 @@ WORKDIR "$RUNNER_HOME"
 ENV PATH="$RUNNER_HOME/.local/bin:$PATH" \
     USER="$RUNNER_USER"
 
+RUN mkdir -p "$RUNNER_HOME/.local/bin"
+
 # Set default command to shell so that decision jobs can run other shell commands like `pip`.
 CMD ["/bin/ash", "--login"]
