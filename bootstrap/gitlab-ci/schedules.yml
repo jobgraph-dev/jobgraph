@@ -3,4 +3,9 @@ jobs:
     single_job:
         cron: 00 12 * * 1
         description: Schedule a single targeted job each Monday, noon UTC.
+        # TODO Change target jobs method
+        target_jobs_method: default
+    update_dependencies:
+        cron: 00 12 * * 3
+        description: "Update jobgraph dependencies (e.g.: Docker images) each Wednesday, UTC"
         target_jobs_method: default

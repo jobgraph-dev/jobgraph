@@ -31,6 +31,7 @@ def bootstrap(
         jobgraph_bot_gitlab_token,
     )
     generate_schedules_stage(cwd)
+    generate_updates_stage(cwd)
 
 
 def copy_gitlab_ci_in_bootstrap_folder(cwd):
@@ -105,32 +106,57 @@ def setup_repo_secrets(
     terraform_apply(terraform_dir, **apply_variables)
 
 
-_LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML = {
-    "    image: {in_tree: decision}\n": '    image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
-    "        TF_ROOT: ${CI_PROJECT_DIR}/terraform\n": "        TF_ROOT: /jobgraph/terraform\n",
-}
-
-
 def generate_schedules_stage(cwd):
-    source_stage_yml_relative_path = Path("jobgraph_schedules/stage.yml")
+    return _copy_and_modify_stage(
+        cwd,
+        source_stage_yml_relative_path=Path("jobgraph_schedules/stage.yml"),
+        forewords_lines=[
+            "# This file lets jobgraph modify Gitlab CI schedules based on the\n",
+            "# content of `gitlab-ci/schedules.yml`. Modify this current file\n",
+            "# at your own risks.\n",
+        ],
+        lines_to_replace={
+            "    image: {in_tree: decision}\n": '    image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
+            "        TF_ROOT: ${CI_PROJECT_DIR}/terraform\n": "        TF_ROOT: /jobgraph/terraform\n",  # noqa: E501
+        },
+    )
+
+
+def generate_updates_stage(cwd):
+    return _copy_and_modify_stage(
+        cwd,
+        source_stage_yml_relative_path=Path("jobgraph_updates/stage.yml"),
+        forewords_lines=[
+            "# This file lets jobgraph update itself and any docker images it uses.\n",
+            "# Modify this current file at your own risks.\n",
+        ],
+        lines_to_replace={
+            "        image: {in_tree: decision}\n": '        image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
+            "            --git-committer-email='10283475-jobgraph-bot@users.noreply.gitlab.com'\n": "            --git-committer-email='CHANGE-THIS@EMAIL.ADDRESS'\n",  # noqa: E501
+        },
+    )
+
+
+def _copy_and_modify_stage(
+    cwd,
+    source_stage_yml_relative_path,
+    forewords_lines,
+    lines_to_replace,
+):
     source_stage_yml_path = get_stages_dir() / source_stage_yml_relative_path
 
     with open(source_stage_yml_path) as f:
         schedules_yml_lines = f.readlines()
 
-    new_schedules_yml_lines = [
-        "# This file lets jobgraph update Gitlab CI schedules based on the\n",
-        "# content of `gitlab-ci/schedules.yml`. Modify this current file\n",
-        "# at your own risks.\n",
-    ]
+    target_stage_yml_lines = forewords_lines
 
     for line in schedules_yml_lines:
-        if line in _LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML:
-            new_line = _LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML[line]
-            new_schedules_yml_lines.append(new_line)
+        if line in lines_to_replace:
+            new_line = lines_to_replace[line]
+            target_stage_yml_lines.append(new_line)
             continue
 
-        new_schedules_yml_lines.append(line)
+        target_stage_yml_lines.append(line)
 
     target_stage_dir = get_stages_dir(gitlab_ci_dir=get_gitlab_ci_dir(root_dir=cwd))
     target_stage_yml_path = target_stage_dir / source_stage_yml_relative_path
@@ -139,4 +165,4 @@ def generate_schedules_stage(cwd):
     os.makedirs(target_dir, exist_ok=True)
 
     with open(target_stage_yml_path, "w") as f:
-        f.writelines(new_schedules_yml_lines)
+        f.writelines(target_stage_yml_lines)
