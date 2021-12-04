@@ -51,7 +51,7 @@ def update_dependencies(
         _update_terraform_providers(graph_config)
 
     _update_dockerfiles(root_dir=repo_root)
-    _update_decision_image()
+    _update_decision_image(root_dir=repo_root)
     _update_external_images(graph_config)
 
     if create_new_merge_request:
@@ -140,8 +140,8 @@ _IMAGE_INSTRUCTION_PREFIX = "    image: "
 # Although, parsing .gitlab-ci.yml with pyyaml actually badly messes up the
 # formatting.
 # Moreover, the indentation is safeguarded by yamllint.
-def _update_decision_image():
-    with open(get_gitlab_ci_yml_path()) as f:
+def _update_decision_image(root_dir):
+    with open(get_gitlab_ci_yml_path(root_dir)) as f:
         lines = f.readlines()
 
     new_lines = []
