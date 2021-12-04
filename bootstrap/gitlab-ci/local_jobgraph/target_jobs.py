@@ -6,6 +6,8 @@ from jobgraph.target_jobs import target_jobs
 def target_jobs_some_schedule(full_job_graph, parameters, graph_config):
     # Use job attributes to select what jobs should be in the target graph.
     def filter(job, parameters):
-        return job.attributes.get("single_job_on_given_schedule", False)
+        return job.attributes.get("schedules", {}).get(
+            "single_job_on_given_schedule", False
+        )
 
     return [l for l, t in full_job_graph.jobs.items() if filter(t, parameters)]

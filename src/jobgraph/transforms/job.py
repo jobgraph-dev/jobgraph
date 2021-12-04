@@ -106,7 +106,10 @@ def build_job(config, jobs):
             "run_on_pipeline_sources", ["push", "web"]
         )
         attributes["run_on_git_branches"] = job.pop("run_on_git_branches", ["all"])
-        attributes["schedules"] = job.pop("schedules", {})
+        schedules = job.pop("schedules", {})
+        if schedules:
+            attributes["schedules"] = schedules
+            attributes["run_on_pipeline_sources"].append("schedule")
 
         actual_gitlab_ci_job = always_merger.merge(
             deepcopy(config.graph_config["job_defaults"]), job
