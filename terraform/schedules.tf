@@ -8,7 +8,7 @@ resource "gitlab_pipeline_schedule" "schedules" {
   active      = true
   cron        = each.value.cron
   description = "[jobgraph] ${each.value.description}"
-  project     = "30264497"
+  project     = var.GITLAB_PROJECT_ID
   ref         = "main"
 }
 
