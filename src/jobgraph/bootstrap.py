@@ -112,7 +112,7 @@ _LINES_TO_REPLACE_IN_SCHEDULES_STAGE_YML = {
 
 
 def generate_schedules_stage(cwd):
-    source_stage_yml_relative_path = Path("schedules/stage.yml")
+    source_stage_yml_relative_path = Path("jobgraph_schedules/stage.yml")
     source_stage_yml_path = get_stages_dir() / source_stage_yml_relative_path
 
     with open(source_stage_yml_path) as f:
