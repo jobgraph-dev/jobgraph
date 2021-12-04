@@ -5,13 +5,22 @@ transforms:
 - jobgraph.transforms.job:transforms
 
 
+job_defaults:
+    description: >
+        This job uses the `hello_world` image defined in `gitlab-ci/stages/docker_image/stage.yml`.
+        Jobgraph automatically links this job with the other one with a hash that represents the
+        docker context.
+    image: {in_tree: hello_world}
+    runner_alias: misc
+
+
 jobs:
-    hello_world_from_a_job:
-        description: >
-            This job uses the `hello_world` image defined in `gitlab-ci/stages/docker_image/stage.yml`.
-            Jobgraph automatically links this job with the other one with a hash that represents the
-            docker context.
-        image: {in_tree: hello_world}
-        runner_alias: misc
+    from_a_job:
         script:
         - cowsay 'Hello from a job!'
+
+    from_a_schedule:
+        run_on_pipeline_sources:
+        - schedule
+        script:
+        - cowsay 'Scheduled hello!'
