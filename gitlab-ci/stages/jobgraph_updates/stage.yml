@@ -3,7 +3,6 @@ loader: jobgraph.loader.transform:loader
 
 transforms:
 - jobgraph.transforms.docker_in_docker:transforms
-- jobgraph.transforms.reinstall_jobgraph:transforms
 - jobgraph.transforms.job:transforms
 
 job_defaults:
@@ -17,7 +16,6 @@ jobs:
     jobgraph_dependencies:
         description: Bump jobgraph dependencies (python packages and docker images)
         image: {in_tree: decision}
-        reinstall_jobgraph: true
         # We want to run this job in 2 scenarios:
         #  * when the decision image has changed (which is handled by the "job" transform)
         #  * on a regular schedule to update dependencies periodically
