@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from pathlib import Path
 
@@ -20,10 +21,15 @@ def bootstrap(
     gitlab_project_id, gitlab_root_url, jobgraph_bot_username, jobgraph_bot_gitlab_token
 ):
     cwd = Path.cwd()
-    get_repository(cwd)
+    get_repository(cwd)  # Ensure we're at the root of a git repo
+    decision_image_full_location = get_image_full_location_with_digest(
+        "decision", root_dir=GITLAB_CI_DIR
+    )
     copy_gitlab_ci_in_bootstrap_folder(cwd)
-    generate_gitlab_ci_yml(cwd)
-    generate_config_yml(cwd, gitlab_project_id, gitlab_root_url)
+    generate_gitlab_ci_yml(cwd, decision_image_full_location)
+    generate_config_yml(
+        cwd, gitlab_project_id, gitlab_root_url, decision_image_full_location
+    )
     setup_repo_secrets(
         gitlab_project_id,
         gitlab_root_url,
@@ -47,7 +53,7 @@ def copy_gitlab_ci_in_bootstrap_folder(cwd):
         shutil.copy(path, target_path)
 
 
-def generate_gitlab_ci_yml(cwd):
+def generate_gitlab_ci_yml(cwd, decision_image_full_location):
     source_gitlab_ci_yml = get_gitlab_ci_yml_path()
 
     with open(source_gitlab_ci_yml) as f:
@@ -66,18 +72,23 @@ def generate_gitlab_ci_yml(cwd):
         )
     ]
 
+    target_lines = [
+        re.sub(r"    image: (.+)$", f"    image: {decision_image_full_location}", line)
+        for line in target_lines
+    ]
+
     with open(get_gitlab_ci_yml_path(root_dir=cwd), "w") as f:
         f.writelines(target_lines)
 
 
-def generate_config_yml(cwd, gitlab_project_id, gitlab_root_url):
+def generate_config_yml(
+    cwd, gitlab_project_id, gitlab_root_url, decision_image_full_location
+):
     graph_config = load_graph_config()
     graph_config["gitlab"]["project_id"] = gitlab_project_id
     graph_config["gitlab"]["root_url"] = gitlab_root_url
 
-    graph_config["docker"]["external_images"][
-        "jobgraph"
-    ] = get_image_full_location_with_digest("decision", root_dir=GITLAB_CI_DIR)
+    graph_config["docker"]["external_images"]["jobgraph"] = decision_image_full_location
 
     graph_config["jobgraph"][
         "decision_parameters"
@@ -152,11 +163,11 @@ def _copy_and_modify_stage(
     source_stage_yml_path = get_stages_dir() / source_stage_yml_relative_path
 
     with open(source_stage_yml_path) as f:
-        schedules_yml_lines = f.readlines()
+        source_stage_lines = f.readlines()
 
     target_stage_yml_lines = forewords_lines
 
-    for line in schedules_yml_lines:
+    for line in source_stage_lines:
         if line in lines_to_replace:
             new_line = lines_to_replace[line]
             target_stage_yml_lines.append(new_line)
