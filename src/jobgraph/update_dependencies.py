@@ -141,7 +141,8 @@ _IMAGE_INSTRUCTION_PREFIX = "    image: "
 # formatting.
 # Moreover, the indentation is safeguarded by yamllint.
 def _update_decision_image(root_dir):
-    with open(get_gitlab_ci_yml_path(root_dir)) as f:
+    gitlab_ci_yml_path = get_gitlab_ci_yml_path(root_dir)
+    with open(gitlab_ci_yml_path) as f:
         lines = f.readlines()
 
     new_lines = []
@@ -157,7 +158,7 @@ def _update_decision_image(root_dir):
 
         new_lines.append(line)
 
-    with open(get_gitlab_ci_yml_path(), "w") as f:
+    with open(gitlab_ci_yml_path, "w") as f:
         lines = f.writelines(new_lines)
 
 
