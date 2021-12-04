@@ -14,12 +14,12 @@ jobs:
         - echo "$JOBGRAPH_BOT_SSH_PRIVATE_KEY" | base64 -d | tr -d '\r' | ssh-add -
         description: "Bump jobgraph dependencies (e.g.: Docker images)"
         image: {in_tree: decision}
+        runner_alias: misc
         # We want to run this job in 2 scenarios:
         #  * when the decision image has changed (which is handled by the "job" transform)
         #  * on a regular schedule to update dependencies periodically
-        run_on_pipeline_sources:
-        - schedule
-        runner_alias: misc
+        schedules:
+            jobgraph_updates: True
         script: >-
             jobgraph update-dependencies
             --new-merge-request

@@ -71,3 +71,13 @@ def target_jobs_default(full_job_graph, parameters, graph_config):
 def target_jobs_nothing(full_job_graph, parameters, graph_config):
     """Select nothing, for DONTBUILD pushes"""
     return []
+
+
+@target_jobs("jobgraph_updates")
+def target_jobs_jobgraph_updates(full_job_graph, parameters, graph_config):
+    """Target the jobs which have indicated they should be run based on attributes."""
+
+    def filter(job, parameters):
+        return job.attributes.get("schedules", {}).get("jobgraph_updates", False)
+
+    return [l for l, t in full_job_graph.jobs.items() if filter(t, parameters)]

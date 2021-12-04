@@ -7,4 +7,5 @@ jobs:
     update_dependencies:
         cron: 00 12 * * 3
         description: "Update jobgraph dependencies (e.g.: Docker images) each Wednesday, UTC"
-        target_jobs_method: default
+        # This target_jobs_method is provided by upstream jobgraph
+        target_jobs_method: jobgraph_updates
