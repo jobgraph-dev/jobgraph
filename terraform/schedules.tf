@@ -9,7 +9,7 @@ resource "gitlab_pipeline_schedule" "schedules" {
   cron        = each.value.cron
   description = "[jobgraph] ${each.value.description}"
   project     = var.GITLAB_PROJECT_ID
-  ref         = "main"
+  ref         = var.GITLAB_DEFAULT_BRANCH
 }
 
 resource "gitlab_pipeline_schedule_variable" "schedules" {

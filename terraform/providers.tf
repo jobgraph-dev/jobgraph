@@ -16,6 +16,11 @@ variable "GITLAB_PROJECT_ID" {
   description = "Project ID that will get modified."
 }
 
+variable "GITLAB_DEFAULT_BRANCH" {
+  type        = string
+  description = "Default git branch against which schedules will run."
+}
+
 variable "SCHEDULES_YML_PATH" {
   type        = string
   description = "Path to jobgraph's schedules.yml file"
