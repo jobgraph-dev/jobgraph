@@ -72,11 +72,8 @@ def generate_gitlab_ci_yml(cwd):
 
 def generate_config_yml(cwd, gitlab_project_id, gitlab_root_url):
     graph_config = load_graph_config()
-    graph_config["gitlab"] |= {
-        "project_id": gitlab_project_id,
-        "root_url": gitlab_root_url,
-    }
-
+    graph_config["gitlab"]["project_id"] = gitlab_project_id
+    graph_config["gitlab"]["root_url"] = gitlab_root_url
     graph_config["docker"]["external_images"][
         "jobgraph"
     ] = get_image_full_location_with_digest("decision", root_dir=GITLAB_CI_DIR)
