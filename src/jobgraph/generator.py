@@ -375,6 +375,8 @@ def load_jobs_for_stage(parameters, stage, root_dir=None):
     # make parameters read-write
     parameters = dict(parameters)
     parameters["target-stage"] = stage
-    parameters = Parameters(strict=False, **parameters)
+    parameters = Parameters(
+        strict=False, repo_dir=os.path.dirname(root_dir), **parameters
+    )
     jgg = JobGraphGenerator(root_dir=root_dir, parameters=parameters)
     return {job.label: job for job in jgg.full_job_set if job.stage == stage}

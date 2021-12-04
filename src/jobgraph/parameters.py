@@ -74,7 +74,7 @@ class Parameters(ReadOnlyDict):
             # apply defaults to missing parameters
             kwargs = Parameters._fill_defaults(repo, **kwargs)
 
-        kwargs = _determine_base_rev(kwargs)
+        kwargs = _determine_base_rev(repo, kwargs)
 
         ReadOnlyDict.__init__(self, **kwargs)
 
@@ -212,8 +212,7 @@ class Parameters(ReadOnlyDict):
         return pformat(dict(self), indent=2)
 
 
-def _determine_base_rev(kwargs):
-    repo = get_repo()
+def _determine_base_rev(repo, kwargs):
     base_rev = kwargs.get("base_rev")
 
     should_find_first_common_revision = False
