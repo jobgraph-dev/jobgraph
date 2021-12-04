@@ -6,7 +6,6 @@
 loader: jobgraph.loader.transform:loader
 
 transforms:
-- jobgraph.transforms.update:transforms
 - jobgraph.transforms.docker_in_docker:transforms
 - jobgraph.transforms.reinstall_jobgraph:transforms
 - jobgraph.transforms.job:transforms
@@ -22,23 +21,12 @@ jobs:
     jobgraph_dependencies:
         description: Bump jobgraph dependencies (python packages and docker images)
         image: {in_tree: decision}
-        # We want to run this job in 3 scenarios:
-        #  * when the decision image has changed
-        #  * on a regular schedule to update dependencies periodically
-        #  * whenever we add a new dependency to the decision image. This
-        #    way .gitlab-ci.yml is automatically bumped and the next commit
-        #    can make use of this new dependency
-        optimization:
-            by_pipeline_source:
-                schedule: {}
-                default:
-                    skip_unless_changed:
-                    - requirements/base.in
         reinstall_jobgraph: true
+        # We want to run this job in 2 scenarios:
+        #  * when the decision image has changed (which is handled by the "job" transform)
+        #  * on a regular schedule to update dependencies periodically
         run_on_pipeline_sources:
-        - push
         - schedule
-        - web
         runner_alias: misc
         script: >-
             jobgraph update-dependencies
