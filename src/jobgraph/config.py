@@ -86,7 +86,7 @@ class GraphConfig:
         Add the project's jobgraph directory to the python path, and register
         any extensions present.
         """
-        modify_path = os.path.dirname(self.root_dir)
+        modify_path = self.root_dir
         if GraphConfig._PATH_MODIFIED:
             if GraphConfig._PATH_MODIFIED == modify_path:
                 # Already modified path with the same root_dir.
