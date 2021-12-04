@@ -1,6 +1,3 @@
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 The objective of optimization is to remove as many jobs from the graph as
 possible, as efficiently as possible, thereby delivering useful results as
