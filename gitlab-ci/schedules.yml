@@ -1,6 +1,6 @@
 ---
 jobs:
-    update-dependencies:
+    update_dependencies:
         cron: 00 12 * * 3
         description: Update jobgraph dependencies
         target_jobs_method: default
