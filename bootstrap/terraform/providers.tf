@@ -19,3 +19,5 @@ variable "GITLAB_PROJECT_ID" {
 provider "gitlab" {
   token = var.JOBGRAPH_BOT_GITLAB_TOKEN
 }
+
+provider "tls" {}
