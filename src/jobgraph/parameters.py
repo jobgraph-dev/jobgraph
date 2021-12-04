@@ -114,7 +114,7 @@ class Parameters(ReadOnlyDict):
     def _fill_defaults(repo, **kwargs):
         defaults = {
             "base_repository": repo.get_url(),
-            "base_rev": "0",  # TODO
+            "base_rev": NULL_GIT_COMMIT,
             "build_date": int(time.time()),
             "do_not_optimize": [],
             "filters": ["target_jobs_method"],
