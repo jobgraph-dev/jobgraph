@@ -193,6 +193,13 @@ def generate_tests_stage(cwd):
         lines_to_replace={
             '        - "**/*.py"\n': '        - "gitlab-ci/**/*.py"',
             "    image: {in_tree: python_test}\n": '    image: {"docker_image_reference": "<jobgraph_tests>"}\n',  # noqa: E501
+            # The following line is even a bigger hack than the simple search-and-
+            # replace strategy currently implemented. It strips the \n so that
+            # the generated file doesn't end with to \n\n which makes yamllint
+            # unhappy.
+            #
+            # TODO: Implement a much nicer search-and-replace strategy.
+            """    script: pyupgrade --py310-plus $(find "$JOBGRAPH_ROOT_DIR" -name '*.py')\n""": """    script: pyupgrade --py310-plus $(find "$JOBGRAPH_ROOT_DIR" -name '*.py')""",  # noqa: E501
             "unit:\n": "",
             '    description: "Run `unit tests` to validate the latest changes"\n': "",
             "    reinstall_jobgraph: true\n": "",
