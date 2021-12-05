@@ -21,6 +21,6 @@ jobs:
 
     from_a_schedule:
         schedules:
-            single_job_on_given_schedule: True
+            single_job_on_given_schedule: true
         script:
         - cowsay 'Scheduled hello!'

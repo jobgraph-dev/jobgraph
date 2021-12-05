@@ -19,7 +19,7 @@ jobs:
         #  * when the decision image has changed (which is handled by the "job" transform)
         #  * on a regular schedule to update dependencies periodically
         schedules:
-            jobgraph_updates: True
+            jobgraph_updates: true
         script: >-
             jobgraph update-dependencies
             --new-merge-request

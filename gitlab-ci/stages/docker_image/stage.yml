@@ -15,8 +15,8 @@ job_defaults:
             unprotected: "unprotected/{job_name}"
     push_as_latest:
         by_head_ref:
-            main: True
-            default: False
+            main: true
+            default: false
 
 
 jobs:

@@ -42,6 +42,7 @@ repos:
   rev: v1.26.3
   hooks:
   - id: yamllint
+    args: [--strict]
 - repo: https://github.com/hadolint/hadolint
   rev: v2.8.0
   hooks:

@@ -8,4 +8,4 @@ job_defaults:
 
 yamllint:
     description: "Run `yamllint` to validate the latest changes"
-    script: yamllint "$JOBGRAPH_ROOT_DIR"
+    script: yamllint --strict "$JOBGRAPH_ROOT_DIR"
