@@ -5,4 +5,4 @@
 # See also http://pep8.readthedocs.io/en/latest/intro.html#configuration
 max-line-length = 99
 # E203 is not PEP8 compliant per black. See https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#slices
-extend-ignore = E203, E402
+extend-ignore = E203

@@ -13,9 +13,9 @@ from jobgraph.config import DEFAULT_ROOT_DIR
 from jobgraph.parameters import get_repo
 from jobgraph.util.memoize import memoize
 
-IMAGE_DIR = os.path.join(".", "gitlab-ci", "docker")
-
 from .yaml import load_yaml
+
+IMAGE_DIR = os.path.join(".", "gitlab-ci", "docker")
 
 
 def docker_url(path, **kwargs):
