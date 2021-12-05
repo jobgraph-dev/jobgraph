@@ -305,7 +305,8 @@ class JobGraphGenerator:
             old_len = len(target_job_set.graph.nodes)
             target_jobs = set(fltr(target_job_set, parameters, graph_config))
             target_job_set = JobGraph(
-                {l: all_jobs[l] for l in target_jobs}, Graph(target_jobs, set())
+                {label: all_jobs[label] for label in target_jobs},
+                Graph(target_jobs, set()),
             )
             number_pruned_jobs = old_len - len(target_jobs)
             logger.info(
@@ -339,7 +340,7 @@ class JobGraphGenerator:
             target_jobs | docker_image_jobs | always_target_jobs
         )
         target_job_graph = JobGraph(
-            {l: all_jobs[l] for l in target_graph.nodes}, target_graph
+            {label: all_jobs[label] for label in target_graph.nodes}, target_graph
         )
         yield verifications("target_job_graph", target_job_graph, graph_config)
 

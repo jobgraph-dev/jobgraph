@@ -10,4 +10,6 @@ def target_jobs_some_schedule(full_job_graph, parameters, graph_config):
             "single_job_on_given_schedule", False
         )
 
-    return [l for l, t in full_job_graph.jobs.items() if filter(t, parameters)]
+    return [
+        label for label, task in full_job_graph.jobs.items() if filter(task, parameters)
+    ]

@@ -125,11 +125,11 @@ class TestGraph(unittest.TestCase):
 
     def assert_postorder(self, seq, all_nodes):
         seen = set()
-        for e in seq:
-            for l, r, n in self.tree.edges:
-                if l == e:
-                    self.assertTrue(r in seen)
-            seen.add(e)
+        for edge in seq:
+            for left, right, _ in self.tree.edges:
+                if left == edge:
+                    self.assertTrue(right in seen)
+            seen.add(edge)
         self.assertEqual(seen, all_nodes)
 
     def test_visit_postorder_tree(self):
@@ -152,11 +152,11 @@ class TestGraph(unittest.TestCase):
 
     def assert_preorder(self, seq, all_nodes):
         seen = set()
-        for e in seq:
-            for l, r, n in self.tree.edges:
-                if r == e:
-                    self.assertTrue(l in seen)
-            seen.add(e)
+        for edge in seq:
+            for left, right, _ in self.tree.edges:
+                if right == edge:
+                    self.assertTrue(left in seen)
+            seen.add(edge)
         self.assertEqual(seen, all_nodes)
 
     def test_visit_preorder_tree(self):

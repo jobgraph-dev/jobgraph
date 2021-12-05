@@ -64,7 +64,11 @@ def standard_filter(job, parameters):
 @target_jobs("default")
 def target_jobs_default(full_job_graph, parameters, graph_config):
     """Target the jobs which have indicated they should be run based on attributes."""
-    return [l for l, t in full_job_graph.jobs.items() if standard_filter(t, parameters)]
+    return [
+        label
+        for label, t in full_job_graph.jobs.items()
+        if standard_filter(t, parameters)
+    ]
 
 
 @target_jobs("nothing")
@@ -80,4 +84,4 @@ def target_jobs_jobgraph_updates(full_job_graph, parameters, graph_config):
     def filter(job, parameters):
         return job.attributes.get("schedules", {}).get("jobgraph_updates", False)
 
-    return [l for l, t in full_job_graph.jobs.items() if filter(t, parameters)]
+    return [label for label, t in full_job_graph.jobs.items() if filter(t, parameters)]
