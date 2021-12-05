@@ -2,6 +2,7 @@
 loader: jobgraph.loader.transform:loader
 
 transforms:
+- jobgraph.transforms.reinstall_jobgraph:transforms
 - jobgraph.transforms.job:transforms
 
 # You can split a stage into multiple files
@@ -13,3 +14,5 @@ jobs_from:
 job_defaults:
     runner_alias: t-linux
     timeout: 3 minutes
+    variables:
+        JOBGRAPH_ROOT_DIR: $CI_PROJECT_DIR

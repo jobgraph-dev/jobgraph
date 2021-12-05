@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+from copy import copy
 from pathlib import Path
 
 from jobgraph.config import GraphConfig, load_graph_config
@@ -38,6 +39,7 @@ def bootstrap(
     )
     generate_schedules_stage(cwd)
     generate_updates_stage(cwd)
+    generate_tests_stage(cwd)
 
 
 def copy_gitlab_ci_in_bootstrap_folder(cwd):
@@ -127,7 +129,7 @@ def setup_repo_secrets(
 
 
 def generate_schedules_stage(cwd):
-    return _copy_and_modify_stage(
+    _copy_and_modify_stage(
         cwd,
         source_stage_yml_relative_path=Path("jobgraph_schedules/stage.yml"),
         forewords_lines=[
@@ -143,7 +145,7 @@ def generate_schedules_stage(cwd):
 
 
 def generate_updates_stage(cwd):
-    return _copy_and_modify_stage(
+    _copy_and_modify_stage(
         cwd,
         source_stage_yml_relative_path=Path("jobgraph_updates/stage.yml"),
         forewords_lines=[
@@ -153,6 +155,57 @@ def generate_updates_stage(cwd):
         lines_to_replace={
             "        image: {in_tree: decision}\n": '        image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
             "            --git-committer-email='10283475-jobgraph-bot@users.noreply.gitlab.com'\n": "            --git-committer-email='CHANGE-THIS@EMAIL.ADDRESS'\n",  # noqa: E501
+        },
+    )
+
+
+_TEST_STAGE_FOREWORD = [
+    "# This stage ensure your jobgraph definitions are correctly linted.\n",
+    "# Modify this current file at your own risks.\n",
+]
+
+
+def generate_tests_stage(cwd):
+    _copy_and_modify_stage(
+        cwd,
+        source_stage_yml_relative_path=Path("jobgraph_tests/stage.yml"),
+        forewords_lines=_TEST_STAGE_FOREWORD,
+        lines_to_replace={
+            "- jobgraph.transforms.reinstall_jobgraph:transforms\n": "",
+            "        JOBGRAPH_ROOT_DIR: $CI_PROJECT_DIR\n": "        JOBGRAPH_ROOT_DIR: $CI_PROJECT_DIR/gitlab-ci\n",  # noqa: E501
+        },
+    )
+
+    _copy_and_modify_stage(
+        cwd,
+        source_stage_yml_relative_path=Path("jobgraph_tests/dockerfiles.yml"),
+        forewords_lines=_TEST_STAGE_FOREWORD,
+        lines_to_replace={
+            '        - "**/Dockerfile"\n': '        - "gitlab-ci/**/Dockerfile"',
+        },
+    )
+
+    _copy_and_modify_stage(
+        cwd,
+        source_stage_yml_relative_path=Path("jobgraph_tests/python.yml"),
+        forewords_lines=_TEST_STAGE_FOREWORD,
+        lines_to_replace={
+            '        - "**/*.py"\n': '        - "gitlab-ci/**/*.py"',
+            "    image: {in_tree: python_test}\n": '    image: {"docker_image_reference": "<jobgraph_tests>"}\n',  # noqa: E501
+            "unit:\n": "",
+            '    description: "Run `unit tests` to validate the latest changes"\n': "",
+            "    reinstall_jobgraph: true\n": "",
+            "    script: pytest --pyargs jobgraph\n": "",
+        },
+    )
+
+    _copy_and_modify_stage(
+        cwd,
+        source_stage_yml_relative_path=Path("jobgraph_tests/yaml.yml"),
+        forewords_lines=_TEST_STAGE_FOREWORD,
+        lines_to_replace={
+            '        - "**/*.yml"\n': '        - "gitlab-ci/**/*.yml"',
+            "    image: {in_tree: python_test}\n": '    image: {"docker_image_reference": "<jobgraph_tests>"}\n',  # noqa: E501
         },
     )
 
@@ -168,7 +221,7 @@ def _copy_and_modify_stage(
     with open(source_stage_yml_path) as f:
         source_stage_lines = f.readlines()
 
-    target_stage_yml_lines = forewords_lines
+    target_stage_yml_lines = copy(forewords_lines)
 
     for line in source_stage_lines:
         if line in lines_to_replace:

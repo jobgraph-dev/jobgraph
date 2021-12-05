@@ -1,11 +1,11 @@
 ---
 job_defaults:
-    image: {"docker_image_reference": "<jobgraph_tests>"}
+    image: {in_tree: python_test}
     optimization:
         skip_unless_changed:
-        - "gitlab-ci/**/*.yml"
+        - "**/*.yml"
 
 
 yamllint:
     description: "Run `yamllint` to validate the latest changes"
-    script: yamllint gitlab-ci/
+    script: yamllint "$JOBGRAPH_ROOT_DIR"

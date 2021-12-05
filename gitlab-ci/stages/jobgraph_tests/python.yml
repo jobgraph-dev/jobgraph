@@ -8,23 +8,23 @@ job_defaults:
 
 black:
     description: "Run `black` to ensure strict code style"
-    script: black --check .
+    script: black --check "$JOBGRAPH_ROOT_DIR"
 
 flake8:
     description: "Run `flake8` to ensure code validates PEP8"
-    script: flake8
+    script: flake8 "$JOBGRAPH_ROOT_DIR"
 
 flynt:
     description: "Run `flynt` to ensure f-strings are remain the only way to interpolate strings"
-    script: flynt --fail-on-change --dry-run .
+    script: flynt --fail-on-change --dry-run "$JOBGRAPH_ROOT_DIR"
 
 isort:
     description: "Run `isort` to ensure python import statements are well ordered"
-    script: isort --check --diff .
+    script: isort --check --diff "$JOBGRAPH_ROOT_DIR"
 
 pyupgrade:
     description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
-    script: pyupgrade --py310-plus $(find . -name '*.py')
+    script: pyupgrade --py310-plus $(find "$JOBGRAPH_ROOT_DIR" -name '*.py')
 
 unit:
     description: "Run `unit tests` to validate the latest changes"
