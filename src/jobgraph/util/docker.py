@@ -202,7 +202,8 @@ def stream_context_tar(
 
         elif not file_path.is_relative_to(docker_context_root):
             raise ValueError(
-                f'File "{file_path}" is not within the docker context root "{docker_context_root}"'
+                f'File "{file_path}" is not within the docker context root '
+                '"{docker_context_root}"'
             )
 
         if not file_path.is_file():

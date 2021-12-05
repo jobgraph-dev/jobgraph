@@ -47,7 +47,8 @@ def keymatch(attributes, target):
 
 def _match_run_on(key, run_on):
     """
-    Determine whether the given parameter is included in the corresponding `run-on-attribute`.
+    Determine whether the given parameter is included in the corresponding
+    `run-on-attribute`.
     """
     if "all" in run_on:
         return True
@@ -59,8 +60,8 @@ match_run_on_pipeline_sources = _match_run_on
 
 def match_run_on_git_branches(git_branch, run_on_git_branches):
     """
-    Determine whether the given project is included in the `run_on_git_branches` parameter.
-    Allows 'all'.
+    Determine whether the given project is included in the
+    `run_on_git_branches` parameter. Allows 'all'.
     """
     if "all" in run_on_git_branches:
         return True

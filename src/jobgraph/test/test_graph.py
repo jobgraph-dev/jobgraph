@@ -85,7 +85,8 @@ class TestGraph(unittest.TestCase):
         )
 
     def test_transitive_closure_multi_edges(self):
-        "transitive closure of a tree with multiple edges between nodes keeps those edges"
+        "transitive closure of a tree with multiple edges between nodes keeps"
+        "those edges"
         self.assertEqual(
             self.multi_edges.transitive_closure({"3"}),
             Graph(

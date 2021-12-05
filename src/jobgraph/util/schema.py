@@ -165,8 +165,8 @@ def check_schema(schema):
 
 class Schema(VSchema):
     """
-    Operates identically to voluptuous.Schema, but applying some jobgraph-specific checks
-    in the process.
+    Operates identically to voluptuous.Schema, but applying some
+    jobgraph-specific checks in the process.
     """
 
     def __init__(self, *args, **kwargs):

@@ -2,7 +2,9 @@
 # We can't migrate this configuration to pyproject.toml because flake8
 # doesn't support it. See https://github.com/PyCQA/flake8/issues/234
 
-# See also http://pep8.readthedocs.io/en/latest/intro.html#configuration
-max-line-length = 99
-# E203 is not PEP8 compliant per black. See https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#slices
+# black made the choice about the ideal line length.
+# See https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#line-length
+max-line-length = 88
+# E203 is not PEP8 compliant per black.
+# See https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#slices
 extend-ignore = E203

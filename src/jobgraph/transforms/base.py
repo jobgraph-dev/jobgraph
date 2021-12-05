@@ -113,7 +113,8 @@ class ValidateSchema:
             elif "label" in job:
                 error = f"In job {job['label']!r}:"
             elif "primary-dependency" in job:
-                error = f"In {config.stage} stage job for {job['primary-dependency'].label!r}:"
+                error = f"In {config.stage} stage job for "
+                "{job['primary-dependency'].label!r}:"
             else:
                 error = "In unknown job:"
             validate_schema(self.schema, job, error)

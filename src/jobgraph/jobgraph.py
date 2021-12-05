@@ -38,11 +38,13 @@ class JobGraph:
     def to_json(self):
         "Return a JSON-able object representing the job graph, as documented"
         named_links_dict = self.graph.named_links_dict()
-        # this dictionary may be keyed by label or by taskid, so let's just call it 'key'
+        # this dictionary may be keyed by label or by taskid, so let's just call
+        # it 'key'
         jobs = {}
         for key in self.graph.visit_postorder():
             jobs[key] = self.jobs[key].to_json()
-            # overwrite upstream_dependencies with the information in the jobgraph's edges.
+            # overwrite upstream_dependencies with the information in the
+            # jobgraph's edges.
             jobs[key]["upstream_dependencies"] = named_links_dict.get(key, {})
         return jobs
 

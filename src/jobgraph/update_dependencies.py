@@ -122,7 +122,8 @@ def _update_dockerfiles(root_dir):
         base_image = docker_file.baseimage
 
         # base_image may not be defined if it's generated within jobgraph.
-        # "common" is an "AS statement" that gets incorrectly parsed by DockerfileParser.
+        # "common" is an "AS statement" that gets incorrectly parsed by
+        # DockerfileParser.
         if base_image and base_image != "common":
             new_digest = fetch_image_digest_from_registry(base_image)
             new_base_image = set_digest(base_image, new_digest)

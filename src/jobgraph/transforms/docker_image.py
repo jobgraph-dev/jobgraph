@@ -139,7 +139,8 @@ def fill_common_values(config, jobs):
 
         job |= {
             "label": image_base_name,
-            "description": f"Build the docker image {image_base_name} for use by downstream jobs",
+            "description": f"Build the docker image {image_base_name} for "
+            "use by downstream jobs",
             "image": {"docker_image_reference": "<docker_in_docker>"},
             "runner_alias": "images",
         }
@@ -266,7 +267,10 @@ def define_whether_image_should_be_pushed_as_latest(config, jobs):
             script = job.setdefault("script", [])
             script.extend(
                 [
-                    'docker tag "$DOCKER_IMAGE_FULL_LOCATION" "$DOCKER_IMAGE_LATEST_LOCATION"',
+                    (
+                        'docker tag "$DOCKER_IMAGE_FULL_LOCATION" '
+                        '"$DOCKER_IMAGE_LATEST_LOCATION"'
+                    ),
                     'docker push "$DOCKER_IMAGE_LATEST_LOCATION"',
                 ]
             )

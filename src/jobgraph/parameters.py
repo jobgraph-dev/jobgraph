@@ -167,7 +167,8 @@ class Parameters(ReadOnlyDict):
 
         :return str: The URL displaying the given path.
         """
-        # For getting the file URL for git repositories, we only support a Github HTTPS remote
+        # For getting the file URL for git repositories, we only support a Github
+        # HTTPS remote
         repo = self["head_repository"]
         repo_providers = [
             repo_provider
@@ -181,7 +182,8 @@ class Parameters(ReadOnlyDict):
             )
         elif len(repo_providers) == 0:
             raise ParameterMismatch(
-                f"Don't know how to determine file URL for non-github or non-gitlabrepo: {repo}"
+                "Don't know how to determine file URL for non-github "
+                f"or non-gitlabrepo: {repo}"
             )
 
         repo_provider = repo_providers[0]
@@ -197,7 +199,8 @@ class Parameters(ReadOnlyDict):
             )
         else:
             raise ParameterMismatch(
-                "Identified github or gitlab URL but cannot determine file URL. Repo: {repo}"
+                "Identified github or gitlab URL but cannot determine file URL. "
+                "Repo: {repo}"
             )
 
         rev = self["head_rev"]

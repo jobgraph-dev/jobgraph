@@ -491,13 +491,14 @@ def image_digest(args):
 @argument(
     "--is-head-ref-protected",
     # This argument is written in an usual way for 2 reasons:
-    #   1. It's not a flag (as in we define it with `store_true`) because it's just easier
-    #      to keep this argument around no matter the value of $CI_COMMIT_REF_PROTECTED.
-    #   2. It doesn't store a boolean (which was originally the case) because functions
-    #      like resolve_keyed_by() only work with strings.
+    #   1. It's not a flag (as in we define it with `store_true`) because it's
+    #      just easier to keep this argument around no matter the value of
+    #      $CI_COMMIT_REF_PROTECTED.
+    #   2. It doesn't store a boolean (which was originally the case) because
+    #      functions like resolve_keyed_by() only work with strings.
     #
-    # This is why we convert a string which conveys boolean information into another
-    # string that stores 2 states.
+    # This is why we convert a string which conveys boolean information into
+    # another string that stores 2 states.
     type=lambda x: "protected" if strtobool(x) else "unprotected",
     dest="head_ref_protection",
     required=True,
@@ -562,7 +563,8 @@ def decision(options):
 
 @command(
     "update-dependencies",
-    help="Update all dependencies defined in jobgraph (Docker base images, python pacakges, etc.)",
+    help="Update all dependencies defined in jobgraph (Docker base images, "
+    "python packages, etc.)",
 )
 @argument(
     "--new-merge-request",

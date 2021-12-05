@@ -71,7 +71,8 @@ class TestTaskRefs(unittest.TestCase):
         )
 
     def test_multiple(self):
-        "resolve_docker_image_references resolves multiple references in the same string"
+        "resolve_docker_image_references resolves multiple references in the"
+        "same string"
         self.do(
             {
                 "multiple": {
@@ -83,18 +84,20 @@ class TestTaskRefs(unittest.TestCase):
         )
 
     def test_embedded(self):
-        "resolve_docker_image_references resolves ebmedded references"
+        "resolve_docker_image_references resolves embedded references"
         self.do(
             {
                 "embedded": {
-                    "docker_image_reference": "stuff before <image_reference3> stuff after"
+                    "docker_image_reference": "stuff before <image_reference3> "
+                    "stuff after"
                 }
             },
             {"embedded": "stuff before image3 stuff after"},
         )
 
     def test_multikey(self):
-        "resolve_docker_image_references is ignored when there is another key in the dict"
+        "resolve_docker_image_references is ignored when there is another key"
+        "in the dict"
         self.do(
             {
                 "escape": {
@@ -111,7 +114,8 @@ class TestTaskRefs(unittest.TestCase):
         )
 
     def test_invalid(self):
-        "resolve_docker_image_references raises a KeyError on reference to an invalid task"
+        "resolve_docker_image_references raises a KeyError on reference to an"
+        "invalid task"
         self.assertRaisesRegex(
             KeyError,
             'job "subject" has no docker image named "no-such"',

@@ -22,7 +22,8 @@ def _recurse(val, param_fns):
 
 
 def resolve_timestamps(now, task_def):
-    """Resolve all instances of `{'relative-datestamp': '..'}` in the given task definition"""
+    """Resolve all instances of `{'relative-datestamp': '..'}` in the given
+    task definition"""
     return _recurse(
         task_def,
         {

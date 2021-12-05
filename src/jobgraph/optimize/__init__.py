@@ -136,7 +136,8 @@ def _log_optimization(verb, opt_counts):
 
 def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
     """
-    Implement the "Removing Jobs" phase, returning a set of job labels of all removed jobs.
+    Implement the "Removing Jobs" phase, returning a set of job labels of all
+    removed jobs.
     """
     opt_counts = defaultdict(int)
     removed = set()
@@ -213,7 +214,8 @@ def get_subgraph(
         )
 
     #  drop edges that are no longer entirely in the job graph
-    #   (note that this omits edges to replaced jobs, but they are still in job.dependnecies)
+    #   (note that this omits edges to replaced jobs, but they are still
+    #    in job.dependencies)
     remaining_edges = {
         (left, right, name)
         for (left, right, name) in target_job_graph.graph.edges

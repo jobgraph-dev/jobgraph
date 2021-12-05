@@ -88,7 +88,7 @@ def _get_container_registry_token(image_data):
         )
 
     params = {
-        "scope": f"repository:{image_data['namespace']}/{image_data['image_name']}:pull",
+        "scope": f"repository:{image_data['namespace']}/{image_data['image_name']}:pull",  # noqa: E501
     }
     params |= auth_config.get("params", {})
     response = session.get(auth_config["endpoint"], params=params)

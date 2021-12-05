@@ -107,7 +107,8 @@ class GitRepository(Repository):
         matches = _LS_REMOTE_PATTERN.search(output)
         if not matches:
             raise RuntimeError(
-                f'Could not find the main branch of remote repository "{remote}". Got: {output}'
+                f'Could not find the main branch of remote repository "{remote}". '
+                "Got: {output}"
             )
 
         short_branch_name = matches.group("branch_name")
