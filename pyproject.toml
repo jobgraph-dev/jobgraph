@@ -5,6 +5,7 @@ target-version = ["py39"]
 [tool.isort]
 force_grid_wrap = 0
 include_trailing_comma = true
+known_first_party = ["jobgraph"]
 line_length = 88
 multi_line_output = 3
 use_parentheses = true
