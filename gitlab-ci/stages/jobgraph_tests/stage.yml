@@ -12,6 +12,9 @@ jobs_from:
 - yaml.yml
 
 job_defaults:
+    before_script:
+    # Needed so linters pick the Gitlab CI configuration stored in that folder
+    - cd "$JOBGRAPH_ROOT_DIR"
     runner_alias: t-linux
     timeout: 3 minutes
     variables:

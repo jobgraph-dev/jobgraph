@@ -9,6 +9,7 @@ from jobgraph.docker import get_image_full_location_with_digest
 from jobgraph.paths import (
     BOOTSTRAP_DIR,
     GITLAB_CI_DIR,
+    JOBGRAPH_ROOT_DIR,
     get_gitlab_ci_dir,
     get_gitlab_ci_yml_path,
     get_stages_dir,
@@ -208,6 +209,12 @@ def generate_tests_stage(cwd):
             "    image: {in_tree: python_test}\n": '    image: {"docker_image_reference": "<jobgraph_tests>"}\n',  # noqa: E501
         },
     )
+
+    for lint_config_file in (".flake8", ".yamllint", "pyproject.toml"):
+        shutil.copy(
+            JOBGRAPH_ROOT_DIR / lint_config_file,
+            get_gitlab_ci_dir(root_dir=cwd) / lint_config_file,
+        )
 
 
 def _copy_and_modify_stage(
