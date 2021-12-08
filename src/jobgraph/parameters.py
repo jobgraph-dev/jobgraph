@@ -246,7 +246,7 @@ def _determine_base_rev(repo, kwargs):
         # from getting the remote repository of the kwargs["head_ref"]
         # branch. Thus, we have to rely on the fact that "origin" is
         # the only remote
-        main_branch = repo.get_main_branch()
+        main_branch = repo.get_default_branch()
         kwargs["base_rev"] = repo.find_first_common_revision(
             main_branch, kwargs["head_rev"]
         )

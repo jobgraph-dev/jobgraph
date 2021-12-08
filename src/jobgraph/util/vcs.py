@@ -102,12 +102,31 @@ class GitRepository(Repository):
     def tracked_files(self):
         return {Path(file) for file in self.run("ls-files").splitlines()}
 
-    def get_main_branch(self, remote=DEFAULT_REMOTE_NAME, short_format=False):
+    def get_default_branch(self, remote=DEFAULT_REMOTE_NAME, short_format=False):
+        try:
+            # This call works if you have (network) access to the repo
+            return self._get_default_branch_from_remote_query(remote, short_format)
+        except subprocess.CalledProcessError:
+            pass
+
+        try:
+            # this one works if the current repo was cloned from an existing
+            # repo elsewhere
+            return self._get_default_branch_from_cloned_metadata(remote, short_format)
+        except subprocess.CalledProcessError:
+            pass
+
+        # this one is the last resort in case the remote is not accessible and
+        # the local repo is where `git init` was made
+        return self._guess_default_branch(remote, short_format)
+
+    def _get_default_branch_from_remote_query(self, remote, short_format):
+        # This function requires network access to the repo
         output = self.run("ls-remote", "--symref", remote, "HEAD")
         matches = _LS_REMOTE_PATTERN.search(output)
         if not matches:
             raise RuntimeError(
-                f'Could not find the main branch of remote repository "{remote}". '
+                f'Could not find the default branch of remote repository "{remote}". '
                 "Got: {output}"
             )
 
@@ -115,6 +134,25 @@ class GitRepository(Repository):
         if short_format:
             return short_branch_name
         return f"{remote}/{short_branch_name}"
+
+    def _get_default_branch_from_cloned_metadata(self, remote, short_format):
+        output = self.run("rev-parse", "--abbrev-ref", f"{remote}/HEAD").strip()
+        if short_format:
+            return "/".join(output.split("/")[1:])
+        return output
+
+    def _guess_default_branch(self, remote, short_format):
+        branches = [
+            line.strip()
+            for line in self.run("branch", "--all", "--no-color").splitlines()
+        ]
+        for candidate_branch in ("main", "master"):
+            if f"remotes/{remote}/{candidate_branch}" in branches:
+                if short_format:
+                    return candidate_branch
+                return f"{remote}/{candidate_branch}"
+
+        raise RuntimeError(f"Unable to find default branch. Got: {branches}")
 
     def get_url(self, remote=DEFAULT_REMOTE_NAME):
         return self.run("remote", "get-url", remote).strip()

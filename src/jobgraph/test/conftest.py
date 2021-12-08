@@ -91,7 +91,7 @@ class FakeRepo:
     def does_commit_exist_locally(*args, **kwargs):
         return True
 
-    def get_main_branch(*args, **kwargs):
+    def get_default_branch(*args, **kwargs):
         return "main"
 
     def find_first_common_revision(*args, **kwargs):
