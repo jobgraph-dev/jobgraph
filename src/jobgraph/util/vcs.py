@@ -236,4 +236,4 @@ def get_repository(path):
     if os.path.exists(os.path.join(path, ".git")):
         return GitRepository(path)
 
-    raise RuntimeError("Current directory is not a git repository")
+    raise RuntimeError('"{path}" is not the root of a git repository')
