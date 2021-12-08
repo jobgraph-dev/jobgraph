@@ -617,15 +617,25 @@ def update_depdencies(options):
 @argument(
     "--jobgraph-bot-username",
     required=True,
-    help="Gitlab username that will setup repository secrets to let jobgraph update "
-    "Gitlab CI schedules. Username must be the owner of the supplied token. Gitlab "
-    "user must have at least the `maintainer` role.",
+    help="Account that will regularly update jobgraph.",
 )
 @argument(
     "--jobgraph-bot-gitlab-token",
     required=True,
     help="Gitlab token that let jobgraph update Gitlab CI schedules based on a file "
     "stored on the repo an monitored by jobgraph. Token must have the `api` scope",
+)
+@argument(
+    "--maintainer-username",
+    required=True,
+    help="Gitlab username that will setup repository secrets to let jobgraph update "
+    "Gitlab CI schedules. Username must be the owner of the supplied token. Gitlab "
+    "user must have at least the `maintainer` role.",
+)
+@argument(
+    "--maintainer-gitlab-token",
+    required=True,
+    help="Gitlab token owned by the maintainer",
 )
 def bootstrap(options):
     from jobgraph.bootstrap import bootstrap

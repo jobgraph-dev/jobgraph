@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shutil
@@ -18,12 +19,21 @@ from jobgraph.paths import (
 from jobgraph.util.terraform import terraform_apply, terraform_init
 from jobgraph.util.vcs import get_repository
 
+logger = logging.getLogger(__name__)
+
 
 def bootstrap(
-    gitlab_project_id, gitlab_root_url, jobgraph_bot_username, jobgraph_bot_gitlab_token
+    gitlab_project_id,
+    gitlab_root_url,
+    jobgraph_bot_username,
+    jobgraph_bot_gitlab_token,
+    maintainer_username,
+    maintainer_gitlab_token,
 ):
     cwd = Path.cwd()
     get_repository(cwd)  # Ensure we're at the root of a git repo
+    os.environ["CI_REGISTRY_USER"] = maintainer_username
+    os.environ["CI_REGISTRY_PASSWORD"] = maintainer_gitlab_token
     decision_image_full_location = get_image_full_location_with_digest(
         "decision", root_dir=GITLAB_CI_DIR
     )
@@ -32,15 +42,17 @@ def bootstrap(
     generate_config_yml(
         cwd, gitlab_project_id, gitlab_root_url, decision_image_full_location
     )
+    generate_schedules_stage(cwd)
+    generate_updates_stage(cwd)
+    generate_tests_stage(cwd)
     setup_repo_secrets(
         gitlab_project_id,
         gitlab_root_url,
         jobgraph_bot_username,
         jobgraph_bot_gitlab_token,
+        maintainer_username,
+        maintainer_gitlab_token,
     )
-    generate_schedules_stage(cwd)
-    generate_updates_stage(cwd)
-    generate_tests_stage(cwd)
 
 
 def copy_gitlab_ci_in_bootstrap_folder(cwd):
@@ -108,7 +120,12 @@ def generate_config_yml(
 
 
 def setup_repo_secrets(
-    gitlab_project_id, gitlab_root_url, jobgraph_bot_username, jobgraph_bot_gitlab_token
+    gitlab_project_id,
+    gitlab_root_url,
+    jobgraph_bot_username,
+    jobgraph_bot_gitlab_token,
+    maintainer_username,
+    maintainer_gitlab_token,
 ):
     terraform_dir = get_terraform_dir(root_dir=BOOTSTRAP_DIR)
 
@@ -116,8 +133,8 @@ def setup_repo_secrets(
         terraform_dir=terraform_dir,
         gitlab_project_id=gitlab_project_id,
         gitlab_root_url=gitlab_root_url,
-        terraform_username=jobgraph_bot_username,
-        terraform_password=jobgraph_bot_gitlab_token,
+        terraform_username=maintainer_username,
+        terraform_password=maintainer_gitlab_token,
         terraform_state_name="jobgraph-bootstrap",
         upgrade_providers=False,
     )
@@ -125,8 +142,13 @@ def setup_repo_secrets(
     apply_variables = {
         "GITLAB_PROJECT_ID": gitlab_project_id,
         "JOBGRAPH_BOT_GITLAB_TOKEN": jobgraph_bot_gitlab_token,
+        "MAINTAINER_GITLAB_TOKEN": maintainer_gitlab_token,
     }
     terraform_apply(terraform_dir, **apply_variables)
+    logging.info(
+        f"Please add the SSH public key above to {jobgraph_bot_username}'s "
+        "keys (https://gitlab.com/-/profile/keys)"
+    )
 
 
 def generate_schedules_stage(cwd):
