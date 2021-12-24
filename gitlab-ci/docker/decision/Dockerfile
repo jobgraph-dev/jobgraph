@@ -13,14 +13,14 @@ USER root
 # The second one are runtime dependencies
 RUN apk add --no-cache \
     build-base~=0.5 \
-    curl~=7.79 \
-    gzip~=1.10 \
+    curl~=7.80 \
+    gzip~=1.11 \
     tar~=1.34 \
     \
     bash~=5.1 \
     docker~=20.10 \
     jq~=1.6 \
-    openssh~=8.6
+    openssh~=8.8
 
 USER "$RUNNER_USER"
 
