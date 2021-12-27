@@ -80,5 +80,6 @@ RUN pip install --prefix="$RUNNER_HOME/.local" --no-cache-dir --require-hashes -
 COPY --chown="$RUNNER_USER:$RUNNER_USER" src "$JOBGRAPH_DIR/src"
 COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci "$JOBGRAPH_DIR/gitlab-ci"
 COPY --chown="$RUNNER_USER:$RUNNER_USER" bootstrap "$JOBGRAPH_DIR/bootstrap"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" terraform "$JOBGRAPH_DIR/terraform"
 COPY --chown="$RUNNER_USER:$RUNNER_USER" .gitlab-ci.yml setup.py python-version.txt .flake8 .yamllint pyproject.toml "$JOBGRAPH_DIR"/
 RUN  pip install --prefix="$RUNNER_HOME/.local" --no-cache-dir --no-deps --editable "$JOBGRAPH_DIR"
