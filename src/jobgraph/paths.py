@@ -2,6 +2,7 @@ from pathlib import Path
 
 _SRC_DIR = Path(__file__).parent.parent.resolve()
 JOBGRAPH_ROOT_DIR = _SRC_DIR.parent
+JOBGRAPH_ROOT_DIR_IN_DOCKER = Path("/jobgraph")
 GITLAB_CI_DIR = JOBGRAPH_ROOT_DIR / "gitlab-ci"
 BOOTSTRAP_DIR = JOBGRAPH_ROOT_DIR / "bootstrap"
 

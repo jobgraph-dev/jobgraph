@@ -6,6 +6,8 @@ from copy import copy
 from pathlib import Path
 from shutil import which
 
+from jobgraph.paths import JOBGRAPH_ROOT_DIR_IN_DOCKER
+
 
 class Repository(ABC):
     def __init__(self, path):
@@ -229,11 +231,74 @@ class GitRepository(Repository):
             raise
 
 
+class JobgraphInDockerImageFakeGitRepository(Repository):
+    tool = "git"
+
+    @property
+    def head_ref(self):
+        return NULL_GIT_COMMIT
+
+    @property
+    def base_ref(self):
+        return NULL_GIT_COMMIT
+
+    @property
+    def branch(self):
+        return NULL_GIT_COMMIT
+
+    def switch_branch(self, branch, force_create=False):
+        pass
+
+    @property
+    def tracked_files(self):
+        return sorted(list(Path(self.path).glob("**/*")))
+
+    def get_default_branch(self, *args, **kwargs):
+        return NULL_GIT_COMMIT
+
+    def get_url(self, *args, **kwargs):
+        return "https://gitlab.com/JohanLorenzo/jobgraph"
+
+    def set_push_url(self, *args, **kwargs):
+        pass
+
+    def get_commit_message(self, revision=None):
+        return "No commit message"
+
+    def working_directory_clean(self, *args, **kwargs):
+        pass
+
+    def update(self, ref):
+        pass
+
+    def get_list_of_changed_files(self, *args, **kwargs):
+        return []
+
+    def find_first_common_revision(self, *args, **kwargs):
+        return NULL_GIT_COMMIT
+
+    def get_file_at_given_revision(self, revision, file_path):
+        with open(file_path) as f:
+            return f.read().strip()
+
+    def commit(self, *args, **kwargs):
+        pass
+
+    def push(self, *args, **kwargs):
+        pass
+
+    def does_commit_exist_locally(self, *args, **kwargs):
+        return False
+
+
 def get_repository(path):
     """Get a repository object for the repository at `path`.
     If `path` is not a known VCS repository, raise an exception.
     """
-    if os.path.exists(os.path.join(path, ".git")):
+    path_ = Path(path)
+    if (path_ / ".git").exists():
         return GitRepository(path)
+    elif path_ == JOBGRAPH_ROOT_DIR_IN_DOCKER:
+        return JobgraphInDockerImageFakeGitRepository(path)
 
     raise RuntimeError(f'"{path}" is not the root of a git repository')
