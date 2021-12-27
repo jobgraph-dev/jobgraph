@@ -157,6 +157,7 @@ def generate_updates_stage(cwd):
         ],
         lines_to_replace={
             "        image: {in_tree: decision}\n": '        image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
+            '        - pip install --prefix "/runner/.local" --no-deps --editable "$CI_PROJECT_DIR"\n': "",  # noqa: E501
             "            --git-committer-email='10283475-jobgraph-bot@users.noreply.gitlab.com'\n": "            --git-committer-email='CHANGE-THIS@EMAIL.ADDRESS'\n",  # noqa: E501
         },
     )
