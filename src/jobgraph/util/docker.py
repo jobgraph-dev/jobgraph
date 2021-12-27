@@ -164,9 +164,6 @@ def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args)
             if file_argument.startswith("--chown"):
                 continue
 
-            if file_argument == ".":
-                file_argument = "**/*"
-
             for path in Path(docker_context_root).glob(file_argument):
                 if not path.exists():
                     raise ValueError(f"path does not exist: {path}")

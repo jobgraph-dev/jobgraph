@@ -67,10 +67,9 @@ COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/decision/known_hosts "
 ENV JOBGRAPH_DIR='/jobgraph'
 
 COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/ "$JOBGRAPH_DIR"/requirements/
-# `--user` doesn't work when providing `pyproject.toml` (down below). We're using `--prefix` as a workaround.
-# Source: https://github.com/pypa/pip/issues/7953#issuecomment-954755720
-RUN pip install --prefix="$RUNNER_HOME/.local" --no-cache-dir --require-hashes --requirement "$JOBGRAPH_DIR"/requirements/base.txt
+RUN pip install --user --no-cache-dir --require-hashes --requirement "$JOBGRAPH_DIR"/requirements/base.txt
 
 
-COPY --chown="$RUNNER_USER:$RUNNER_USER" . "$JOBGRAPH_DIR"
-RUN  pip install --prefix="$RUNNER_HOME/.local" --no-cache-dir --no-deps --editable "$JOBGRAPH_DIR"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" src "$JOBGRAPH_DIR/src"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" setup.py python-version.txt "$JOBGRAPH_DIR"/
+RUN  pip install --user --no-cache-dir --no-deps --editable "$JOBGRAPH_DIR"
