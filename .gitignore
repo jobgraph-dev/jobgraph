@@ -1,6 +1,5 @@
 # Project-specific exclusions
 artifacts/
-docker-contexts/
 
 
 # Byte-compiled / optimized / DLL files
