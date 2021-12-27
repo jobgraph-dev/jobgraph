@@ -65,10 +65,20 @@ COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/decision/known_hosts "
 
 ENV JOBGRAPH_DIR='/jobgraph'
 
+USER root
+# The wheel binary is part of the base python docker image and we reinstall it with pip down below
+RUN pip uninstall --yes wheel
+
+USER "$RUNNER_USER"
+
 COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/ "$JOBGRAPH_DIR"/requirements/
-RUN pip install --user --no-cache-dir --require-hashes --requirement "$JOBGRAPH_DIR"/requirements/base.txt
+# `--user` doesn't work when providing `pyproject.toml` (down below). We're using `--prefix` as a workaround.
+# Source: https://github.com/pypa/pip/issues/7953#issuecomment-954755720
+RUN pip install --prefix="$RUNNER_HOME/.local" --no-cache-dir --require-hashes --requirement "$JOBGRAPH_DIR"/requirements/base.txt
 
 
 COPY --chown="$RUNNER_USER:$RUNNER_USER" src "$JOBGRAPH_DIR/src"
-COPY --chown="$RUNNER_USER:$RUNNER_USER" setup.py python-version.txt "$JOBGRAPH_DIR"/
-RUN  pip install --user --no-cache-dir --no-deps --editable "$JOBGRAPH_DIR"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci "$JOBGRAPH_DIR/gitlab-ci"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" bootstrap "$JOBGRAPH_DIR/bootstrap"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" .gitlab-ci.yml setup.py python-version.txt .flake8 .yamllint pyproject.toml "$JOBGRAPH_DIR"/
+RUN  pip install --prefix="$RUNNER_HOME/.local" --no-cache-dir --no-deps --editable "$JOBGRAPH_DIR"
