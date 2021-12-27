@@ -141,7 +141,7 @@ def generate_schedules_stage(cwd):
             "# at your own risks.\n",
         ],
         lines_to_replace={
-            "    image: {in_tree: decision}\n": '    image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
+            "    image: {in_tree: jobgraph}\n": '    image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
             "        TF_ROOT: ${CI_PROJECT_DIR}/terraform\n": "        TF_ROOT: /jobgraph/terraform\n",  # noqa: E501
         },
     )
@@ -156,7 +156,7 @@ def generate_updates_stage(cwd):
             "# Modify this current file at your own risks.\n",
         ],
         lines_to_replace={
-            "        image: {in_tree: decision}\n": '        image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
+            "        image: {in_tree: jobgraph}\n": '        image: {docker_image_reference: "<jobgraph>"}\n',  # noqa: E501
             '        - pip install --prefix "/runner/.local" --no-deps --editable "$CI_PROJECT_DIR"\n': "",  # noqa: E501
             "            --git-committer-email='10283475-jobgraph-bot@users.noreply.gitlab.com'\n": "            --git-committer-email='CHANGE-THIS@EMAIL.ADDRESS'\n",  # noqa: E501
         },

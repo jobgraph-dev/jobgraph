@@ -8,7 +8,7 @@ transforms:
 job_defaults:
     before_script:
     - cd "${TF_ROOT}"
-    image: {in_tree: decision}
+    image: {in_tree: jobgraph}
     optimization:
         skip_unless_changed:
         - gitlab-ci/schedules.yml

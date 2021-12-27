@@ -24,16 +24,16 @@ _IMAGE_DATA_PER_FULL_LOCATION = {
         "registry": "index.docker.io",
         "tag": "3.10-alpine",
     },
-    "registry.gitlab.com/johanlorenzo/jobgraph/decision:latest@sha256:92dbab416ab1538e2df8daf6880f2383bb1719d7e73d1954c0d19d4054d687b9": {  # noqa E501
+    "registry.gitlab.com/johanlorenzo/jobgraph/jobgraph:latest@sha256:92dbab416ab1538e2df8daf6880f2383bb1719d7e73d1954c0d19d4054d687b9": {  # noqa E501
         "digest": "sha256:92dbab416ab1538e2df8daf6880f2383bb1719d7e73d1954c0d19d4054d687b9",  # noqa E501
-        "image_name": "decision",
+        "image_name": "jobgraph",
         "namespace": "johanlorenzo/jobgraph",
         "registry": "registry.gitlab.com",
         "tag": "latest",
     },
     "registry.Gitlab.com/JohanLorenzo/jobgraph/Decision:20a3d0f40f466fcbe8f741bd4ce8f7a6843dc2fd4a97858a1b3c83eeb283b015": {  # noqa E501
         "digest": "",
-        "image_name": "decision",
+        "image_name": "jobgraph",
         "namespace": "johanlorenzo/jobgraph",
         "registry": "registry.gitlab.com",
         "tag": "20a3d0f40f466fcbe8f741bd4ce8f7a6843dc2fd4a97858a1b3c83eeb283b015",

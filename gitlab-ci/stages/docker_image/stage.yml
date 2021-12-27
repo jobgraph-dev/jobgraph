@@ -21,7 +21,7 @@ job_defaults:
 
 jobs:
     python_base: {}
-    decision:
+    jobgraph:
         parent: python_base
     python_test:
         parent: python_base
