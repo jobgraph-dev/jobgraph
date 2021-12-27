@@ -13,11 +13,11 @@ USER root
 # The second one are runtime dependencies
 RUN apk add --no-cache \
     build-base~=0.5 \
-    curl~=7.80 \
     gzip~=1.11 \
     tar~=1.34 \
     \
     bash~=5.1 \
+    curl~=7.80 \
     docker~=20.10 \
     jq~=1.6 \
     openssh~=8.8
@@ -49,7 +49,6 @@ USER root
 # Remove build dependencies
 RUN rm "$TFENV_SHA_FILE" "$TERRAFORM_VERSION_FILE" && \
     apk del build-base \
-    curl \
     gzip \
     tar
 
