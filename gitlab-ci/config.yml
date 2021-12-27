@@ -3,8 +3,7 @@ docker:
     external_images:
         docker_in_docker: docker:dind@sha256:4e04836731b7100e8bd5e0b35756f53d0b6211ddb3cc7ec326ae3640adcfa004
         hadolint: hadolint/hadolint:latest-alpine@sha256:6c4b7c23f96339489dd35f21a711996d7ce63047467a9a562287748a03ad5242
-        # These are actually internal images but they're used by bootstrap
-        jobgraph: registry.gitlab.com/johanlorenzo/jobgraph/decision:latest@sha256:d7eec904d4590b18d5c006e6c54c490a2b0dfabccfbb0012775b9423b903ac28
+        jobgraph: registry.gitlab.com/johanlorenzo/jobgraph/decision:latest@sha256:a967a22d387246a8c6fe3a968bb73ea8527a5d023a0527c5dadb521f9435b3cc
         jobgraph_tests: registry.gitlab.com/johanlorenzo/jobgraph/python_test:latest@sha256:01c66ecdcbc8dad02ffb17f17e5858e43377d66ff29c6ff27dd63d9795246a07
 gitlab:
     project_id: 30264497
