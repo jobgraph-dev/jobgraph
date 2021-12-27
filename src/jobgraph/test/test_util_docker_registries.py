@@ -31,7 +31,7 @@ _IMAGE_DATA_PER_FULL_LOCATION = {
         "registry": "registry.gitlab.com",
         "tag": "latest",
     },
-    "registry.Gitlab.com/JohanLorenzo/jobgraph/Decision:20a3d0f40f466fcbe8f741bd4ce8f7a6843dc2fd4a97858a1b3c83eeb283b015": {  # noqa E501
+    "registry.Gitlab.com/JohanLorenzo/jobgraph/Jobgraph:20a3d0f40f466fcbe8f741bd4ce8f7a6843dc2fd4a97858a1b3c83eeb283b015": {  # noqa E501
         "digest": "",
         "image_name": "jobgraph",
         "namespace": "johanlorenzo/jobgraph",
