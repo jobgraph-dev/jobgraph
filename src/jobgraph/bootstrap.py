@@ -1,15 +1,12 @@
 import logging
 import os
-import re
 import shutil
 from copy import copy
 from pathlib import Path
 
 from jobgraph.config import GraphConfig, load_graph_config
-from jobgraph.docker import get_image_full_location_with_digest
 from jobgraph.paths import (
     BOOTSTRAP_DIR,
-    GITLAB_CI_DIR,
     JOBGRAPH_ROOT_DIR,
     get_gitlab_ci_dir,
     get_gitlab_ci_yml_path,
@@ -34,14 +31,9 @@ def bootstrap(
     get_repository(cwd)  # Ensure we're at the root of a git repo
     os.environ["CI_REGISTRY_USER"] = maintainer_username
     os.environ["CI_REGISTRY_PASSWORD"] = maintainer_gitlab_token
-    decision_image_full_location = get_image_full_location_with_digest(
-        "decision", root_dir=GITLAB_CI_DIR
-    )
     copy_gitlab_ci_in_bootstrap_folder(cwd)
-    generate_gitlab_ci_yml(cwd, decision_image_full_location)
-    generate_config_yml(
-        cwd, gitlab_project_id, gitlab_root_url, decision_image_full_location
-    )
+    generate_gitlab_ci_yml(cwd)
+    generate_config_yml(cwd, gitlab_project_id, gitlab_root_url)
     generate_schedules_stage(cwd)
     generate_updates_stage(cwd)
     generate_tests_stage(cwd)
@@ -68,7 +60,7 @@ def copy_gitlab_ci_in_bootstrap_folder(cwd):
         shutil.copy(path, target_path)
 
 
-def generate_gitlab_ci_yml(cwd, decision_image_full_location):
+def generate_gitlab_ci_yml(cwd):
     source_gitlab_ci_yml = get_gitlab_ci_yml_path()
 
     with open(source_gitlab_ci_yml) as f:
@@ -87,26 +79,14 @@ def generate_gitlab_ci_yml(cwd, decision_image_full_location):
         )
     ]
 
-    target_lines = [
-        re.sub(r"    image: (.+)$", f"    image: {decision_image_full_location}", line)
-        for line in target_lines
-    ]
-
     with open(get_gitlab_ci_yml_path(root_dir=cwd), "w") as f:
         f.writelines(target_lines)
 
 
-def generate_config_yml(
-    cwd, gitlab_project_id, gitlab_root_url, decision_image_full_location
-):
+def generate_config_yml(cwd, gitlab_project_id, gitlab_root_url):
     graph_config = load_graph_config()
     graph_config["gitlab"]["project_id"] = gitlab_project_id
     graph_config["gitlab"]["root_url"] = gitlab_root_url
-
-    graph_config["docker"]["external_images"]["jobgraph"] = decision_image_full_location
-    graph_config["docker"]["external_images"][
-        "jobgraph_tests"
-    ] = get_image_full_location_with_digest("python_test", root_dir=GITLAB_CI_DIR)
 
     graph_config["jobgraph"][
         "decision_parameters"
