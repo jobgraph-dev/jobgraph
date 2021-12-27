@@ -60,17 +60,16 @@ FROM common
 
 COPY --from=builder / /
 
-ENV JOBGRAPH_DIR='/jobgraph'
-
-COPY --chown="$RUNNER_USER:$RUNNER_USER" src "$JOBGRAPH_DIR/src"
-COPY --chown="$RUNNER_USER:$RUNNER_USER" setup.py python-version.txt "$JOBGRAPH_DIR"/
-COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/base.in requirements/base.txt "$JOBGRAPH_DIR"/requirements/
-RUN pip install --user --no-cache-dir --require-hashes --requirement "$JOBGRAPH_DIR"/requirements/base.txt && \
-    pip install --user --no-cache-dir --no-deps --editable "$JOBGRAPH_DIR"
-
-
 ENV SSH_DIR="$RUNNER_HOME/.ssh"
 RUN mkdir -p "$SSH_DIR" && chmod 700 "$SSH_DIR"
 COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/decision/known_hosts "$SSH_DIR/known_hosts"
 
-COPY --chown="$RUNNER_USER:$RUNNER_USER" terraform/*.tf "$JOBGRAPH_DIR"/terraform/
+ENV JOBGRAPH_DIR='/jobgraph'
+
+COPY --chown="$RUNNER_USER:$RUNNER_USER" requirements/ "$JOBGRAPH_DIR"/requirements/
+RUN pip install --user --no-cache-dir --require-hashes --requirement "$JOBGRAPH_DIR"/requirements/base.txt
+
+
+COPY --chown="$RUNNER_USER:$RUNNER_USER" src "$JOBGRAPH_DIR/src"
+COPY --chown="$RUNNER_USER:$RUNNER_USER" setup.py python-version.txt "$JOBGRAPH_DIR"/
+RUN  pip install --user --no-cache-dir --no-deps --editable "$JOBGRAPH_DIR"
