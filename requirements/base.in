@@ -10,4 +10,5 @@ redo
 requests
 requests_unixsocket
 slugid
+tomli<2 # TODO: Remove this line once black and pep517 don't have conflicting versions anymore
 voluptuous
