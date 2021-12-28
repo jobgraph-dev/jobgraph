@@ -1,6 +1,7 @@
 FROM python:3.10-alpine@sha256:affe0faa14e7553fc570beec3864e74b5e36f8c19b2bb49ae8ba79c0e9e7236e
 
-ENV RUNNER_USER='runner' \
+ENV DEFAULT_WORKDIR='/builds' \
+    RUNNER_USER='runner' \
     RUNNER_HOME='/runner'
 
 RUN mkdir -p "$RUNNER_HOME" && \
@@ -8,9 +9,9 @@ RUN mkdir -p "$RUNNER_HOME" && \
 
 # Gitlab CI usually clone the git repository under /builds.
 # That's why we're setting the default workdir there.
-RUN mkdir -p "/builds/" && \
-    chown -R "$RUNNER_USER:$RUNNER_USER" "/builds/"
-WORKDIR "/builds/"
+RUN mkdir -p "$DEFAULT_WORKDIR" && \
+    chown -R "$RUNNER_USER:$RUNNER_USER" "$DEFAULT_WORKDIR"
+WORKDIR "$DEFAULT_WORKDIR"
 
 RUN apk update && \
     apk add --no-cache --update git~=2.34

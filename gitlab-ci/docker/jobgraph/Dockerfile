@@ -27,6 +27,7 @@ USER "$RUNNER_USER"
 ENV TFENV_SHA_FILE="$RUNNER_HOME/tfenv.sha256" \
     TERRAFORM_VERSION_FILE="$RUNNER_HOME/.terraform-version"
 
+WORKDIR "$RUNNER_HOME"
 COPY --chown="$RUNNER_USER:$RUNNER_USER" gitlab-ci/docker/jobgraph/tfenv.sha256 "$TFENV_SHA_FILE"
 RUN TFENV_VERSION="$(sed -E 's/[0-9a-f]+  tfenv-(.+)\.tar\.gz/\1/' "$TFENV_SHA_FILE")" && \
     TFENV_ARCHIVE="$RUNNER_HOME/tfenv-$TFENV_VERSION.tar.gz" && \
@@ -35,6 +36,7 @@ RUN TFENV_VERSION="$(sed -E 's/[0-9a-f]+  tfenv-(.+)\.tar\.gz/\1/' "$TFENV_SHA_F
     mkdir -p "$TFENV_TARGET_DIR" && \
     tar xvf "$TFENV_ARCHIVE" --strip-components=1 --directory="$TFENV_TARGET_DIR" && \
     rm "$TFENV_ARCHIVE"
+WORKDIR "$DEFAULT_WORKDIR"
 
 COPY --chown="$RUNNER_USER:$RUNNER_USER" terraform/.terraform-version "$TERRAFORM_VERSION_FILE"
 RUN tfenv install && tfenv use
