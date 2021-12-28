@@ -21,7 +21,7 @@ The repository first needs to be cloned and then install the ``jobgraph``
 within the virtual environment.
 
 ```sh
-$ git clone https://gitlab.com/JohanLorenzo/jobgraph/
+$ git clone https://gitlab.com/jobgraph-dev/jobgraph/
 $ cd <location-where-jobgraph-has-been-cloned>
 $ mkvirtualenv jobgraph
 # ensure we get the development version of it locally to be able to work with it
