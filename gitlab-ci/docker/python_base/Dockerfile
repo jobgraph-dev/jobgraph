@@ -10,11 +10,14 @@ RUN apk update && \
     apk add --no-cache --update git~=2.34
 
 USER "$RUNNER_USER"
-WORKDIR "$RUNNER_HOME"
 ENV PATH="$RUNNER_HOME/.local/bin:$PATH" \
     USER="$RUNNER_USER"
 
-RUN mkdir -p "$RUNNER_HOME/.local/bin"
+RUN mkdir -p "$RUNNER_HOME/.local/bin" "/builds/"
+
+# Gitlab CI usually clone the git repository under /builds.
+# That's why we're setting the default workdir there.
+WORKDIR "/builds/"
 
 # Set default command to shell so that decision jobs can run other shell commands like `pip`.
 CMD ["/bin/ash", "--login"]
