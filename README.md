@@ -6,29 +6,29 @@ Make your Gitlab CI Pipelines scale up! Jobgraph lets you abstract complexity aw
 
 Jobgraph enables your Gitlab CI pipelines to:
  1. **scale up**  
- Jobgraph lets you define jobs dynamically based on the state of the repository and other external factors
+ *Jobgraph lets you define jobs dynamically based on the state of the repository and other external factors.*
  1. **be reproducible**  
- Jobgraph pins as many moving parts as possible
+ *Jobgraph pins as many moving parts as possible.*
  1. **get automatic (yet reproducible) updates**  
- Jobgraph ensure these pinned parts get regularly bumped
+ *Jobgraph ensure these pinned parts get regularly bumped.*
  1. **be debuggable more easily**  
- Jobgraph outputs exactly what jobs are going to be run and lets you hook a debugger if needed
+ *Jobgraph outputs exactly what jobs are going to be run and lets you hook a debugger if needed.*
  1. **avoid footguns**  
- Jobgraph uses exiting linters to highlight bad usages of Docker, Python, or yaml.
+ *Jobgraph uses exiting linters to highlight bad usages of Docker, Python, or yaml.*
 
 ## Is Jobgraph suited for your project?
 
 You would be interested in Jobgraph if:
  * **your pipelines don't always look the way you expected them to**  
- Jobgraph allows you to reproduce/debug one of its runs locally.
+ *Jobgraph allows you to reproduce/debug one of its runs locally.*
  * **your project fits in a sizable monorepo**  
- Jobgraph is able to generate complex Gitlab CI's pipelines that can't easily fit in a single `.gitlab-ci.yml` file
+ *Jobgraph is able to generate complex Gitlab CI's pipelines that can't easily fit in a single `.gitlab-ci.yml` file.*
  * **you had to generate a `.gitlab-ci.yml`**  
- Jobgraph takes this responsibility by leveraging Gitlab's [child pipeline](https://docs.gitlab.com/ee/ci/pipelines/parent_child_pipelines.html) feature.
+ *Jobgraph takes this responsibility by leveraging Gitlab's [child pipeline](https://docs.gitlab.com/ee/ci/pipelines/parent_child_pipelines.html) feature.*
  * **your CI uses your custom docker images**  
- Jobgraph makes these docker images part of the pipeline and rebuild them only when needed.
+ *Jobgraph makes these docker images part of the pipeline and rebuild them only when needed.*
  * **you don't want to manually manage job dependencies**  
- Jobgraph programmatically fulfills the `needs` of your Gitlab CI jobs.
+ *Jobgraph programmatically fulfills the `needs` of your Gitlab CI jobs.*
 
 ## Origin
 
