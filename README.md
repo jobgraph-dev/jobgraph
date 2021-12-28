@@ -30,6 +30,26 @@ You would be interested in Jobgraph if:
  * **you don't want to manually manage job dependencies**  
  *Jobgraph programmatically fulfills the `needs` of your Gitlab CI jobs.*
 
+## Usage
+
+### First setup
+
+ 1. Ensure you are the maintainer of the Gitlab project you want to put jobgraph on. Create a [personal access token](https://gitlab.com/-/profile/personal_access_tokens) with the `api` scope and an expiry date in the near future.
+ 1. Create a dedicated user account for a jobgraph bot. Give it the `developer` role. *Note: This account will handle scheduled pipelines - they require the `developer` role.*
+ 1. Get the Gitlab project ID.
+ 1. From the root of your repository, substitute the variables down below, then run the following command:
+
+```sh
+docker run \
+    --pull=always \
+    --volume "$(pwd):/builds" \
+    registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph \
+    jobgraph bootstrap --gitlab-project-id "$GITLAB_PROJECT_ID" --jobgraph-bot-username "$JOBGRAPH_BOT_USERNAME" --jobgraph-bot-gitlab-token "$JOBGRAPH_BOT_GITLAB_TOKEN" --maintainer-username "$MAINTAINER_USERNAME" --maintainer-gitlab-token "$MAINTAINER_GITLAB_TOKEN"
+```
+
+ 5. Add the generated SSH key to the bot account.
+ 6. Commit the changes and pushes them to the main branch.
+
 ## Origin
 
 Jobgraph is a fork of [Mozilla's Taskgraph](https://hg.mozilla.org/ci/taskgraph/), which makes Firefox ships on a daily basis. Taskgraph supports another Continuous Integration (CI) system: Taskcluster. Both of them cope with CI pipelines containing 10,000 jobs for a single release. Jobgraph aims to bring Gitlab CI to this level of complexity 🙂
@@ -41,20 +61,17 @@ See this [blogpost](https://johanlorenzo.github.io/blog/2019/10/24/taskgraph-is-
 
 *// TODO: Convert this blog post to the jobgraph lingo.*
 
-### Usage
+## Contribute
 
-The repository first needs to be cloned and then install the ``jobgraph``
-within the virtual environment.
+### Install the source code
+
+Install Python 3.10. Then:
 
 ```sh
-$ git clone https://gitlab.com/jobgraph-dev/jobgraph/
-$ cd <location-where-jobgraph-has-been-cloned>
-$ mkvirtualenv jobgraph
-# ensure we get the development version of it locally to be able to work with it
-$ (jobgraph) pip install -e .
-# now one can change directory to the github project that needs jobgraph, e.g. Fenix
-$ (jobgraph) cd <location-where-fenix-has-been-cloned>
-$ (jobgraph) jobgraph --help
+git clone https://gitlab.com/jobgraph-dev/jobgraph/
+cd jobgraph
+python3 -m virtualenv venv
+source venv/bin/activate
+pip install -e .
+jobgraph --help
 ```
-
-TODO: Write the rest of the documentation
