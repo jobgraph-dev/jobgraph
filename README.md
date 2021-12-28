@@ -37,7 +37,9 @@ Jobgraph is a fork of [Mozilla's Taskgraph](https://hg.mozilla.org/ci/taskgraph/
 ## Jobgraph at high-level
 
 
-See this [blogpost](https://johanlorenzo.github.io/blog/2019/10/24/taskgraph-is-now-deployed-to-the-biggest-mozilla-mobile-projects.html) which summarizes Taskgraph's basic usage and functionalities. The blog post predates Jobgraph was a thing but the concepts are the same.
+See this [blogpost](https://johanlorenzo.github.io/blog/2019/10/24/taskgraph-is-now-deployed-to-the-biggest-mozilla-mobile-projects.html) which summarizes Taskgraph's basic usage and functionalities. The blog post predates Jobgraph but the concepts are the same.
+
+*// TODO: Convert this blog post to the jobgraph lingo.*
 
 ### Usage
 
