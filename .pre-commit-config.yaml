@@ -58,3 +58,8 @@ repos:
   - id: terraform_fmt
   - id: terraform_tflint
   - id: terraform_tfsec
+- repo: https://github.com/pdoc3/pdoc
+  rev: "0.10.0"
+  hooks:
+  - id: pdoc
+    args: [--html]

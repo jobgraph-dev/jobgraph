@@ -17,7 +17,8 @@ jobs:
             skip_unless_changed:
             - "**/*.py"
             - "**/*.md"
+        reinstall_jobgraph: true
         runner_alias: t-linux
         script:
-        - pdoc3 --html "$CI_PROJECT_DIR"
+        - pdoc3 --html jobgraph
         timeout: 3 minutes

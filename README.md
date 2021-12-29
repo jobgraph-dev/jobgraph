@@ -1,6 +1,5 @@
 # Jobgraph
 
-
 Make your Gitlab CI Pipelines scale up! Jobgraph lets you abstract complexity away while making sure your pipelines stand the test of time.
 
 ## What does Jobgraph do?
