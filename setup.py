@@ -12,11 +12,16 @@ with open(os.path.join(root_dir, "requirements", "base.in")) as fp:
 with open(os.path.join(root_dir, "python-version.txt")) as fp:
     python_version = fp.read().strip()
 
+with open(os.path.join(root_dir, "README.md")) as fp:
+    long_description = fp.read()
+
 
 setup(
     name="gitlabci-jobgraph",
     version="1.0.0",
     description="Build Gitlab CI jobgraph",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="TODO",
     packages=find_packages("src"),
     package_dir={"": "src"},
