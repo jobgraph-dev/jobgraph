@@ -1,3 +1,8 @@
+"""
+.. include:: ../../README.md
+"""
+
+
 # Maximum number of dependencies a single job can have.
 MAX_UPSTREAM_DEPENDENCIES = 50
 

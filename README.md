@@ -5,6 +5,7 @@ Make your Gitlab CI Pipelines scale up! Jobgraph lets you abstract complexity aw
 ## What does Jobgraph do?
 
 Jobgraph enables your Gitlab CI pipelines to:
+
  1. **scale up**  
  *Jobgraph lets you define jobs dynamically based on the state of the repository and other external factors.*
  1. **be reproducible**  
@@ -19,6 +20,7 @@ Jobgraph enables your Gitlab CI pipelines to:
 ## Is Jobgraph suited for your project?
 
 You would be interested in Jobgraph if:
+
  * **your pipelines don't always look the way you expected them to**  
  *Jobgraph allows you to reproduce/debug one of its runs locally.*
  * **your project fits in a sizable monorepo**  
@@ -38,15 +40,18 @@ You would be interested in Jobgraph if:
  1. Create a dedicated user account for a jobgraph bot. Give it the `developer` role. *Note: This account will handle scheduled pipelines - they require the `developer` role.*
  1. Get the Gitlab project ID.
  1. From the root of your repository, substitute the variables down below, then run the following command:
-
 ```sh
 docker run \
     --pull=always \
     --volume "$(pwd):/builds" \
     registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph \
-    jobgraph bootstrap --gitlab-project-id "$GITLAB_PROJECT_ID" --jobgraph-bot-username "$JOBGRAPH_BOT_USERNAME" --jobgraph-bot-gitlab-token "$JOBGRAPH_BOT_GITLAB_TOKEN" --maintainer-username "$MAINTAINER_USERNAME" --maintainer-gitlab-token "$MAINTAINER_GITLAB_TOKEN"
+    jobgraph bootstrap \
+        --gitlab-project-id "$GITLAB_PROJECT_ID" \
+        --jobgraph-bot-username "$JOBGRAPH_BOT_USERNAME" \
+        --jobgraph-bot-gitlab-token "$JOBGRAPH_BOT_GITLAB_TOKEN" \
+        --maintainer-username "$MAINTAINER_USERNAME" \
+        --maintainer-gitlab-token "$MAINTAINER_GITLAB_TOKEN"
 ```
-
  5. Add the generated SSH key to the bot account.
  6. Commit the changes and pushes them to the main branch.
 

@@ -4,6 +4,7 @@ flake8
 flynt
 isort
 mock
+pdoc
 pytest
 pyupgrade
 yamllint

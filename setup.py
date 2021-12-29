@@ -25,6 +25,9 @@ setup(
     url="TODO",
     packages=find_packages("src"),
     package_dir={"": "src"},
+    package_data={
+        "": ["*.md"],
+    },
     install_requires=requirements,
     classifiers=[
         f"Programming Language :: Python :: {python_version}",
