@@ -61,8 +61,13 @@ class JobGraph:
             all_jobs[label] = job["actual_gitlab_ci_job"]
 
             stage = job["actual_gitlab_ci_job"]["stage"]
-            if stage not in all_stages:
-                all_stages.insert(0, stage)
+            if all_stages and all_stages[0] == stage:
+                continue
+
+            if stage in all_stages:
+                all_stages.remove(stage)
+
+            all_stages.insert(0, stage)
 
         return {
             "stages": all_stages,
