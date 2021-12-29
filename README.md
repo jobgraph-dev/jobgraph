@@ -1,6 +1,5 @@
 # Jobgraph
 
-
 Make your Gitlab CI Pipelines scale up! Jobgraph lets you abstract complexity away while making sure your pipelines stand the test of time.
 
 ## What does Jobgraph do?
@@ -17,6 +16,8 @@ Jobgraph enables your Gitlab CI pipelines to:
  *Jobgraph outputs exactly what jobs are going to be run and lets you hook a debugger if needed.*
  1. **avoid footguns**  
  *Jobgraph uses exiting linters to highlight bad usages of Docker, Python, or yaml.*
+
+For more information, have a look at [What does Jobgraph aim to solve?](docs/what-does-jobgraph-aim-to-solve.md).
 
 ## Is Jobgraph suited for your project?
 
