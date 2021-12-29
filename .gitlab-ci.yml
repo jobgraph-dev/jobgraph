@@ -11,7 +11,7 @@ decision:
         expire_in: 1 year
         paths:
         - artifacts/*
-    image: registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph:latest@sha256:af396763575ed19a8c60b587e2a01736dd788d777fbcf290c7f347612448c97d
+    image: registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph:latest@sha256:e2e2ff04c907e4f6ea468e73b14ec17dd4cb6edf591e58dce8ac6a99401f4449
     retry:
         max: 2
         when:

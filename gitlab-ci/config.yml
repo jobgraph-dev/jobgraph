@@ -3,8 +3,8 @@ docker:
     external_images:
         docker_in_docker: docker:dind@sha256:4e04836731b7100e8bd5e0b35756f53d0b6211ddb3cc7ec326ae3640adcfa004
         hadolint: hadolint/hadolint:latest-alpine@sha256:6c4b7c23f96339489dd35f21a711996d7ce63047467a9a562287748a03ad5242
-        jobgraph: registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph:latest@sha256:af396763575ed19a8c60b587e2a01736dd788d777fbcf290c7f347612448c97d
-        jobgraph_tests: registry.gitlab.com/jobgraph-dev/jobgraph/python_test:latest@sha256:ec50c4aff0653e21147e7e45020028b031804c07cebee605bd9480a3f6b91a14
+        jobgraph: registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph:latest@sha256:e2e2ff04c907e4f6ea468e73b14ec17dd4cb6edf591e58dce8ac6a99401f4449
+        jobgraph_tests: registry.gitlab.com/jobgraph-dev/jobgraph/python_test:latest@sha256:4dad986d4b752b1cc2b29d33ebd67ee21bbde86b42fe1c4a7af625222ba9e83c
 gitlab:
     project_id: 30264497
     root_url: https://gitlab.com
