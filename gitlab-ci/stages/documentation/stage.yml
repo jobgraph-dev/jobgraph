@@ -19,5 +19,5 @@ jobs:
             - "**/*.md"
         runner_alias: t-linux
         script:
-        - pdoc --html .
+        - pdoc3 --html "$CI_PROJECT_DIR"
         timeout: 3 minutes
