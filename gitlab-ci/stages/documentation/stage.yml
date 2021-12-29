@@ -1,0 +1,23 @@
+---
+loader: jobgraph.loader.transform:loader
+
+transforms:
+- jobgraph.transforms.reinstall_jobgraph:transforms
+- jobgraph.transforms.job:transforms
+
+
+jobs:
+    pages:
+        artifacts:
+            paths:
+            - html/jobgraph
+        description: Generate documentation and upload it to https://jobgraph-dev.gitlab.io/jobgraph
+        image: {in_tree: python_test}
+        optimization:
+            skip_unless_changed:
+            - "**/*.py"
+            - "**/*.md"
+        runner_alias: t-linux
+        script:
+        - pdoc --html .
+        timeout: 3 minutes
