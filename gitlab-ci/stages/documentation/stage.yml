@@ -10,7 +10,7 @@ jobs:
     pages:
         artifacts:
             paths:
-            - html/jobgraph
+            - public
         description: Generate documentation and upload it to https://jobgraph-dev.gitlab.io/jobgraph
         image: {in_tree: python_test}
         optimization:
@@ -21,4 +21,5 @@ jobs:
         runner_alias: t-linux
         script:
         - pdoc3 --html jobgraph
+        - mv html/jobgraph public/
         timeout: 3 minutes
