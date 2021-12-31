@@ -17,7 +17,7 @@ Jobgraph enables your Gitlab CI pipelines to:
  1. **avoid footguns**  
  *Jobgraph uses exiting linters to highlight bad usages of Docker, Python, or yaml.*
 
-For more information, have a look at [What does Jobgraph aim to solve?](docs/what-does-jobgraph-aim-to-solve.md).
+For more technical information, have a look at [What does Jobgraph aim to solve?](docs/what-does-jobgraph-aim-to-solve.md).
 
 ## Is Jobgraph suited for your project?
 
@@ -55,17 +55,18 @@ docker run \
         --maintainer-gitlab-token "$MAINTAINER_GITLAB_TOKEN"
 ```
  5. Add the generated SSH key to the bot account.
- 6. Commit the changes and pushes them to the main branch.
+ 6. Commit the changes and pushes them to Gitlab. You are now able to see Jobgraph in action!
+
+### How to use make Jobgraph fit to your needs
+
+Jobgraph is now up and working. You might now be wondering how things are linked together. The example files provided by `jobgraph bootstrap` contain some code comments to make some precise points explicit. That said, you may be interested in an overview first. In this case, check out:
+
+ 1. [What does Jobgraph aim to solve?](docs/what-does-jobgraph-aim-to-solve.md).
+ 1. [The journey of a job configuration](docs/the-journey-of-a-job-configuration.md).
 
 ## Origin
 
-Jobgraph is a fork of [Mozilla's Taskgraph](https://hg.mozilla.org/ci/taskgraph/), which makes Firefox ships on a daily basis. Taskgraph supports another Continuous Integration (CI) system: Taskcluster. Both of them cope with CI pipelines containing 10,000 jobs for a single release. Jobgraph aims to bring Gitlab CI to this level of complexity 🙂
-
-## Jobgraph at high-level
-
-See this [blogpost](https://johanlorenzo.github.io/blog/2019/10/24/taskgraph-is-now-deployed-to-the-biggest-mozilla-mobile-projects.html) which summarizes Taskgraph's basic usage and functionalities. The blog post predates Jobgraph but the concepts are the same.
-
-*// TODO: Convert this blog post to the jobgraph lingo.*
+Jobgraph is a fork of [Mozilla's Taskgraph](https://hg.mozilla.org/ci/taskgraph/), which is instrumental in shipping Firefox on a daily basis. Taskgraph supports another Continuous Integration (CI) system: Taskcluster. Both of Taskcluster and Taskgraph cope with CI pipelines containing 10,000 jobs for a single release. Jobgraph aims to bring Gitlab CI to this level of complexity 🙂
 
 ## Contribute
 
