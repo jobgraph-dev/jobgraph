@@ -4,7 +4,7 @@
 
 Using Jobgraph is usually about dealing with this part of the data flow.
 
-*TODO: Add a graph showing the link between each step.*
+![First part of the flow](docs/images/the-journey-of-a-job-configuration-part1.svg)
 
 
 ### `stage.yml`
@@ -39,6 +39,7 @@ Moreover, transforms can be shared among stages, which gives a way to factorize 
 
 You may not need it, but that’s how optimization happens!
 
+![Second part of the flow](docs/images/the-journey-of-a-job-configuration-part2.svg)
 
 ### Target jobs
 
