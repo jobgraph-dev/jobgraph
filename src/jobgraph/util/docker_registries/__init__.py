@@ -1,4 +1,5 @@
 import os
+from functools import wraps
 
 import requests
 
@@ -6,31 +7,63 @@ from jobgraph.util.memoize import memoize
 
 _DOCKER_IMAGE_DIGEST_METHOD = "@sha256:"
 _DOCKER_DEFAULT_REGISTRY = "index.docker.io"
-_AUTHENTICATION_CONFIG_PER_REGISTRY = {
-    _DOCKER_DEFAULT_REGISTRY: {
-        "endpoint": "https://auth.docker.io/token",
-        "params": {
-            "service": "registry.docker.io",
+registry_domains = {}
+
+
+def register_docker_registry_domain(domain):
+    def inner_function(func):
+        if domain not in registry_domains:
+            registry_domains[domain] = func
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return inner_function
+
+
+@register_docker_registry_domain(_DOCKER_DEFAULT_REGISTRY)
+def fetch_image_digest_from_default_registry(image_data):
+    session = get_container_registry_session(
+        image_data,
+        {
+            "endpoint": "https://auth.docker.io/token",
+            "params": {
+                "service": "registry.docker.io",
+            },
         },
-    },
-    # TODO: Support self-hosted gitlab instances.
-    "registry.gitlab.com": {
-        "endpoint": "https://gitlab.com/jwt/auth",
-        "params": {
-            "client_id": "docker",
-            "offline_token": "true",
-            "service": "container_registry",
+    )
+    return get_image_digest(image_data, session)
+
+
+@register_docker_registry_domain("registry.gitlab.com")
+def fetch_image_digest_from_gitlab_com(image_data):
+    session = get_container_registry_session(
+        image_data,
+        {
+            "endpoint": "https://gitlab.com/jwt/auth",
+            "params": {
+                "client_id": "docker",
+                "offline_token": "true",
+                "service": "container_registry",
+            },
+            "auth_env_variables": ("CI_REGISTRY_USER", "CI_REGISTRY_PASSWORD"),
         },
-        "auth_env_variables": ("CI_REGISTRY_USER", "CI_REGISTRY_PASSWORD"),
-    },
-}
+    )
+    return get_image_digest(image_data, session)
 
 
 @memoize
 def fetch_image_digest_from_registry(image_full_location):
     image_data = parse_image_full_location(image_full_location)
-    token = _get_container_registry_token(image_data)
-    return _get_image_digest(image_data, token)
+    registry_domain = image_data["registry"]
+    try:
+        fetch_image_digest_func = registry_domains[registry_domain]
+        return fetch_image_digest_func(image_data)
+    except KeyError:
+        raise KeyError(f"Unknown registry domain: {registry_domain}")
 
 
 def parse_image_full_location(image_full_location):
@@ -71,9 +104,17 @@ def parse_image_full_location(image_full_location):
     }
 
 
-def _get_container_registry_token(image_data):
+def get_container_registry_session(image_data, auth_config):
+    token = _get_container_registry_token(image_data, auth_config)
+    session = requests.Session()
+    session.headers = {
+        "Authorization": f"Bearer {token}",
+    }
+    return session
+
+
+def _get_container_registry_token(image_data, auth_config):
     registry = image_data["registry"]
-    auth_config = _AUTHENTICATION_CONFIG_PER_REGISTRY[registry]
     session = requests.Session()
     if auth_config.get("auth_env_variables"):
         for env_var_name in auth_config["auth_env_variables"]:
@@ -93,16 +134,16 @@ def _get_container_registry_token(image_data):
     params |= auth_config.get("params", {})
     response = session.get(auth_config["endpoint"], params=params)
     response.raise_for_status()
+
     return response.json()["token"]
 
 
-def _get_image_digest(image_data, token):
+def get_image_digest(image_data, session):
     url = f"https://{image_data['registry']}/v2/{image_data['namespace']}/{image_data['image_name']}/manifests/{image_data['tag']}"  # noqa E501
-    response = requests.get(
+    response = session.get(
         url,
         headers={
             "Accept": "application/vnd.docker.distribution.manifest.v2+json",
-            "Authorization": f"Bearer {token}",
         },
     )
 
