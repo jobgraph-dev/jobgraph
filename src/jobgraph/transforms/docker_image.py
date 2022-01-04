@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from functools import wraps
 
 from dockerfile_parse import DockerfileParser
 from voluptuous import Optional, Required
@@ -52,6 +53,34 @@ docker_image_schema = gitlab_ci_job_input.extend(
 )
 
 
+registry_types = {}
+
+
+def register_docker_registry(name):
+    def inner_function(func):
+        if name not in registry_types:
+            registry_types[name] = func
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return inner_function
+
+
+@register_docker_registry("gitlab")
+def gitlab_container_registry_config(job):
+    job["before_script"] = [
+        'docker login --username "$CI_REGISTRY_USER" --password '
+        '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
+    ]
+    job.setdefault("optimization", {}).setdefault(
+        "skip_if_on_gitlab_container_registry", True
+    )
+
+
 transforms.add_validate(docker_image_schema)
 
 
@@ -81,17 +110,11 @@ def ensure_external_base_images_have_digests(config, jobs):
 def add_registry_specific_config(config, jobs):
     for job in jobs:
         registry_type = job.pop("container_registry_type")
-        # TODO Use decorators instead
-        if registry_type == "gitlab":
-            job["before_script"] = [
-                'docker login --username "$CI_REGISTRY_USER" --password '
-                '"$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
-            ]
-            job.setdefault("optimization", {}).setdefault(
-                "skip_if_on_gitlab_container_registry", True
-            )
-        else:
-            raise ValueError(f"Unknown container_registry_type: {registry_type}")
+        try:
+            registry_config_func = registry_types[registry_type]
+            registry_config_func(job)
+        except KeyError:
+            raise KeyError(f"Unknown container_registry_type: {registry_type}")
 
         yield job
 
