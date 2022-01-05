@@ -38,6 +38,23 @@ def fetch_image_digest_from_default_registry(image_data):
     return get_image_digest(image_data, session)
 
 
+@register_docker_registry_domain("registry.gitlab.com")
+def fetch_image_digest_from_gitlab_com(image_data):
+    session = get_container_registry_session(
+        image_data,
+        {
+            "endpoint": "https://gitlab.com/jwt/auth",
+            "params": {
+                "client_id": "docker",
+                "offline_token": "true",
+                "service": "container_registry",
+            },
+            "auth_env_variables": ("CI_REGISTRY_USER", "CI_REGISTRY_PASSWORD"),
+        },
+    )
+    return get_image_digest(image_data, session)
+
+
 @memoize
 def fetch_image_digest_from_registry(image_full_location):
     image_data = parse_image_full_location(image_full_location)

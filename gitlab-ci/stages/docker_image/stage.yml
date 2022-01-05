@@ -8,7 +8,7 @@ transforms:
 
 
 job_defaults:
-    container_registry_type: gitlab
+    docker_registry_domain: registry.gitlab.com
     image_name_template:
         by_head_ref_protection:
             protected: "{job_name}"
