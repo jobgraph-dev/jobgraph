@@ -12,7 +12,7 @@ job_defaults:
     image_name_template:
         by_head_ref_protection:
             protected: "{job_name}"
-            unprotected: "unprotected/{job_name}"
+            unprotected: "unprotected-branches/{job_name}"
     push_as_latest:
         by_head_ref:
             main: true
