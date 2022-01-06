@@ -217,6 +217,20 @@ secret_def = {
     Optional("file"): bool,
 }
 
+cache_def = {
+    Required("key"): Any(
+        str,
+        {
+            Required("files"): [str],
+            Optional("prefix"): str,
+        },
+    ),
+    Required("paths"): [str],
+    Optional("policy"): Any("pull", "push", "pull-push"),
+    Optional("untracked"): bool,
+    Optional("when"): when_def,
+}
+
 # Source https://docs.gitlab.com/ee/ci/yaml/index.html
 gitlab_ci_job_common = Schema(
     {
@@ -236,19 +250,7 @@ gitlab_ci_job_common = Schema(
             Optional("when"): when_def,
         },
         Optional("before_script"): str_or_list_of_str,
-        Optional("cache"): {
-            Optional("key"): Any(
-                str,
-                {
-                    Required("files"): [str],
-                    Optional("prefix"): str,
-                },
-            ),
-            Required("paths"): [str],
-            Optional("policy"): Any("pull", "push", "pull-push"),
-            Optional("untracked"): bool,
-            Optional("when"): when_def,
-        },
+        Optional("cache"): cache_def,
         Optional("coverage"): str,
         Optional("dast_configuration"): {
             Required("site_profile"): str,
