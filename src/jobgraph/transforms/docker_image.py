@@ -150,18 +150,16 @@ def define_image_name(config, jobs):
 def fill_common_values(config, jobs):
     for job in jobs:
         image_base_name = job["name"]
-
-        job |= {
-            "label": image_base_name,
-            "description": f"Build the docker image {image_base_name} for "
-            "use by downstream jobs",
-            "image": {"docker_image_reference": "<docker_in_docker>"},
-            "runner_alias": "images",
-        }
-
+        job.setdefault("label", image_base_name)
+        job.setdefault(
+            "description",
+            f"Build the docker image {image_base_name} for use by downstream jobs",
+        )
+        job.setdefault("image", {"docker_image_reference": "<docker_in_docker>"})
         job.setdefault("optimization", {}).setdefault(
             "skip_if_on_docker_registry", True
         )
+        job.setdefault("runner_alias", "images")
 
         yield job
 
