@@ -3,8 +3,8 @@ from jobgraph.util.docker_registries import fetch_image_digest_from_registry
 
 
 @register_strategy("skip_if_on_docker_registry")
-class GitlabContainerRegistrySearch(OptimizationStrategy):
-    def should_remove_job(self, job, params, arg):
+class DockerRegistrySearch(OptimizationStrategy):
+    def should_remove_job(self, job, params, graph_config, arg):
         if not arg:
             return False
 

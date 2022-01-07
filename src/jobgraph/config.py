@@ -25,6 +25,10 @@ DEFAULT_ROOT_DIR = os.path.join("gitlab-ci", "stages")
 
 graph_config_schema = Schema(
     {
+        Optional("cache"): {
+            Required("type"): str,
+            Required("bucket_name"): str,
+        },
         Required("docker"): {
             Required("external_images"): {
                 Required("docker_in_docker"): str,

@@ -57,6 +57,7 @@ def optimize_job_graph(target_job_graph, params, do_not_optimize, graph_config):
         optimizations=optimizations,
         params=params,
         do_not_optimize=do_not_optimize,
+        graph_config=graph_config,
     )
 
     return get_subgraph(
@@ -134,7 +135,7 @@ def _log_optimization(verb, opt_counts):
         logger.info(f"No jobs {verb} during optimization")
 
 
-def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
+def remove_jobs(target_job_graph, params, optimizations, do_not_optimize, graph_config):
     """
     Implement the "Removing Jobs" phase, returning a set of job labels of all
     removed jobs.
@@ -164,7 +165,7 @@ def remove_jobs(target_job_graph, params, optimizations, do_not_optimize):
 
         # call the optimization strategy
         opt_by, opt, arg = optimizations(label)
-        if opt.should_remove_job(job, params, arg):
+        if opt.should_remove_job(job, params, graph_config, arg):
             removed.add(label)
             opt_counts[opt_by] += 1
             continue
@@ -255,7 +256,7 @@ def _get_candidate_docker_images(
 
 
 class OptimizationStrategy:
-    def should_remove_job(self, job, params, arg):
+    def should_remove_job(self, job, params, graph_config, arg):
         """Determine whether to optimize this job by removing it.  Returns
         True to remove."""
         return False
@@ -263,19 +264,19 @@ class OptimizationStrategy:
 
 @register_strategy("always")
 class Always(OptimizationStrategy):
-    def should_remove_job(self, job, params, file_patterns):
+    def should_remove_job(self, job, params, graph_config, file_patterns):
         return True
 
 
 @register_strategy("never")
 class Never(OptimizationStrategy):
-    def should_remove_job(self, job, params, file_patterns):
+    def should_remove_job(self, job, params, graph_config, file_patterns):
         return False
 
 
 @register_strategy("skip_unless_changed")
 class SkipUnlessChanged(OptimizationStrategy):
-    def should_remove_job(self, job, params, file_patterns):
+    def should_remove_job(self, job, params, graph_config, file_patterns):
         repo = get_repo()
         repo_root = Path(repo.path)
 
@@ -302,3 +303,4 @@ class SkipUnlessChanged(OptimizationStrategy):
 
 
 importlib.import_module("jobgraph.optimize.docker_registry")
+importlib.import_module("jobgraph.optimize.cache")

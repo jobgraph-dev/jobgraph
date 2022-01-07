@@ -9,7 +9,7 @@ from jobgraph.jobgraph import JobGraph
 
 
 class Remove(optimize.OptimizationStrategy):
-    def should_remove_job(self, task, params, arg):
+    def should_remove_job(self, task, params, graph_config, arg):
         return True
 
 

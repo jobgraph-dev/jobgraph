@@ -69,7 +69,7 @@ class FakeOptimization(optimize.OptimizationStrategy):
         super().__init__(*args, **kwargs)
         self.mode = mode
 
-    def should_remove_job(self, task, params, arg):
+    def should_remove_job(self, task, params, graph_config, arg):
         if self.mode == "always":
             return True
         if self.mode == "even":
