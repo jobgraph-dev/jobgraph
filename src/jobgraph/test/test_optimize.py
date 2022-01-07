@@ -78,6 +78,7 @@ class TestOptimize(unittest.TestCase):
             optimizations=optimize._get_optimizations(graph, self.strategies),
             params={},
             do_not_optimize=do_not_optimize,
+            graph_config={},
         )
         self.assertEqual(got_removed, exp_removed)
 
