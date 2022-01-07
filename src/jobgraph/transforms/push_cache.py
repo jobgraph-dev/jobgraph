@@ -75,7 +75,10 @@ def set_optimization(config, jobs):
         repo_root = Path(config.graph_config.root_dir).parent
         files_hashes = hash_paths(str(repo_root), key.get("files", []))
 
+        processed_cache_key = f"{job['name']}-{files_hashes}"
         prefix = job["cache"]["key"].get("prefix", "")
-        cache["key"] = f"{prefix}-{files_hashes}" if prefix else files_hashes
+        cache["key"] = (
+            f"{prefix}-{processed_cache_key}" if prefix else processed_cache_key
+        )
 
         yield job
