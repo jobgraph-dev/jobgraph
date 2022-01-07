@@ -241,7 +241,7 @@ gitlab_ci_job_common = Schema(
             Optional("expire_in"): str,
             Optional("expose_as"): str,
             Optional("name"): str,
-            Required("paths"): [str],
+            Optional("paths"): [str],
             Optional("public"): bool,
             # TODO Be more restrictive for reports
             # https://docs.gitlab.com/ee/ci/yaml/artifacts_reports.html
