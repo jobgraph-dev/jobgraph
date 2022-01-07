@@ -98,7 +98,7 @@ else:
     MATCH_STAR_STAR_END_RE = re.compile(r"(^|\\\/)\\\*\\\*$")
 
 
-def match(path, pattern):
+def search(path, pattern):
     """
     Return whether the given path matches the given pattern.
     An asterisk can be used to match any string, including the null string, in
@@ -128,7 +128,7 @@ def match(path, pattern):
         p = MATCH_STAR_STAR_END_RE.sub(r"(?:\1.+)?", p)
         p = p.replace(r"\*", "[^/]*") + "(?:/.*)?$"
         re_cache[pattern] = re.compile(p)
-    return re_cache[pattern].match(path) is not None
+    return re_cache[pattern].search(path) is not None
 
 
 def rebase(oldbase, base, relativepath):

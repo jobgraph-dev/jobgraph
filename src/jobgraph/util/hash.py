@@ -34,7 +34,7 @@ def hash_paths(base_path, patterns):
     found = set()
     for pattern in patterns:
         files = _find_files(base_path)
-        matches = [path for path in files if mozpath.match(path, pattern)]
+        matches = [path for path in files if mozpath.search(path, pattern)]
         if matches:
             found.update(matches)
         else:
