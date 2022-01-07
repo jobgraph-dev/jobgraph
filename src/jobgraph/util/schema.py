@@ -250,7 +250,7 @@ gitlab_ci_job_common = Schema(
             Optional("when"): when_def,
         },
         Optional("before_script"): str_or_list_of_str,
-        Optional("cache"): cache_def,
+        Optional("cache"): [cache_def],
         Optional("coverage"): str,
         Optional("dast_configuration"): {
             Required("site_profile"): str,

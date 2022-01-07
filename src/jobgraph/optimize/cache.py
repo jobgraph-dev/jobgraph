@@ -10,7 +10,10 @@ class GitlabCacheSearch(OptimizationStrategy):
         if not arg:
             return False
 
-        return does_cache_exist(graph_config, job.actual_gitlab_ci_job["cache"]["key"])
+        return all(
+            does_cache_exist(graph_config, cache["key"])
+            for cache in job.actual_gitlab_ci_job["cache"]
+        )
 
 
 _registry_cache_type = {}
