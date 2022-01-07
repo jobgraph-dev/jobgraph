@@ -49,5 +49,26 @@ def loader(stage, path, config, params, loaded_jobs):
 
     for name, job in jobs():
         job["name"] = name
+        set_cache_upstream_jobs(job, loaded_jobs)
         logger.debug(f"Generating jobs for {stage} {name}")
         yield job
+
+
+def set_cache_upstream_jobs(job, loaded_jobs):
+    job_names_to_pull_cache_from = job.pop("pull_caches_from_jobs", None)
+
+    if job_names_to_pull_cache_from:
+        if type(job_names_to_pull_cache_from) != list:
+            raise ValueError(f"Job {job['name']} must provide a list of job names")
+
+        cache_dependencies = []
+
+        for job_name in job_names_to_pull_cache_from:
+            for loaded_job in loaded_jobs:
+                if job_name == loaded_job.label:
+                    cache_dependencies.append(loaded_job)
+                    break
+            else:
+                raise ValueError(f"Couldn't find job {job_name} in loaded jobs")
+
+        job["upstream_cache_jobs"] = cache_dependencies

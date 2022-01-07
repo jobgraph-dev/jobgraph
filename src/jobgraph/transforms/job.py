@@ -52,6 +52,29 @@ def build_docker_runner_payload(config, jobs):
 
 
 @transforms.add
+def build_pull_cache_payload(config, jobs):
+    for job in jobs:
+        upstream_cache_jobs = job.pop("upstream_cache_jobs", [])
+        pull_caches = job.setdefault("cache", [])
+
+        for cache_job in upstream_cache_jobs:
+            push_caches = cache_job.actual_gitlab_ci_job["cache"]
+            if type(push_caches) == dict:
+                push_caches = [push_caches]
+
+            for push_cache in push_caches:
+                pull_caches.append(
+                    {
+                        "key": push_cache["key"],
+                        "paths": push_cache["paths"],
+                        "policy": "pull",
+                    }
+                )
+
+        yield job
+
+
+@transforms.add
 def set_defaults(config, jobs):
     for job in jobs:
         job.setdefault("always_target", False)
