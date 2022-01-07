@@ -76,6 +76,6 @@ def set_optimization(config, jobs):
         files_hashes = hash_paths(str(repo_root), key.get("files", []))
 
         prefix = job["cache"]["key"].get("prefix", "")
-        cache["key"] = f"{prefix}/{files_hashes}" if prefix else files_hashes
+        cache["key"] = f"{prefix}-{files_hashes}" if prefix else files_hashes
 
         yield job
