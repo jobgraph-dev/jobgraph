@@ -17,6 +17,7 @@ from voluptuous.validators import Length
 
 import jobgraph
 from jobgraph import MAX_UPSTREAM_DEPENDENCIES
+from jobgraph.job import Job
 
 from .keyed_by import evaluate_keyed_by
 
@@ -231,6 +232,11 @@ cache_def = {
     Optional("when"): when_def,
 }
 
+push_caches_def = {
+    Required("key_files"): [str],
+    Required("paths"): [str],
+}
+
 # Source https://docs.gitlab.com/ee/ci/yaml/index.html
 gitlab_ci_job_common = Schema(
     {
@@ -250,7 +256,6 @@ gitlab_ci_job_common = Schema(
             Optional("when"): when_def,
         },
         Optional("before_script"): str_or_list_of_str,
-        Optional("cache"): [cache_def],
         Optional("coverage"): str,
         Optional("dast_configuration"): {
             Required("site_profile"): str,
@@ -369,6 +374,8 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
             ): object,
         },
         Required("image"): docker_image_ref,
+        Optional("push_caches"): [push_caches_def],
+        Optional("upstream_cache_jobs"): [Job],
         Optional("run_on_pipeline_sources"): [str],
         Optional("run_on_git_branches"): [str],
         # The `always_target` attribute will cause the job to be included in the
@@ -389,6 +396,7 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
 gitlab_ci_job_output = gitlab_ci_job_common.extend(
     {
         Optional("upstream_dependencies"): [str],
+        Optional("cache"): [cache_def],
         Required("image"): str,
         Optional("needs"): All(
             [

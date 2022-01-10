@@ -6,11 +6,13 @@ complexities of runner implementations.
 """
 
 from copy import copy, deepcopy
+from pathlib import Path
 
 from deepmerge import always_merger
 
 from jobgraph import MAX_UPSTREAM_DEPENDENCIES
 from jobgraph.transforms.base import TransformSequence
+from jobgraph.util.hash import hash_paths
 from jobgraph.util.schema import gitlab_ci_job_input, validate_schema
 
 from ..util import docker as dockerutil
@@ -52,29 +54,6 @@ def build_docker_runner_payload(config, jobs):
 
 
 @transforms.add
-def build_pull_cache_payload(config, jobs):
-    for job in jobs:
-        upstream_cache_jobs = job.pop("upstream_cache_jobs", [])
-        pull_caches = job.setdefault("cache", [])
-
-        for cache_job in upstream_cache_jobs:
-            push_caches = cache_job.actual_gitlab_ci_job["cache"]
-            if type(push_caches) == dict:
-                push_caches = [push_caches]
-
-            for push_cache in push_caches:
-                pull_caches.append(
-                    {
-                        "key": push_cache["key"],
-                        "paths": push_cache["paths"],
-                        "policy": "pull",
-                    }
-                )
-
-        yield job
-
-
-@transforms.add
 def set_defaults(config, jobs):
     for job in jobs:
         job.setdefault("always_target", False)
@@ -103,6 +82,58 @@ def validate(config, jobs):
             job,
             f"In job {job['label']}:",
         )
+        yield job
+
+
+@transforms.add
+def build_push_cache_payload(config, jobs):
+    repo_root = Path(config.graph_config.root_dir).parent
+
+    for job in jobs:
+        actual_caches = job.setdefault("cache", [])
+        push_caches = job.pop("push_caches", [])
+
+        for push_cache in push_caches:
+            files_hashes = hash_paths(str(repo_root), push_cache["key_files"])
+            prefix = (
+                config.params["head_ref"]
+                if config.params["head_ref_protection"] == "protected"
+                else "unprotected-branches"
+            )
+
+            actual_caches.append(
+                {
+                    "key": f"{prefix}-{job['label']}-{files_hashes}",
+                    "paths": push_cache["paths"],
+                    "policy": "push",
+                }
+            )
+
+        job.setdefault("optimization", {}).setdefault("skip_if_cache_exists", True)
+
+        yield job
+
+
+@transforms.add
+def build_pull_cache_payload(config, jobs):
+    for job in jobs:
+        upstream_cache_jobs = job.pop("upstream_cache_jobs", [])
+        pull_caches = job.setdefault("cache", [])
+
+        for cache_job in upstream_cache_jobs:
+            push_caches = cache_job.actual_gitlab_ci_job["cache"]
+            if type(push_caches) == dict:
+                push_caches = [push_caches]
+
+            for push_cache in push_caches:
+                pull_caches.append(
+                    {
+                        "key": push_cache["key"],
+                        "paths": push_cache["paths"],
+                        "policy": "pull",
+                    }
+                )
+
         yield job
 
 
