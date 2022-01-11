@@ -6,6 +6,8 @@ from copy import copy
 from pathlib import Path
 from shutil import which
 
+from jobgraph.util.memoize import memoize
+
 
 class Repository(ABC):
     def __init__(self, path):
@@ -99,6 +101,7 @@ class GitRepository(Repository):
         self.run(*command)
 
     @property
+    @memoize
     def tracked_files(self):
         return {Path(file) for file in self.run("ls-files").splitlines()}
 

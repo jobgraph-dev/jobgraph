@@ -5,6 +5,7 @@ transformations is generic to any kind of job, but abstracts away some of the
 complexities of runner implementations.
 """
 
+import hashlib
 from copy import copy, deepcopy
 from pathlib import Path
 
@@ -86,38 +87,9 @@ def validate(config, jobs):
 
 
 @transforms.add
-def build_push_cache_payload(config, jobs):
-    repo_root = Path(config.graph_config.root_dir).parent
-
-    for job in jobs:
-        actual_caches = job.setdefault("cache", [])
-        push_caches = job.pop("push_caches", [])
-
-        for push_cache in push_caches:
-            files_hashes = hash_paths(str(repo_root), push_cache["key_files"])
-            prefix = (
-                config.params["head_ref"]
-                if config.params["head_ref_protection"] == "protected"
-                else "unprotected-branches"
-            )
-
-            actual_caches.append(
-                {
-                    "key": f"{prefix}-{job['label']}-{files_hashes}",
-                    "paths": push_cache["paths"],
-                    "policy": "push",
-                }
-            )
-
-        job.setdefault("optimization", {}).setdefault("skip_if_cache_exists", True)
-
-        yield job
-
-
-@transforms.add
 def build_pull_cache_payload(config, jobs):
     for job in jobs:
-        upstream_cache_jobs = job.pop("upstream_cache_jobs", [])
+        upstream_cache_jobs = job.get("upstream_cache_jobs", [])
         pull_caches = job.setdefault("cache", [])
 
         for cache_job in upstream_cache_jobs:
@@ -135,6 +107,57 @@ def build_pull_cache_payload(config, jobs):
                 )
 
         yield job
+
+
+@transforms.add
+def build_push_cache_payload(config, jobs):
+    repo_root = Path(config.graph_config.root_dir).parent
+
+    for job in jobs:
+        upstream_cache_jobs = job.pop("upstream_cache_jobs", [])
+        push_caches = job.pop("push_caches", [])
+        actual_caches_configuration = job.setdefault("cache", [])
+
+        for push_cache in push_caches:
+            cache_hash = _build_push_cache_hash(
+                repo_root, push_cache["key_files"], upstream_cache_jobs
+            )
+
+            prefix = (
+                config.params["head_ref"]
+                if config.params["head_ref_protection"] == "protected"
+                else "unprotected-branches"
+            )
+
+            actual_caches_configuration.append(
+                {
+                    "key": f"{prefix}-{job['label']}-{cache_hash}",
+                    "paths": push_cache["paths"],
+                    "policy": "push",
+                }
+            )
+
+            attributes_push_cache = job.setdefault("attributes", {}).setdefault(
+                "push_caches_hashes", []
+            )
+            attributes_push_cache.append(cache_hash)
+
+        job.setdefault("optimization", {}).setdefault("skip_if_cache_exists", True)
+
+        yield job
+
+
+def _build_push_cache_hash(repo_root, key_files, upstream_cache_jobs):
+    hash = hashlib.sha256()
+
+    files_hashes = hash_paths(repo_root, key_files)
+    hash.update(f"files {files_hashes}".encode())
+
+    for cache_job in upstream_cache_jobs:
+        for push_cache_hash in cache_job.attributes["push_caches_hashes"]:
+            hash.update(f"{cache_job.label} {push_cache_hash}".encode())
+
+    return hash.hexdigest()
 
 
 @transforms.add

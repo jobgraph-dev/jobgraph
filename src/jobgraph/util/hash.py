@@ -1,6 +1,6 @@
 import hashlib
-from pathlib import Path
 
+from jobgraph.parameters import get_repo
 from jobgraph.util import path as mozpath
 from jobgraph.util.memoize import memoize
 
@@ -15,32 +15,28 @@ def hash_path(path):
         return hashlib.sha256(fh.read()).hexdigest()
 
 
-def _find_files(base_path):
-    for path in Path(base_path).rglob("*"):
-        if path.is_file():
-            yield str(path)
-
-
-def hash_paths(base_path, patterns):
+def hash_paths(root_dir, patterns):
     """
     Give a list of path patterns, return a digest of the contents of all
     the corresponding files, similarly to git tree objects.
+    Patterns must be relative to the root of the git repository. Only
+    tracked files are hashed.
 
     Each file is hashed. The list of all hashes and file paths is then
     itself hashed to produce the result.
     """
     h = hashlib.sha256()
+    tracked_files = get_repo(root_dir).tracked_files
 
     found = set()
     for pattern in patterns:
-        files = _find_files(base_path)
-        matches = [path for path in files if mozpath.search(path, pattern)]
+        matches = [path for path in tracked_files if mozpath.search(str(path), pattern)]
         if matches:
             found.update(matches)
         else:
             raise Exception(f"{pattern} did not match anything")
     for path in sorted(found):
-        hash = hash_path(mozpath.abspath(mozpath.join(base_path, path)))
+        hash = hash_path(mozpath.abspath(mozpath.join(root_dir, path)))
         path = mozpath.normsep(path)
         h.update(f"{hash} {path}\n".encode())
     return h.hexdigest()
