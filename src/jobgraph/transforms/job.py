@@ -91,8 +91,11 @@ def build_pull_cache_payload(config, jobs):
     for job in jobs:
         upstream_cache_jobs = job.get("upstream_cache_jobs", [])
         pull_caches = job.setdefault("cache", [])
+        upstream_deps = job.setdefault("upstream_dependencies", {})
 
         for cache_job in upstream_cache_jobs:
+            upstream_deps[f"cache_{cache_job.label}"] = cache_job.label
+
             push_caches = cache_job.actual_gitlab_ci_job["cache"]
             if type(push_caches) == dict:
                 push_caches = [push_caches]
