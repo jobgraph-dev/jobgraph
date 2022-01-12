@@ -96,10 +96,15 @@ def build_pull_cache_payload(config, jobs):
         for cache_job in upstream_cache_jobs:
             upstream_deps[f"cache_{cache_job.label}"] = cache_job.label
 
-            push_caches = cache_job.actual_gitlab_ci_job["cache"]
-            if type(push_caches) == dict:
-                push_caches = [push_caches]
+            all_caches = cache_job.actual_gitlab_ci_job["cache"]
+            if type(all_caches) == dict:
+                all_caches = [all_caches]
 
+            push_caches = [
+                cache
+                for cache in all_caches
+                if "push" in cache.get("policy", "pull-push")
+            ]
             for push_cache in push_caches:
                 pull_caches.append(
                     {
