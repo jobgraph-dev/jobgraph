@@ -18,9 +18,9 @@ flake8==4.0.1 \
     --hash=sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d \
     --hash=sha256:806e034dda44114815e23c16ef92f95c91e4c71100ff52813adf7132a6ad870d
     # via -r requirements/test.in
-flynt==0.69 \
-    --hash=sha256:42de12dd29e66cc067cda8a2c1fb34fb79c0b14b0c48cd7cdcbc7c5a84578adf \
-    --hash=sha256:5bc49abd71891afbc2400f22f040ba9f23259fe03f9049dd62a2de8953248ce7
+flynt==0.76 \
+    --hash=sha256:7a99c5a550ea9e8c21203f6999ed8ce69cbad7bc8465268469777cf06413193a \
+    --hash=sha256:fc122c5f589b0c4d019d7d33597f4925fd886a8e6fb3cbadb918e4baa3661687
     # via -r requirements/test.in
 iniconfig==1.1.1 \
     --hash=sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3 \
@@ -159,9 +159,9 @@ pytest==6.2.5 \
     --hash=sha256:131b36680866a76e6781d13f101efb86cf674ebb9762eb70d3082b6f29889e89 \
     --hash=sha256:7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134
     # via -r requirements/test.in
-pyupgrade==2.30.0 \
-    --hash=sha256:93dfabfb86ebbc511e7aab0775c6330897af85eab0048ab12cd2ae4e14d959ff \
-    --hash=sha256:95c9986bff7f525b20986d6bd161bb14c223633a2035a292a8fa8f1936f3a7a4
+pyupgrade==2.31.0 \
+    --hash=sha256:0a62c5055f854d7f36e155b7ee8920561bf0399c53edd975cf02436eef8937fc \
+    --hash=sha256:80e2308cae2b11c3fdd091137495d99abf7e0cd98b501aa5758974991497c24c
     # via -r requirements/test.in
 tokenize-rt==4.2.1 \
     --hash=sha256:08a27fa032a81cf45e8858d0ac706004fcd523e8463415ddf1442be38e204ea8 \
