@@ -12,6 +12,7 @@ import logging
 import os
 from collections import defaultdict
 from pathlib import Path
+from subprocess import CalledProcessError
 
 from yaml import safe_load
 
@@ -72,12 +73,23 @@ def _get_changed_external_docker_images(params, graph_config):
     config_file_relative_path = os.path.relpath(
         graph_config.config_yml, graph_config.vcs_root
     )
-    config_yml_at_base_rev = repo.get_file_at_given_revision(
-        params["base_rev"], config_file_relative_path
-    )
-    external_docker_images_at_base_rev = (
-        safe_load(config_yml_at_base_rev).get("docker", {}).get("external_images", {})
-    )
+
+    try:
+        config_yml_at_base_rev = repo.get_file_at_given_revision(
+            params["base_rev"], config_file_relative_path
+        )
+        external_docker_images_at_base_rev = (
+            safe_load(config_yml_at_base_rev)
+            .get("docker", {})
+            .get("external_images", {})
+        )
+    except CalledProcessError:
+        # File may not exist at base_rev. This may occur when performing a
+        # migration to jobgraph
+        #
+        # TODO: narrow down this error to avoid hiding other errors
+        external_docker_images_at_base_rev = {}
+
     external_docker_images = graph_config["docker"].get("external_images", {})
 
     return {
