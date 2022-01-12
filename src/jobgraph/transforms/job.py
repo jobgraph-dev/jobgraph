@@ -145,7 +145,7 @@ def build_push_cache_payload(config, jobs):
             )
             attributes_push_cache.append(cache_hash)
 
-        job.setdefault("optimization", {}).setdefault("skip_if_cache_exists", True)
+            job.setdefault("optimization", {}).setdefault("skip_if_cache_exists", True)
 
         yield job
 
