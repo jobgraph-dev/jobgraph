@@ -48,6 +48,7 @@ decision:
         --is-head-ref-protected="$CI_COMMIT_REF_PROTECTED"
         --message="$CI_COMMIT_MESSAGE"
         --owner="$CI_COMMIT_AUTHOR"
+        --pipeline-id="$CI_PIPELINE_ID"
         --pipeline-source="$CI_PIPELINE_SOURCE"
         --target-jobs-method="$TARGET_JOBS_METHOD"
     stage: decision

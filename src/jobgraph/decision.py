@@ -85,6 +85,7 @@ def get_decision_parameters(graph_config, options):
             "head_tag",
             "owner",
             "target_jobs_method",
+            "pipeline_id",
             "pipeline_source",
         ]
         if n in options

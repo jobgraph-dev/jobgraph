@@ -534,6 +534,12 @@ def image_digest(args):
 )
 @argument("--head-tag", help="Tag attached to the revision", default="")
 @argument(
+    "--pipeline-id",
+    type=int,
+    help="The pipeline ID the decision job runs in",
+    default="",
+)
+@argument(
     "--pipeline-source",
     required=True,
     help="the pipeline_source value used to generate this task",

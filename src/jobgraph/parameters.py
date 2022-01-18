@@ -43,6 +43,7 @@ base_schema = Schema(
         # target-stage is not included, since it should never be
         # used at run-time
         Required("target_jobs_method"): str,
+        Required("pipeline_id"): int,
         Required("pipeline_source"): str,
     }
 )
@@ -126,6 +127,7 @@ class Parameters(ReadOnlyDict):
             "optimize_target_jobs": True,
             "owner": "nobody@mozilla.com",
             "target_jobs_method": "default",
+            "pipeline_id": 0,
             "pipeline_source": "",
         }
 
