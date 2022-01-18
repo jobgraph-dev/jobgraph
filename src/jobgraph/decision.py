@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+from pathlib import Path
 
 import yaml
 from voluptuous import Optional
@@ -13,6 +14,7 @@ from jobgraph.util.yaml import load_yaml
 from .generator import JobGraphGenerator
 from .jobgraph import JobGraph
 from .parameters import Parameters
+from .util.chunkify import chunkify
 from .util.schema import Schema, validate_schema
 
 logger = logging.getLogger(__name__)
@@ -63,9 +65,8 @@ def jobgraph_decision(options, parameters=None):
 
     # write out the optimized job graph to describe what will actually happen
     write_artifact("optimized-job-graph.yml", jgg.optimized_job_graph.to_json())
-    write_artifact(
-        "generated-gitlab-ci.yml", jgg.optimized_job_graph.to_gitlab_ci_jobs()
-    )
+
+    _write_generated_gitlab_ci_yml(jgg)
 
 
 def get_decision_parameters(graph_config, options):
@@ -177,6 +178,55 @@ def write_artifact(filename, data):
             f.write(json.dumps(data))
     else:
         raise TypeError(f"Don't know how to write to {filename}")
+
+
+# gitlab.com has a limit on the size of `.gitlab-ci.yml` (or any generated one)
+# It's documented to be 1MB[1], but 350kb somehow triggered this error too.
+# Thus, let's assume the threshold is much smaller.
+#
+# [1] https://docs.gitlab.com/ee/administration/instance_limits.html#maximum-size-and-depth-of-cicd-configuration-yaml-files    # noqa E501
+GITLAB_CI_YML_THRESHOLD_SIZE_IN_BYTES = 250000
+
+
+def _write_generated_gitlab_ci_yml(jobgraph_generator):
+    generated_ci_jobs = jobgraph_generator.optimized_job_graph.to_gitlab_ci_jobs()
+    generated_main_file_name = "generated-gitlab-ci.yml"
+    output_path = Path(ARTIFACTS_DIR) / generated_main_file_name
+
+    write_artifact(generated_main_file_name, generated_ci_jobs)
+
+    number_of_files_to_generate = (
+        output_path.stat().st_size // GITLAB_CI_YML_THRESHOLD_SIZE_IN_BYTES
+    ) + 1
+
+    if number_of_files_to_generate > 1:
+        stages = generated_ci_jobs.pop("stages")
+        includes = []
+
+        all_jobs_names = tuple(sorted(generated_ci_jobs.keys()))
+
+        for chunk in range(1, number_of_files_to_generate + 1):
+            jobs_names_in_chunk = chunkify(
+                all_jobs_names, chunk, number_of_files_to_generate
+            )
+            jobs_in_chunk = {
+                job_name: job
+                for job_name, job in generated_ci_jobs.items()
+                if job_name in jobs_names_in_chunk
+            }
+
+            file_name = f"generated-include-{chunk}.yml"
+            includes.append(
+                {
+                    "artifact": str(Path(ARTIFACTS_DIR) / file_name),
+                    "job": "decision",
+                }
+            )
+            write_artifact(file_name, jobs_in_chunk)
+
+        write_artifact(
+            generated_main_file_name, {"stages": stages, "include": includes}
+        )
 
 
 def read_artifact(filename):
