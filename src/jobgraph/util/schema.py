@@ -376,6 +376,7 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
         Required("image"): docker_image_ref,
         Optional("push_caches"): [push_caches_def],
         Optional("upstream_cache_jobs"): [Job],
+        Optional("download_artifacts_from_decision_job"): bool,
         Optional("run_on_pipeline_sources"): [str],
         Optional("run_on_git_branches"): [str],
         # The `always_target` attribute will cause the job to be included in the

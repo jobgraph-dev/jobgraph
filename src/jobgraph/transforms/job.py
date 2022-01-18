@@ -87,6 +87,20 @@ def validate(config, jobs):
 
 
 @transforms.add
+def set_decision_needs(config, jobs):
+    for job in jobs:
+        if job.pop("download_artifacts_from_decision_job", False):
+            needs = job.setdefault("needs", [])
+            needs.append(
+                {
+                    "pipeline": config.params["pipeline_id"],
+                    "job": "decision",
+                }
+            )
+        yield job
+
+
+@transforms.add
 def build_pull_cache_payload(config, jobs):
     for job in jobs:
         upstream_cache_jobs = job.get("upstream_cache_jobs", [])

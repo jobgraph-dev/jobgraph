@@ -218,7 +218,8 @@ def get_subgraph(
             docker_images=candidate_docker_images,
         )
         unique_dependencies = set(named_job_dependencies.values())
-        job.actual_gitlab_ci_job["needs"] = sorted(list(unique_dependencies))
+        needs = job.actual_gitlab_ci_job.setdefault("needs", [])
+        needs.extend(sorted(list(unique_dependencies)))
         job.actual_gitlab_ci_job.setdefault("stage", job.stage)
         validate_schema(
             gitlab_ci_job_output,
