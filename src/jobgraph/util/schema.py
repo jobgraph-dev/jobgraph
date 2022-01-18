@@ -407,7 +407,7 @@ gitlab_ci_job_output = gitlab_ci_job_common.extend(
                         Required("job"): str,
                         Optional("artifacts"): bool,
                         Optional("optional"): bool,
-                        Optional("pipeline"): int,
+                        Optional("pipeline"): str,
                         Optional("project"): str,
                         Optional("ref"): str,
                     },

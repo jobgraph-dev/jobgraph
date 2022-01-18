@@ -22,7 +22,7 @@ def vals():
         "optimize_target_jobs": True,
         "owner": "nobody@mozilla.com",
         "target_jobs_method": "default",
-        "pipeline_id": 1234,
+        "pipeline_id": "1234",
         "pipeline_source": "push",
     }
 

@@ -60,7 +60,7 @@ DEFAULT_OPTIONS = {
     "head_ref_protection": "protected",
     "head_tag": "v0.0.1",
     "owner": "nobody@mozilla.com",
-    "pipeline_id": 1234,
+    "pipeline_id": "1234",
     "pipeline_source": "push",
 }
 
