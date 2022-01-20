@@ -237,6 +237,25 @@ push_caches_def = {
     Required("paths"): [str],
 }
 
+retry_amount_def = Range(0, 2)
+retry_when_def = [
+    Any(
+        "always",
+        "unknown_failure",
+        "script_failure",
+        "api_failure",
+        "stuck_or_timeout_failure",
+        "runner_system_failure",
+        "runner_unsupported",
+        "stale_schedule",
+        "job_execution_timeout",
+        "archived_failure",
+        "unmet_prerequisites",
+        "scheduler_failure",
+        "data_integrity_failure",
+    )
+]
+
 # Source https://docs.gitlab.com/ee/ci/yaml/index.html
 gitlab_ci_job_common = Schema(
     {
@@ -304,29 +323,6 @@ gitlab_ci_job_common = Schema(
             Required("tag_name"): str,
         },
         Optional("resource_group"): str,
-        Optional("retry"): Any(
-            Range(0, 2),
-            {
-                Required("max"): Range(0, 2),
-                Optional("when"): [
-                    Any(
-                        "always",
-                        "unknown_failure",
-                        "script_failure",
-                        "api_failure",
-                        "stuck_or_timeout_failure",
-                        "runner_system_failure",
-                        "runner_unsupported",
-                        "stale_schedule",
-                        "job_execution_timeout",
-                        "archived_failure",
-                        "unmet_prerequisites",
-                        "scheduler_failure",
-                        "data_integrity_failure",
-                    )
-                ],
-            },
-        ),
         Optional("schedules"): dict,
         Optional("script"): str_or_list_of_str,
         Optional("secrets"): {
@@ -375,6 +371,13 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
             ): object,
         },
         Required("image"): docker_image_ref,
+        Optional("retry"): Any(
+            retry_amount_def,
+            {
+                Optional("max"): retry_amount_def,
+                Optional("when"): retry_when_def,
+            },
+        ),
         Optional("push_caches"): [push_caches_def],
         Optional("upstream_cache_jobs"): [Job],
         Optional("download_artifacts_from_decision_job"): bool,
@@ -437,5 +440,12 @@ gitlab_ci_job_output = gitlab_ci_job_common.extend(
                 },
             ),
         },
+        Optional("retry"): Any(
+            retry_amount_def,
+            {
+                Required("max"): retry_amount_def,
+                Optional("when"): retry_when_def,
+            },
+        ),
     }
 )
