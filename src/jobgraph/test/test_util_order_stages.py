@@ -54,6 +54,20 @@ from jobgraph.util.order_stages import order_stages
             },
             ["stage_a", "stage_b", "stage_c"],
         ),
+        (
+            Graph(
+                {"job_a", "job_b", "job_c"},
+                {
+                    ("job_c", "job_b", "c depends on b"),
+                },
+            ),
+            {
+                "job_a": {"stage": "stage_a"},
+                "job_b": {"stage": "stage_b"},
+                "job_c": {"stage": "stage_c"},
+            },
+            ["stage_a", "stage_b", "stage_c"],
+        ),
     ),
 )
 def test_order_stages(graph, all_jobs_per_label, expected_stages):
