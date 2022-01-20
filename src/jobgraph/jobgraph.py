@@ -2,6 +2,7 @@ import attr
 
 from .graph import Graph
 from .job import Job
+from .util.order_stages import order_stages
 
 
 @attr.s(frozen=True)
@@ -49,28 +50,15 @@ class JobGraph:
         return jobs
 
     def to_gitlab_ci_jobs(self):
-        all_stages = []
-        all_jobs = {}
-
-        # We need to visit the graph starting from the leaves. This way, we know what
-        # stages are the last ones. If we started from the roots, then we would end up
-        # with some jobs in later stages to be the first ones because they depend on
-        # no other jobs (they likely use external docker images)
-        for label in self.graph.visit_preorder():
-            job = self.jobs[label].to_json()
-            all_jobs[label] = job["actual_gitlab_ci_job"]
-
-            stage = job["actual_gitlab_ci_job"]["stage"]
-            if all_stages and all_stages[0] == stage:
-                continue
-
-            if stage in all_stages:
-                all_stages.remove(stage)
-
-            all_stages.insert(0, stage)
-
+        all_jobs = {
+            label: job.to_json()["actual_gitlab_ci_job"]
+            for label, job in self.jobs.items()
+        }
         return {
-            "stages": all_stages,
+            "stages": order_stages(
+                self.graph,
+                all_actual_gitlab_ci_jobs_per_label=all_jobs,
+            ),
             **all_jobs,
         }
 
