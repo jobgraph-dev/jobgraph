@@ -1,9 +1,26 @@
 import logging
 
+from ..util.chunkify import chunkify
 from ..util.templates import merge
 from ..util.yaml import load_yaml
 
 logger = logging.getLogger(__name__)
+
+
+# Although undocumented, gitlab.com has a limit on how many jobs
+# can be displayed in a single stage. Gitlab is able to deal with
+# many more jobs than this limit, it just doesn't display them.
+#
+# The issue was originally reported[1] and fixed by bumping the
+# limit to 200[2]. That said, a later patch made this value configurable
+# and it seems gitlab.com sticks with 100. As of this writing,
+# the value is not documented[4].
+#
+# [1] https://gitlab.com/gitlab-org/gitlab/-/issues/336319
+# [2] https://gitlab.com/gitlab-org/gitlab/-/merge_requests/69314
+# [3] https://gitlab.com/gitlab-org/gitlab/-/merge_requests/69853
+# [4] https://docs.gitlab.com/ee/user/gitlab_com/index.html#gitlabcom-specific-rate-limits  # noqa E501
+_MAXIMUM_NUMBER_OF_DISPLAYED_JOBS_PER_STAGE = 100
 
 
 def loader(stage, path, config, params, loaded_jobs):
@@ -47,11 +64,28 @@ def loader(stage, path, config, params, loaded_jobs):
                 job["job_from"] = filename
                 yield name, job
 
-    for name, job in jobs():
-        job["name"] = name
-        set_cache_upstream_jobs(job, loaded_jobs)
-        logger.debug(f"Generating jobs for {stage} {name}")
-        yield job
+    jobs_list = list(jobs())
+
+    number_of_stages_to_generate = (
+        len(jobs_list) // _MAXIMUM_NUMBER_OF_DISPLAYED_JOBS_PER_STAGE
+    ) + 1
+
+    if number_of_stages_to_generate > 1:
+        logger.info(
+            f"Stage {stage} has more than {_MAXIMUM_NUMBER_OF_DISPLAYED_JOBS_PER_STAGE}"
+            f" jobs. Splitting stage into {number_of_stages_to_generate}..."
+        )
+
+    for chunk in range(1, number_of_stages_to_generate + 1):
+        stage_name = stage if number_of_stages_to_generate == 1 else f"{stage}_{chunk}"
+        jobs_in_chunk = chunkify(jobs_list, chunk, number_of_stages_to_generate)
+
+        for name, job in jobs_in_chunk:
+            job["name"] = name
+            job["stage"] = stage_name
+            set_cache_upstream_jobs(job, loaded_jobs)
+            logger.debug(f"Generating jobs for {stage_name} {name}")
+            yield job
 
 
 def set_cache_upstream_jobs(job, loaded_jobs):

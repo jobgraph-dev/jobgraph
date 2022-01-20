@@ -70,7 +70,9 @@ class Stage:
         )
         jobs = [
             Job(
-                self.name,
+                stage=job_dict.get(
+                    "stage", self.name
+                ),  # Stages may be split into smaller ones
                 label=job_dict["label"],
                 description=job_dict["description"],
                 attributes=job_dict["attributes"],

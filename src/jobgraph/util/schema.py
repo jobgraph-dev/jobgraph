@@ -359,6 +359,7 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
     {
         Required("label"): str,
         Required("description"): str,
+        Optional("stage"): str,
         Optional("attributes"): {str: object},
         # relative path (from config.path) to the file this job was defined in
         Optional("job_from"): str,
