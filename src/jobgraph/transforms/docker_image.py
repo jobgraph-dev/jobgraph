@@ -170,7 +170,7 @@ def set_context_hash(config, jobs):
 
     for job in jobs_list:
         image_base_name = job["name"]
-        definition = job.pop("definition", image_base_name)
+        definition = job.get("definition", image_base_name)
         parent = job.pop("parent", None)
         args = job.setdefault("args", {})
         variables = job.setdefault("variables", {})
@@ -263,7 +263,7 @@ def define_docker_script_instructions(config, jobs):
         arguments = job.pop("args", {})
 
         image_name = job.pop("name")
-        definition = job.get("definition", image_name)
+        definition = job.pop("definition", image_name)
         docker_file = os.path.join("gitlab-ci", "docker", definition, "Dockerfile")
         build_args = " ".join(
             f'--build-arg "{argument_name}={argument_value}"'
