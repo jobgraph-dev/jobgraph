@@ -143,11 +143,14 @@ def _get_tracked_copied_files_to_docker_image(docker_context_root, image_path, a
 
 
 def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args):
-    docker_file = DockerfileParser(
-        path=image_path, env_replace=True, build_args=args, cache_content=True
-    )
+    # /!\ `env_replace` doesn't evaluate environment variables when calling
+    # docker_file.structure. As of DockerfileParser 1.2.0, there is no other
+    # way than substituing environment variables ourselves.
+    docker_file = DockerfileParser(path=image_path, build_args=args, cache_content=True)
 
     all_copied_files = set()
+    env_variables = {**docker_file.args, **docker_file.envs}
+
     for instruction in docker_file.structure:
         if instruction.get("instruction") not in ("ADD", "COPY"):
             continue
@@ -163,6 +166,16 @@ def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args)
 
             if file_argument.startswith("--chown"):
                 continue
+
+            # /!\ FIXME: Some environment variables may have different
+            # values along the dockerfile. Here we're only taking the
+            # last known value
+            for env_key, env_value in env_variables.items():
+                file_argument = file_argument.replace(f"${env_key}", env_value)
+                file_argument = file_argument.replace(f"${{{env_key}}}", env_value)
+
+            file_argument = file_argument.strip("'")
+            file_argument = file_argument.strip('"')
 
             for path in Path(docker_context_root).glob(file_argument):
                 if not path.exists():
