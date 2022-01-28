@@ -60,6 +60,12 @@ def set_defaults(config, jobs):
         job.setdefault("always_target", False)
         job.setdefault("optimization", {})
 
+        variables = job.setdefault("variables", {})
+        # Let jobs automatically retry if they fail cloning/fetching the repo.
+        # It's a Gitlab variable.
+        # https://docs.gitlab.com/ee/ci/runners/configure_runners.html
+        variables.setdefault("GET_SOURCES_ATTEMPTS", 3)
+
         yield job
 
 
@@ -180,6 +186,40 @@ def _build_push_cache_hash(repo_root, key_files, upstream_cache_jobs):
             hash.update(f"{cache_job.label} {push_cache_hash}".encode())
 
     return hash.hexdigest()
+
+
+@transforms.add
+def set_cache_default_variables(config, jobs):
+    for job in jobs:
+        if job.get("cache"):
+            variables = job.setdefault("variables", {})
+            # Gitlab CI specific variables. They're all documented at
+            # https://docs.gitlab.com/ee/ci/runners/configure_runners.html
+
+            # Storage vs compute. Usually storage is cheaper in the cloud.
+            variables.setdefault("CACHE_COMPRESSION_LEVEL", "fastest")
+            # We aim to have small and unitary jobs. We shouldn't pull
+            # caches that are too big so let's aim for short timeout
+            # by default.
+            variables.setdefault("CACHE_REQUEST_TIMEOUT", "2 minutes")
+            # Let's enable a retry mechanism (Gitlab Runners don't by default)
+            variables.setdefault("RESTORE_CACHE_ATTEMPTS", 3)
+            variables.setdefault("TRANSFER_METER_FREQUENCY", "5s")
+
+        yield job
+
+
+@transforms.add
+def set_artifacts_default_variables(config, jobs):
+    for job in jobs:
+        if job.get("artifacts"):
+            # Same rationale as cache. Variables are documented at the same place.
+            variables = job.setdefault("variables", {})
+            variables.setdefault("ARTIFACT_COMPRESSION_LEVEL", "fastest")
+            variables.setdefault("ARTIFACT_DOWNLOAD_ATTEMPTS", 3)
+            variables.setdefault("TRANSFER_METER_FREQUENCY", "5s")
+
+        yield job
 
 
 @transforms.add
