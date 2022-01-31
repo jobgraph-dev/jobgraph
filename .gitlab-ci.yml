@@ -10,7 +10,7 @@ decision:
     artifacts:
         expire_in: 1 year
         paths:
-        - artifacts/*
+        - jobgraph-artifacts/*
     image: registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph:latest@sha256:d27ab6c1c4062c6dcde355dabd0d4bbe06c328ff795065175b4300b40ab1d14b
     retry:
         max: 2
@@ -63,6 +63,6 @@ generated-pipeline:
     stage: generated-pipeline
     trigger:
         include:
-        - artifact: artifacts/generated-gitlab-ci.yml
+        - artifact: jobgraph-artifacts/generated-gitlab-ci.yml
           job: decision
         strategy: depend

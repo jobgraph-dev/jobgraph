@@ -19,7 +19,7 @@ from .util.schema import Schema, validate_schema
 
 logger = logging.getLogger(__name__)
 
-ARTIFACTS_DIR = "artifacts"
+ARTIFACTS_DIR = "jobgraph-artifacts"
 
 try_task_config_schema_v2 = Schema(
     {

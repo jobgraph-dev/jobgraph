@@ -20,26 +20,26 @@ class TestDecision(unittest.TestCase):
         data = [{"some": "data"}]
         tmpdir = tempfile.mkdtemp()
         try:
-            decision.ARTIFACTS_DIR = os.path.join(tmpdir, "artifacts")
+            decision.ARTIFACTS_DIR = os.path.join(tmpdir, "jobgraph-artifacts")
             decision.write_artifact("artifact.json", data)
             with open(os.path.join(decision.ARTIFACTS_DIR, "artifact.json")) as f:
                 self.assertEqual(json.load(f), data)
         finally:
             if os.path.exists(tmpdir):
                 shutil.rmtree(tmpdir)
-            decision.ARTIFACTS_DIR = "artifacts"
+            decision.ARTIFACTS_DIR = "jobgraph-artifacts"
 
     def test_write_artifact_yml(self):
         data = [{"some": "data"}]
         tmpdir = tempfile.mkdtemp()
         try:
-            decision.ARTIFACTS_DIR = os.path.join(tmpdir, "artifacts")
+            decision.ARTIFACTS_DIR = os.path.join(tmpdir, "jobgraph-artifacts")
             decision.write_artifact("artifact.yml", data)
             self.assertEqual(load_yaml(decision.ARTIFACTS_DIR, "artifact.yml"), data)
         finally:
             if os.path.exists(tmpdir):
                 shutil.rmtree(tmpdir)
-            decision.ARTIFACTS_DIR = "artifacts"
+            decision.ARTIFACTS_DIR = "jobgraph-artifacts"
 
 
 @pytest.fixture
