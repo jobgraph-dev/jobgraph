@@ -66,6 +66,22 @@ def set_defaults(config, jobs):
         # https://docs.gitlab.com/ee/ci/runners/configure_runners.html
         variables.setdefault("GET_SOURCES_ATTEMPTS", 3)
 
+        # Similarly to the clone strategy, we want to retry jobs whenever
+        # there's an infra-related issue.
+        retry = job.setdefault("retry", {})
+        retry.setdefault("max", 2)
+        retry.setdefault(
+            "when",
+            [
+                "job_execution_timeout",
+                "runner_system_failure",
+                "scheduler_failure",
+                "stale_schedule",
+                "stuck_or_timeout_failure",
+                "unknown_failure",
+            ],
+        )
+
         yield job
 
 
