@@ -70,17 +70,19 @@ def set_defaults(config, jobs):
         # there's an infra-related issue.
         retry = job.setdefault("retry", {})
         retry.setdefault("max", 2)
-        retry.setdefault(
-            "when",
-            [
+        when = retry.setdefault("when", [])
+        when = set(when)
+        when.update(
+            {
                 "job_execution_timeout",
                 "runner_system_failure",
                 "scheduler_failure",
                 "stale_schedule",
                 "stuck_or_timeout_failure",
                 "unknown_failure",
-            ],
+            }
         )
+        retry["when"] = sorted(list(when))
 
         yield job
 
