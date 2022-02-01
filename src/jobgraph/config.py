@@ -57,7 +57,6 @@ graph_config_schema = Schema(
         Required("runners"): {
             Required("aliases"): {
                 str: {
-                    Required("os"): str,
                     Required("runner_tag"): optionally_keyed_by(
                         "head_ref_protection", str
                     ),
