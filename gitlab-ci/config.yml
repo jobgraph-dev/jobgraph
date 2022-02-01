@@ -14,11 +14,8 @@ jobgraph: {}
 runners:
     aliases:
         images:
-            os: linux
             runner_tag: gitlab-org-docker
         misc:
-            os: linux
             runner_tag: gitlab-org-docker
         t-linux:
-            os: linux
             runner_tag: gitlab-org-docker
