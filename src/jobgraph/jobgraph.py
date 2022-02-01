@@ -54,12 +54,30 @@ class JobGraph:
             label: job.to_json()["actual_gitlab_ci_job"]
             for label, job in self.jobs.items()
         }
+
+        if all_jobs:
+            return {
+                "stages": order_stages(
+                    self.graph,
+                    all_actual_gitlab_ci_jobs_per_label=all_jobs,
+                ),
+                **all_jobs,
+            }
+
+        # Sometimes, the optimized graph contains no job. In this
+        # case, we need to spawn a dummy one to keep Gitlab CI happy
         return {
-            "stages": order_stages(
-                self.graph,
-                all_actual_gitlab_ci_jobs_per_label=all_jobs,
-            ),
-            **all_jobs,
+            "stages": ["no_job_to_run"],
+            "no_job_to_run": {
+                "image": "alpine:latest",
+                "script": "echo 'This dummy job was created to work around https://gitlab.com/gitlab-org/gitlab/-/issues/331816'",  # noqa E501
+                "stage": "no_job_to_run",
+                # Let's make this job manual so that it doesn't use any resource
+                # by default.
+                "rules": [
+                    {"when": "manual"},
+                ],
+            },
         }
 
     @classmethod
