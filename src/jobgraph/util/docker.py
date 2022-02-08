@@ -117,21 +117,33 @@ def post_to_docker(tar, api_path, **kwargs):
 
 
 def generate_context_hash(
-    docker_context_root, image_path, args=None, dind_image_full_location=None
+    docker_context_root,
+    image_path,
+    args=None,
+    dind_image_full_location=None,
+    hashes_per_generated_file=None,
 ):
-    copied_files = _get_tracked_copied_files_to_docker_image(
+    hashes_per_generated_file = (
+        {} if hashes_per_generated_file is None else hashes_per_generated_file
+    )
+    copied_tracked_files = _get_copied_tracked_files_to_docker_image(
         docker_context_root, image_path, args
     )
+    copied_generated_files = _get_copied_generated_files_to_docker_image(
+        docker_context_root, image_path, args, hashes_per_generated_file
+    )
+    copied_files = copied_tracked_files + copied_generated_files
     return stream_context_tar(
         docker_context_root,
         image_path,
         copied_files=copied_files,
         args=args,
         dind_image_full_location=dind_image_full_location,
+        hashes_per_generated_file=hashes_per_generated_file,
     )
 
 
-def _get_tracked_copied_files_to_docker_image(docker_context_root, image_path, args):
+def _get_copied_tracked_files_to_docker_image(docker_context_root, image_path, args):
     all_copied_files = _get_all_copied_files_to_docker_image(
         docker_context_root, image_path, args
     )
@@ -142,7 +154,24 @@ def _get_tracked_copied_files_to_docker_image(docker_context_root, image_path, a
     return [file for file in all_copied_files if file in tracked_files]
 
 
-def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args):
+def _get_copied_generated_files_to_docker_image(
+    docker_context_root, image_path, args, hashes_per_generated_file
+):
+    all_copied_files = _get_all_copied_files_to_docker_image(
+        docker_context_root, image_path, args, hashes_per_generated_file
+    )
+    return [
+        Path(file) for file in all_copied_files if file in hashes_per_generated_file
+    ]
+
+
+def _get_all_copied_files_to_docker_image(
+    docker_context_root, image_path, args, hashes_per_generated_file=None
+):
+    hashes_per_generated_file = (
+        {} if hashes_per_generated_file is None else hashes_per_generated_file
+    )
+
     # /!\ `env_replace` doesn't evaluate environment variables when calling
     # docker_file.structure. As of DockerfileParser 1.2.0, there is no other
     # way than substituing environment variables ourselves.
@@ -177,6 +206,10 @@ def _get_all_copied_files_to_docker_image(docker_context_root, image_path, args)
             file_argument = file_argument.strip("'")
             file_argument = file_argument.strip('"')
 
+            if file_argument in hashes_per_generated_file:
+                all_copied_files.add(file_argument)
+                continue
+
             for path in Path(docker_context_root).glob(file_argument):
                 if not path.exists():
                     raise ValueError(f"path does not exist: {path}")
@@ -202,14 +235,23 @@ def stream_context_tar(
     copied_files=None,
     args=None,
     dind_image_full_location=None,
+    hashes_per_generated_file=None,
 ):
     args = {} if args is None else args
     copied_files = [] if copied_files is None else copied_files
+    hashes_per_generated_file = (
+        {} if hashes_per_generated_file is None else hashes_per_generated_file
+    )
+
     copied_files.append(Path(image_path))
     docker_context_root = Path(docker_context_root).resolve()
 
     hash = hashlib.sha256()
     for file_path in sorted(copied_files):
+        if str(file_path) in hashes_per_generated_file:
+            hash.update(hashes_per_generated_file[str(file_path)].encode())
+            continue
+
         if not file_path.is_absolute():
             file_path = docker_context_root / file_path
 

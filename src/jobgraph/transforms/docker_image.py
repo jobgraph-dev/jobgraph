@@ -41,6 +41,7 @@ docker_image_schema = gitlab_ci_job_input.extend(
         # different from the docker image name.
         Optional("definition"): str,
         Optional("description"): str,
+        Optional("hashes_per_generated_file"): {str: str},
         Optional("image"): docker_image_ref,
         Optional("image_name_template"): optionally_keyed_by(
             "head_ref_protection", str
@@ -189,6 +190,8 @@ def set_context_hash(config, jobs):
                 ]
             }
 
+        hashes_per_generated_file = job.pop("hashes_per_generated_file", {})
+
         if not jobgraph.fast:
             image_path = os.path.join(
                 config.graph_config.root_dir, "docker", definition, "Dockerfile"
@@ -204,6 +207,7 @@ def set_context_hash(config, jobs):
                 image_path,
                 args,
                 dind_image_full_location=dind_image,
+                hashes_per_generated_file=hashes_per_generated_file,
             )
         else:
             if config.write_artifacts:
