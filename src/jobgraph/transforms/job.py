@@ -175,9 +175,13 @@ def build_push_cache_payload(config, jobs):
                 else "unprotected-branches"
             )
 
+            # / and its URL-encoded equivalent is forbidden.
+            # See https://docs.gitlab.com/ee/ci/yaml/#cachekey
+            sanitized_job_label = job["label"].replace("/", "_").replace("%2F", "_")
+
             actual_caches_configuration.append(
                 {
-                    "key": f"{prefix}-{job['label']}-{cache_hash}",
+                    "key": f"{prefix}-{sanitized_job_label}-{cache_hash}",
                     "paths": push_cache["paths"],
                     "policy": "push",
                 }
