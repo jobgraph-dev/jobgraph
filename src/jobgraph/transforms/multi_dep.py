@@ -4,15 +4,26 @@ transforms = TransformSequence()
 
 
 @transforms.add
-def build_name_and_attributes(config, jobs):
+def build_name_attributes_and_dependencies(config, jobs):
     for job in jobs:
+        primary_dependency = job.pop("primary_dependency")
+        dependent_jobs = job.pop("dependent_jobs", [primary_dependency])
+
         job["upstream_dependencies"] = {
-            dep.stage: dep.label for dep in _get_all_deps(job)
+            dep.stage: dep.label for dep in dependent_jobs.values()
         }
-        primary_dep = job.pop("primary_dependency")
-        copy_of_attributes = primary_dep.attributes.copy()
+
+        stage_cache_dependencies = config.config.get("stage_cache_dependencies", [])
+        if stage_cache_dependencies:
+            job["upstream_cache_jobs"] = [
+                dep
+                for dep in dependent_jobs.values()
+                if dep.stage in stage_cache_dependencies
+            ]
+
+        copy_of_attributes = primary_dependency.attributes.copy()
         job.setdefault("attributes", copy_of_attributes)
-        job["name"] = _build_job_name(config.stage, primary_dep)
+        job["name"] = _build_job_name(config.stage, primary_dependency)
 
         yield job
 
@@ -25,11 +36,3 @@ def _build_job_name(stage, dependent_job):
         dependent_job_name = dependent_job.label
 
     return f"{dependent_job_name}_{stage}"
-
-
-def _get_all_deps(job):
-    dependent_jobs = job.pop("dependent_jobs", None)
-    if dependent_jobs:
-        return dependent_jobs.values()
-
-    return [job["primary_dependency"]]
