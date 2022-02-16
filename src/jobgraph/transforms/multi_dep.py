@@ -19,7 +19,8 @@ def build_name_and_attributes(config, jobs):
 
 def _build_job_name(stage, dependent_job):
     if dependent_job.label.endswith(dependent_job.stage):
-        dependent_job_name = dependent_job.label[len(dependent_job.stage) + 1 :]
+        stage_length = len(dependent_job.stage) + 1
+        dependent_job_name = dependent_job.label[:-stage_length]
     else:
         dependent_job_name = dependent_job.label
 
