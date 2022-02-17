@@ -348,6 +348,15 @@ gitlab_ci_job_common = Schema(
                 },
             ),
         },
+        Optional("when"): Any(
+            # "never" is missing since jobgraph is in charge
+            # of filtering out job that shouldn't run
+            "always",
+            "delayed",
+            "manual",
+            "on_failure",
+            "on_success",
+        ),
     }
 )
 
