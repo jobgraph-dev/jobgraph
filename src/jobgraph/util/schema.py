@@ -236,6 +236,10 @@ push_caches_def = {
     Required("key_files"): [str],
     Required("paths"): [str],
 }
+pull_push_caches_def = {
+    Required("paths"): [str],
+    Optional("when"): Any("on_success", "on_failure", "always"),
+}
 
 retry_amount_def = Range(0, 2)
 retry_when_def = [
@@ -388,6 +392,7 @@ gitlab_ci_job_input = gitlab_ci_job_common.extend(
             },
         ),
         Optional("push_caches"): [push_caches_def],
+        Optional("pull_push_caches"): [pull_push_caches_def],
         Optional("upstream_cache_jobs"): [Job],
         Optional("download_artifacts_from_decision_job"): bool,
         Optional("run_on_pipeline_sources"): [str],

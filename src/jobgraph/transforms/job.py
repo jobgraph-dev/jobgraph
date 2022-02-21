@@ -175,10 +175,7 @@ def build_push_cache_payload(config, jobs):
                 else "unprotected-branches"
             )
 
-            # / and its URL-encoded equivalent is forbidden.
-            # See https://docs.gitlab.com/ee/ci/yaml/#cachekey
-            sanitized_job_label = job["label"].replace("/", "_").replace("%2F", "_")
-
+            sanitized_job_label = _sanitize_job_label_for_cache(job["label"])
             actual_caches_configuration.append(
                 {
                     "key": f"{prefix}-{sanitized_job_label}-{cache_hash}",
@@ -197,6 +194,12 @@ def build_push_cache_payload(config, jobs):
         yield job
 
 
+def _sanitize_job_label_for_cache(job_label):
+    # / and its URL-encoded equivalent is forbidden.
+    # See https://docs.gitlab.com/ee/ci/yaml/#cachekey
+    return job_label.replace("/", "_").replace("%2F", "_")
+
+
 def _build_push_cache_hash(repo_root, key_files, upstream_cache_jobs):
     hash = hashlib.sha256()
 
@@ -208,6 +211,30 @@ def _build_push_cache_hash(repo_root, key_files, upstream_cache_jobs):
             hash.update(f"{cache_job.label} {push_cache_hash}".encode())
 
     return hash.hexdigest()
+
+
+@transforms.add
+def build_pull_push_cache_payload(config, jobs):
+    for job in jobs:
+        pull_push_caches = job.pop("pull_push_caches", [])
+        actual_caches_configuration = job.setdefault("cache", [])
+
+        for pull_push_cache in pull_push_caches:
+            sanitized_job_label = _sanitize_job_label_for_cache(job["label"])
+
+            actual_caches_configuration.append(
+                {
+                    # the pull-push policy can be quite harmful. That's why we're
+                    # exposing it as a special keyword and why we're forcing
+                    # the key name to include the branch. Such caches are likely
+                    # used to share previous tests results on a given branch.
+                    "key": f"{config.params['head_ref']}-{sanitized_job_label}",
+                    "paths": pull_push_cache["paths"],
+                    "policy": "pull-push",
+                }
+            )
+
+        yield job
 
 
 @transforms.add
