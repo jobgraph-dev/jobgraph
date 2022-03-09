@@ -25,9 +25,9 @@ charset-normalizer==2.0.12 \
     --hash=sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597 \
     --hash=sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df
     # via requests
-click==8.0.3 \
-    --hash=sha256:353f466495adaeb40b6b5f592f9f91cb22372351c84caeb068132442a4518ef3 \
-    --hash=sha256:410e932b050f5eed773c4cda94de75971c89cdb3155a72a0831139a79e5ecb5b
+click==8.0.4 \
+    --hash=sha256:6a7a62563bbfabfda3a38f3023a1db4a35978c0abd76f6c9605ecd6554d6d9b1 \
+    --hash=sha256:8458d7b1287c5fb128c90e23381cf99dcde74beaf6c7ff6384ce84d6fe090adb
     # via
     #   pip-compile-multi
     #   pip-tools
@@ -43,13 +43,13 @@ dockerfile-parse==1.2.0 \
     --hash=sha256:07e65eec313978e877da819855870b3ae47f3fac94a40a965b9ede10484dacc5 \
     --hash=sha256:c3fc8f491e1af8cb5f9e23ea6437a2913467b88a4be143095f150330b090be7e
     # via -r requirements/base.in
-filelock==3.5.0 \
-    --hash=sha256:137b661e657f7850eec9def2a001efadba3414be523b87cd3f9a037372d80a15 \
-    --hash=sha256:a7141afb4feca60925cfc090b411fb9faaf542d06d58ece4f93d940265e6b995
+filelock==3.6.0 \
+    --hash=sha256:9cd540a9352e432c7246a48fe4e8712b10acb1df2ad1f30e8c070b82ae1fed85 \
+    --hash=sha256:f8314284bfffbdcfa0ff3d7992b023d4c628ced6feb957351d4c48d059f56bc0
     # via virtualenv
-identify==2.4.10 \
-    --hash=sha256:7d10baf6ba6f1912a0a49f4c1c2c49fa1718765c3a37d72d13b07779567c5b85 \
-    --hash=sha256:e12b2aea3cf108de73ae055c2260783bde6601de09718f6768cf8e9f6f6322a6
+identify==2.4.12 \
+    --hash=sha256:3f3244a559290e7d3deb9e9adc7b33594c1bc85a9dd82e0f1be519bf12a1ec17 \
+    --hash=sha256:5f06b14366bd1facb88b00540a1de05b69b310cbc2654db3c7e07fa3a4339323
     # via pre-commit
 idna==3.3 \
     --hash=sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff \
@@ -74,9 +74,9 @@ pip-tools==6.5.1 \
     --hash=sha256:80f1cfc7156e4a4465b1a46a6bb3599587909537db1a149cf3a6b73eed979ee4 \
     --hash=sha256:80f562aa699fc76a424539697e0bef41e490a050e57a6a21468531981a9d419e
     # via pip-compile-multi
-platformdirs==2.5.0 \
-    --hash=sha256:30671902352e97b1eafd74ade8e4a694782bd3471685e78c32d0fdfd3aa7e7bb \
-    --hash=sha256:8ec11dfba28ecc0715eb5fb0147a87b1bf325f349f3da9aab2cd6b50b96b692b
+platformdirs==2.5.1 \
+    --hash=sha256:7535e70dfa32e84d4b34996ea99c5e432fa29a708d0f4e394bbcb2a8faa4f16d \
+    --hash=sha256:bcae7cab893c2d310a711b70b24efb93334febe65f8de776ee320b517471e227
     # via virtualenv
 pre-commit==2.17.0 \
     --hash=sha256:725fa7459782d7bec5ead072810e47351de01709be838c2ce1726b9591dad616 \
@@ -156,13 +156,13 @@ toposort==1.7 \
     --hash=sha256:8ed8e109e96ae30bf66da2d2155e4eb9989d9c5c743c837e37d9774a4eddd804 \
     --hash=sha256:ddc2182c42912a440511bd7ff5d3e6a1cabc3accbc674a3258c8c41cbfbb2125
     # via pip-compile-multi
-urllib3==1.26.8 \
-    --hash=sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed \
-    --hash=sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c
+urllib3==1.26.9 \
+    --hash=sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14 \
+    --hash=sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e
     # via requests
-virtualenv==20.13.1 \
-    --hash=sha256:45e1d053cad4cd453181ae877c4ffc053546ae99e7dd049b9ff1d9be7491abf7 \
-    --hash=sha256:e0621bcbf4160e4e1030f05065c8834b4e93f4fcc223255db2a823440aca9c14
+virtualenv==20.13.4 \
+    --hash=sha256:c3e01300fb8495bc00ed70741f5271fc95fed067eb7106297be73d30879af60c \
+    --hash=sha256:ce8901d3bbf3b90393498187f2d56797a8a452fb2d0d7efc6fd837554d6f679c
     # via pre-commit
 voluptuous==0.12.2 \
     --hash=sha256:4db1ac5079db9249820d49c891cb4660a6f8cae350491210abce741fabf56513
