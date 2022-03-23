@@ -13,7 +13,7 @@ Jobgraph enables your Gitlab CI pipelines to:
  1. **get automatic (yet reproducible) updates**  
  *Jobgraph ensure these pinned parts get regularly bumped.*
  1. **be debuggable more easily**  
- *Jobgraph outputs exactly what jobs are going to be run and lets you hook a debugger if needed.*
+ *Jobgraph outputs exactly what jobs are going to be run and lets you [hook a debugger](docs/debug-jobgraph.md) if needed.*
  1. **avoid footguns**  
  *Jobgraph uses exiting linters to highlight bad usages of Docker, Python, or yaml.*
 
@@ -64,6 +64,7 @@ Jobgraph is now up and working. You might now be wondering how things are linked
  1. [What does Jobgraph aim to solve?](docs/what-does-jobgraph-aim-to-solve.md)
  1. [The "decision job" pattern](docs/the-decision-job-pattern.md)
  1. [The journey of a job configuration](docs/the-journey-of-a-job-configuration.md)
+ 1. [Debug jobgraph](docs/debug-jobgraph.md)
 
 ## Origin
 
