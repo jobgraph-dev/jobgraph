@@ -7,7 +7,7 @@ Make your Gitlab CI Pipelines scale up! Jobgraph lets you abstract complexity aw
 Jobgraph enables your Gitlab CI pipelines to:
 
  1. **scale up**  
- *Jobgraph lets you define jobs dynamically based on the state of the repository and other external factors.*
+ *Jobgraph lets you define jobs dynamically based on the state of the repository and [other external factors](docs/the-decision-job-pattern.md).*
  1. **be reproducible**  
  *Jobgraph pins as many moving parts as possible.*
  1. **get automatic (yet reproducible) updates**  
@@ -61,8 +61,9 @@ docker run \
 
 Jobgraph is now up and working. You might now be wondering how things are linked together. The example files provided by `jobgraph bootstrap` contain some code comments to make some precise points explicit. That said, you may be interested in an overview first. In this case, check out:
 
- 1. [What does Jobgraph aim to solve?](docs/what-does-jobgraph-aim-to-solve.md).
- 1. [The journey of a job configuration](docs/the-journey-of-a-job-configuration.md).
+ 1. [What does Jobgraph aim to solve?](docs/what-does-jobgraph-aim-to-solve.md)
+ 1. [The "decision job" pattern](docs/the-decision-job-pattern.md)
+ 1. [The journey of a job configuration](docs/the-journey-of-a-job-configuration.md)
 
 ## Origin
 
