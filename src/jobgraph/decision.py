@@ -161,9 +161,8 @@ def set_try_config(parameters, task_config_file):
 
 
 def write_artifact(filename, data):
-    logger.info(f"writing artifact file `{filename}`")
-    if not os.path.isdir(ARTIFACTS_DIR):
-        os.mkdir(ARTIFACTS_DIR)
+    logger.info(f"writing artifact file `{ARTIFACTS_DIR}/{filename}`")
+    os.makedirs(ARTIFACTS_DIR, exist_ok=True)
     path = os.path.join(ARTIFACTS_DIR, filename)
     if filename.endswith(".yml"):
         with open(path, "w") as f:
