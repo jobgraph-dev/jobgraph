@@ -128,6 +128,7 @@ class GitRepository(Repository):
         # the local repo is where `git init` was made
         return self._guess_default_branch(remote, short_format)
 
+    @memoize
     def _get_default_branch_from_remote_query(self, remote, short_format):
         # This function requires network access to the repo
         output = self.run("ls-remote", "--symref", remote, "HEAD")
@@ -237,6 +238,9 @@ class GitRepository(Repository):
             raise
 
 
+# We need to return the same instance in order to get the methods
+# of GitRepository to be memoized.
+@memoize
 def get_repository(path):
     """Get a repository object for the repository at `path`.
     If `path` is not a known VCS repository, raise an exception.
