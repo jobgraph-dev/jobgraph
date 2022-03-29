@@ -30,7 +30,7 @@ def hash_paths(root_dir, patterns):
 
     found = set()
     for pattern in patterns:
-        matches = [path for path in tracked_files if mozpath.search(str(path), pattern)]
+        matches = [path for path in tracked_files if mozpath.match(str(path), pattern)]
         if matches:
             found.update(matches)
         else:

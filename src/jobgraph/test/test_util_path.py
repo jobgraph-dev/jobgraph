@@ -10,10 +10,10 @@ from jobgraph.util.path import (
     commonprefix,
     dirname,
     join,
+    match,
     normpath,
     rebase,
     relpath,
-    search,
     split,
     splitext,
 )
@@ -87,40 +87,39 @@ class TestPath(unittest.TestCase):
         self.assertEqual(basedir(foobarbaz, ["foo", "bar", ""]), "foo")
         self.assertEqual(basedir(foobarbaz, ["bar", "baz", ""]), "")
 
-    def test_search(self):
-        self.assertTrue(search("foo", ""))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/bar"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo"))
-        self.assertTrue(search("foo", "*"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/bar/*"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/bar/*"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/bar/*"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/bar/*"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/*/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "*/bar/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "*/*/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "*/*/*"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/*/*"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/*/*.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/b*/*z.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/b*r/ba*z.qux"))
-        self.assertFalse(search("foo/bar/baz.qux", "foo/b*z/ba*r.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "**"))
-        self.assertTrue(search("foo/bar/baz.qux", "**/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "**/bar/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/**/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/**/*.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "**/foo/bar/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/**/bar/baz.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/**/bar/*.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/**/*.qux"))
-        self.assertTrue(search("foo/bar/baz.qux", "**/*.qux"))
-        # TODO: Fix this use case
-        # self.assertFalse(search("foo/bar/baz.qux", "**.qux"))
-        self.assertFalse(search("foo/bar", "foo/*/bar"))
-        self.assertTrue(search("foo/bar/baz.qux", "foo/**/bar/**"))
-        self.assertFalse(search("foo/nobar/baz.qux", "foo/**/bar/**"))
-        self.assertTrue(search("foo/bar", "foo/**/bar/**"))
+    def test_match(self):
+        self.assertTrue(match("foo", ""))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/bar"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo"))
+        self.assertTrue(match("foo", "*"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/bar/*"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/bar/*"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/bar/*"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/bar/*"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/*/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "*/bar/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "*/*/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "*/*/*"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/*/*"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/*/*.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/b*/*z.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/b*r/ba*z.qux"))
+        self.assertFalse(match("foo/bar/baz.qux", "foo/b*z/ba*r.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "**"))
+        self.assertTrue(match("foo/bar/baz.qux", "**/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "**/bar/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/**/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/**/*.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "**/foo/bar/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/**/bar/baz.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/**/bar/*.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/**/*.qux"))
+        self.assertTrue(match("foo/bar/baz.qux", "**/*.qux"))
+        self.assertFalse(match("foo/bar/baz.qux", "**.qux"))
+        self.assertFalse(match("foo/bar", "foo/*/bar"))
+        self.assertTrue(match("foo/bar/baz.qux", "foo/**/bar/**"))
+        self.assertFalse(match("foo/nobar/baz.qux", "foo/**/bar/**"))
+        self.assertTrue(match("foo/bar", "foo/**/bar/**"))
 
     def test_rebase(self):
         self.assertEqual(rebase("foo", "foo/bar", "bar/baz"), "baz")
