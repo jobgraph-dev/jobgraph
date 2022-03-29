@@ -147,10 +147,7 @@ def _get_copied_tracked_files_to_docker_image(docker_context_root, image_path, a
     all_copied_files = _get_all_copied_files_to_docker_image(
         docker_context_root, image_path, args
     )
-    tracked_files = [
-        docker_context_root / file_path
-        for file_path in get_repo(docker_context_root).tracked_files
-    ]
+    tracked_files = get_repo(docker_context_root).tracked_files_absolute
     return [file for file in all_copied_files if file in tracked_files]
 
 

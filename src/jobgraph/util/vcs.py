@@ -105,6 +105,11 @@ class GitRepository(Repository):
     def tracked_files(self):
         return {Path(file) for file in self.run("ls-files").splitlines()}
 
+    @property
+    @memoize
+    def tracked_files_absolute(self):
+        return {Path(self.path) / file for file in self.tracked_files}
+
     def get_default_branch(self, remote=DEFAULT_REMOTE_NAME, short_format=False):
         try:
             # This call works if you have (network) access to the repo
