@@ -112,15 +112,15 @@ class GitRepository(Repository):
 
     def get_default_branch(self, remote=DEFAULT_REMOTE_NAME, short_format=False):
         try:
-            # This call works if you have (network) access to the repo
-            return self._get_default_branch_from_remote_query(remote, short_format)
+            # this one works if the current repo was cloned from an existing
+            # repo elsewhere
+            return self._get_default_branch_from_cloned_metadata(remote, short_format)
         except subprocess.CalledProcessError:
             pass
 
         try:
-            # this one works if the current repo was cloned from an existing
-            # repo elsewhere
-            return self._get_default_branch_from_cloned_metadata(remote, short_format)
+            # This call works if you have (network) access to the repo
+            return self._get_default_branch_from_remote_query(remote, short_format)
         except subprocess.CalledProcessError:
             pass
 
@@ -144,6 +144,7 @@ class GitRepository(Repository):
             return short_branch_name
         return f"{remote}/{short_branch_name}"
 
+    @memoize
     def _get_default_branch_from_cloned_metadata(self, remote, short_format):
         output = self.run("rev-parse", "--abbrev-ref", f"{remote}/HEAD").strip()
         if short_format:
