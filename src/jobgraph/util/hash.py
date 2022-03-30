@@ -26,17 +26,21 @@ def hash_paths(root_dir, patterns):
     itself hashed to produce the result.
     """
     h = hashlib.sha256()
-    tracked_files = get_repo(root_dir).tracked_files
 
     found = set()
     for pattern in patterns:
-        matches = [path for path in tracked_files if mozpath.match(str(path), pattern)]
-        if matches:
-            found.update(matches)
+        matched_tracked_files = _get_tracked_files_for_pattern(root_dir, pattern)
+        if matched_tracked_files:
+            found.update(matched_tracked_files)
         else:
             raise Exception(f"{pattern} did not match anything")
     for path in sorted(found):
-        hash = hash_path(mozpath.abspath(mozpath.join(root_dir, path)))
-        path = mozpath.normsep(path)
+        hash = hash_path(mozpath.normsep(path))
         h.update(f"{hash} {path}\n".encode())
     return h.hexdigest()
+
+
+@memoize
+def _get_tracked_files_for_pattern(root_dir, pattern):
+    tracked_files = get_repo(root_dir).tracked_files
+    return {path for path in tracked_files if mozpath.match(str(path), pattern)}
