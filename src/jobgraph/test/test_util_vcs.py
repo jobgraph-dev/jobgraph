@@ -77,11 +77,18 @@ def test_calculate_head_ref(repo):
 
 
 def test_get_repo_path(repo):
+    ci_repository_url = os.environ.get("CI_REPOSITORY_URL")
+    if ci_repository_url:
+        del os.environ["CI_REPOSITORY_URL"]
+
     repo.run("remote", "add", "origin", "https://some/repo")
     repo.run("remote", "add", "other", "https://some.other/repo")
 
     assert repo.get_url() == "https://some/repo"
     assert repo.get_url("other") == "https://some.other/repo"
+
+    if ci_repository_url:
+        os.environ["CI_REPOSITORY_URL"] = ci_repository_url
 
 
 def test_update(repo):
