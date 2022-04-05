@@ -8,7 +8,7 @@ job_defaults:
 
 black:
     description: "Run `black` to ensure strict code style"
-    script: black --check "$JOBGRAPH_ROOT_DIR"
+    script: black --check --diff "$JOBGRAPH_ROOT_DIR"
 
 flake8:
     description: "Run `flake8` to ensure code validates PEP8"
