@@ -1,9 +1,9 @@
 ---
 docker:
     external_images:
-        docker_in_docker: docker:dind@sha256:3aef73464353f0f03b0c6864ac08e54be759aad336de407e6dfcbc7aa53622a2
-        hadolint: hadolint/hadolint:latest-alpine@sha256:ea96feb3ea9036a44f9babd32c949b9fddfaadb049525b2ddb454d48a6a9fb03
-        jobgraph: registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph:latest@sha256:7c374702c708cd150d1b0ea7cbd4820d255da76f6dadb168c29ea99e606804ae
+        docker_in_docker: docker:dind@sha256:dd3584c00ebb822729dd5d2902e3a579ca87b9590637b5175035c1b05ea2fec0
+        hadolint: hadolint/hadolint:latest-alpine@sha256:3fd1fc10e103acc111de1521c119f6374e8b120d4eb474440161c835d30d19ce
+        jobgraph: registry.gitlab.com/jobgraph-dev/jobgraph/jobgraph:latest@sha256:c8dc9f582fba795534a875952b8ae23c7744085bd23dbde830c7b4848520d37d
         jobgraph_tests: registry.gitlab.com/jobgraph-dev/jobgraph/python_test:latest@sha256:f5abdfb9f7a922bffd5d139d62f1449ec36903d163a9403aa60d8cc25fa12b7d
 gitlab:
     project_id: 30264497

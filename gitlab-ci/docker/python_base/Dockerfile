@@ -1,4 +1,4 @@
-FROM python:3.10-alpine@sha256:bddea3d56e850b245bb09e7197f25a60bedf71b4bf0ee50b0d70f8684dd0d9c3
+FROM python:3.10-alpine@sha256:63689f3a9b5641ad0c1092ceead25c9ec7ad9aaa13d274ab4a2e05683f28001b
 
 ENV DEFAULT_WORKDIR='/builds' \
     RUNNER_USER='runner' \
