@@ -165,6 +165,14 @@ class GitRepository(Repository):
         raise RuntimeError(f"Unable to find default branch. Got: {branches}")
 
     def get_url(self, remote=DEFAULT_REMOTE_NAME):
+        # Shared runners on Gitlab CI use private networks inside GCP.
+        # get-url returns it which prevents any git-push from suceeding.
+        #
+        # Context: https://gitlab.com/gitlab-org/gitlab/-/issues/355946
+        gitlab_ci_url = os.environ.get("CI_REPOSITORY_URL")
+        if gitlab_ci_url:
+            return gitlab_ci_url
+
         return self.run("remote", "get-url", remote).strip()
 
     def set_push_url(self, url, remote=DEFAULT_REMOTE_NAME):
