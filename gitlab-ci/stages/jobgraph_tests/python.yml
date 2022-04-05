@@ -24,7 +24,13 @@ isort:
 
 pyupgrade:
     description: "Run `pyupgrade` to ensure new code is written with the latest syntax"
-    script: pyupgrade --py310-plus $(find "$JOBGRAPH_ROOT_DIR" -name '*.py')
+    # pyupgrade doesn't provide a --diff flag and doesn't intend to
+    # https://github.com/asottile/pyupgrade/issues/356
+    script: >-
+        if ! pyupgrade --py310-plus $(find "$JOBGRAPH_ROOT_DIR" -name '*.py'); then
+            git diff
+            exit 1
+        fi
 
 unit:
     description: "Run `unit tests` to validate the latest changes"
