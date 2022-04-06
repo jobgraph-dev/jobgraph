@@ -233,7 +233,8 @@ cache_def = {
 }
 
 push_caches_def = {
-    Required("key_files"): [str],
+    Optional("hash"): str,
+    Optional("key_files"): [str],
     Required("paths"): [str],
 }
 pull_push_caches_def = {

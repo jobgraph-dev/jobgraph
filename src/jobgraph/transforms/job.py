@@ -165,8 +165,12 @@ def build_push_cache_payload(config, jobs):
         actual_caches_configuration = job.setdefault("cache", [])
 
         for push_cache in push_caches:
-            cache_hash = _build_push_cache_hash(
-                repo_root, push_cache["key_files"], upstream_cache_jobs
+            cache_hash = (
+                push_cache["hash"]
+                if push_cache.get("hash")
+                else _build_push_cache_hash(
+                    repo_root, push_cache["key_files"], upstream_cache_jobs
+                )
             )
 
             prefix = (
