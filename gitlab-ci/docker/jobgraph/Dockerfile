@@ -13,7 +13,7 @@ USER root
 # The second one are runtime dependencies
 RUN apk add --no-cache \
     build-base~=0.5 \
-    gzip~=1.11 \
+    gzip~=1.12 \
     tar~=1.34 \
     \
     bash~=5.1 \
